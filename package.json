@@ -2,7 +2,7 @@
   "name": "mining-monitor-web",
   "version": "1.0.0",
   "description": "Веб-интерфейс для мониторинга майнинг ферм",
-  "homepage": ".",
+  "homepage": "https://denpistsoff.github.io/mining-monitor-web",
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -14,7 +14,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "deploy": "npm run build && gh-pages -d build"
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "browserslist": {
     "production": [
