@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mining Monitor Pro</title>
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-card: #1a1a1a;
+            --accent-green: #00ff88;
+            --accent-blue: #00aaff;
+            --accent-red: #ff4444;
+            --accent-yellow: #ffaa00;
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--bg-secondary), #222);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            border: 1px solid #333;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, var(--accent-green), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid #333;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-value {
+            font-size: 2.2em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .online { color: var(--accent-green); }
+        .offline { color: var(--accent-red); }
+        .hashrate { color: var(--accent-blue); }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+        
+        .error {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid var(--accent-red);
+            text-align: center;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏭 Mining Monitor Pro</h1>
+            <p>Real-time mining farm dashboard</p>
+        </div>
+        
+        <div id="loading" class="loading">
+            <h2 class="pulse">🔄 Connecting to mining farm...</h2>
+            <p>Please wait while we load your data</p>
+        </div>
+        
+        <div id="error" class="error" style="display: none;">
+            <h2>❌ Connection Error</h2>
+            <p id="errorMessage">Cannot connect to mining farm</p>
+            <button onclick="loadData()" style="
+                background: var(--accent-blue);
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 5px;
+                margin-top: 15px;
+                cursor: pointer;
+            ">Retry Connection</button>
+        </div>
+        
+        <div id="dashboard" style="display: none;">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>📊 Total Miners</h3>
+                    <div class="stat-value" id="totalMiners">0</div>
+                    <p>Connected devices</p>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>✅ Online</h3>
+                    <div class="stat-value online" id="onlineMiners">0</div>
+                    <p>Active miners</p>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>❌ Offline</h3>
+                    <div class="stat-value offline" id="offlineMiners">0</div>
+                    <p>Inactive miners</p>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>⚡ Hashrate</h3>
+                    <div class="stat-value hashrate" id="totalHashrate">0.00 TH/s</div>
+                    <p>Current speed</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <h3>🕒 Last Update</h3>
+                <p id="lastUpdate">Never</p>
+                <p><small>Auto-updates every 10 seconds</small></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Configuration - ОБНОВИ ЭТИ ДАННЫЕ!
+        const FIREBASE_CONFIG = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "mining-monitor-api.firebaseapp.com",
+            databaseURL: "https://mining-monitor-api-default-rtdb.firebaseio.com",
+            projectId: "mining-monitor-api",
+            storageBucket: "mining-monitor-api.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(FIREBASE_CONFIG);
+        const database = firebase.database();
+
+        function loadData() {
+            // Hide error, show loading
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('dashboard').style.display = 'none';
+            
+            try {
+                // Real-time listener
+                database.ref('/mining_data').on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    
+                    if (data) {
+                        document.getElementById('loading').style.display = 'none';
+                        document.getElementById('error').style.display = 'none';
+                        document.getElementById('dashboard').style.display = 'block';
+                        updateDashboard(data);
+                    } else {
+                        showError('No data available from mining farm');
+                    }
+                }, (error) => {
+                    showError('Firebase error: ' + error.message);
+                });
+                
+            } catch (error) {
+                showError('Connection error: ' + error.message);
+            }
+        }
+        
+        function updateDashboard(data) {
+            // Update main stats
+            document.getElementById('totalMiners').textContent = data.total_miners || 0;
+            document.getElementById('onlineMiners').textContent = data.online_miners || 0;
+            document.getElementById('offlineMiners').textContent = data.offline_miners || 0;
+            document.getElementById('totalHashrate').textContent = 
+                data.total_hashrate ? `${data.total_hashrate.toFixed(2)} TH/s` : '0.00 TH/s';
+            
+            // Update last update time
+            const lastUpdate = data.last_update ? new Date(data.last_update * 1000).toLocaleTimeString() : 'Never';
+            document.getElementById('lastUpdate').textContent = lastUpdate;
+        }
+        
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('errorMessage').textContent = message;
+        }
+        
+        // Initial load
+        loadData();
+        
+        // Telegram Mini App integration
+        if (window.Telegram && Telegram.WebApp) {
+            Telegram.WebApp.expand();
+            Telegram.WebApp.ready();
+        }
+    </script>
+</body>
+</html>
