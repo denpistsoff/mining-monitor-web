@@ -1,247 +1,693 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mining Monitor Pro</title>
+    <title>Mining Monitor Web Dashboard</title>
     <style>
         :root {
-            --bg-primary: #0a0a0a;
-            --bg-secondary: #111111;
-            --bg-card: #1a1a1a;
-            --accent-green: #00ff88;
-            --accent-blue: #00aaff;
-            --accent-red: #ff4444;
-            --accent-yellow: #ffaa00;
-            --text-primary: #ffffff;
-            --text-secondary: #888888;
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --info: #3498db;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            line-height: 1.6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: var(--light);
             min-height: 100vh;
             padding: 20px;
         }
-        
+
         .container {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
         }
-        
+
         .header {
-            background: linear-gradient(135deg, var(--bg-secondary), #222);
-            padding: 30px;
-            border-radius: 20px;
-            margin-bottom: 30px;
-            border: 1px solid #333;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        
+
         .header h1 {
             font-size: 2.5em;
             margin-bottom: 10px;
-            background: linear-gradient(45deg, var(--accent-green), var(--accent-blue));
+            background: linear-gradient(45deg, #3498db, #2ecc71);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        
-        .stats-grid {
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.8;
+        }
+
+        .dashboard {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
-        
-        .stat-card {
-            background: var(--bg-card);
-            padding: 25px;
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 15px;
-            border: 1px solid #333;
-            text-align: center;
-            transition: transform 0.3s ease;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        
-        .stat-card:hover {
+
+        .card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
-        
-        .stat-value {
-            font-size: 2.2em;
+
+        .card h3 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            color: var(--info);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .metric-value {
+            font-size: 1.2em;
             font-weight: bold;
-            margin: 10px 0;
         }
-        
-        .online { color: var(--accent-green); }
-        .offline { color: var(--accent-red); }
-        .hashrate { color: var(--accent-blue); }
-        
+
+        .online { color: var(--success); }
+        .offline { color: var(--danger); }
+        .warning { color: var(--warning); }
+        .info { color: var(--info); }
+
+        .miners-list {
+            grid-column: 1 / -1;
+        }
+
+        .miner-item {
+            display: grid;
+            grid-template-columns: 1fr auto auto auto;
+            gap: 15px;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            align-items: center;
+        }
+
+        .miner-status {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .status-online { background: var(--success); }
+        .status-offline { background: var(--danger); }
+        .status-warning { background: var(--warning); }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            background: var(--info);
+            color: white;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-refresh {
+            background: var(--success);
+        }
+
+        .btn-refresh:hover {
+            background: #219a52;
+        }
+
         .loading {
             text-align: center;
             padding: 40px;
-            color: var(--text-secondary);
+            font-size: 1.2em;
         }
-        
+
         .error {
-            background: var(--bg-card);
-            padding: 30px;
-            border-radius: 15px;
-            border: 1px solid var(--accent-red);
+            background: var(--danger);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
             text-align: center;
         }
-        
+
+        .success {
+            background: var(--success);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .hashrate-display {
+            font-size: 2.5em;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            background: linear-gradient(45deg, #2ecc71, #3498db);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .miner-item {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+        }
+
         .pulse {
             animation: pulse 2s infinite;
         }
-        
+
         @keyframes pulse {
             0% { opacity: 1; }
             50% { opacity: 0.5; }
             100% { opacity: 1; }
+        }
+
+        .last-update {
+            text-align: center;
+            margin-top: 20px;
+            opacity: 0.7;
+            font-size: 0.9em;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🏭 Mining Monitor Pro</h1>
-            <p>Real-time mining farm dashboard</p>
+            <h1>🏭 Mining Monitor Dashboard</h1>
+            <p>Real-time monitoring for your mining farm</p>
         </div>
-        
+
+        <div class="controls">
+            <button class="btn btn-refresh" onclick="loadData()">
+                🔄 Refresh Data
+            </button>
+            <button class="btn" onclick="loadMiners()">
+                📋 Load Miners List
+            </button>
+            <button class="btn" onclick="showFirebaseStatus()">
+                🌐 Firebase Status
+            </button>
+        </div>
+
         <div id="loading" class="loading">
-            <h2 class="pulse">🔄 Connecting to mining farm...</h2>
-            <p>Please wait while we load your data</p>
+            <div class="pulse">🔄 Loading mining data...</div>
         </div>
-        
+
         <div id="error" class="error" style="display: none;">
-            <h2>❌ Connection Error</h2>
-            <p id="errorMessage">Cannot connect to mining farm</p>
-            <button onclick="loadData()" style="
-                background: var(--accent-blue);
-                color: white;
-                border: none;
-                padding: 10px 20px;
-                border-radius: 5px;
-                margin-top: 15px;
-                cursor: pointer;
-            ">Retry Connection</button>
+            ❌ Error loading data. Please check if the monitor is running.
         </div>
-        
+
         <div id="dashboard" style="display: none;">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h3>📊 Total Miners</h3>
-                    <div class="stat-value" id="totalMiners">0</div>
-                    <p>Connected devices</p>
+            <div class="hashrate-display" id="totalHashrate">
+                0.00 TH/s
+            </div>
+
+            <div class="dashboard">
+                <div class="card">
+                    <h3>📊 Farm Overview</h3>
+                    <div class="metric">
+                        <span>Total Miners:</span>
+                        <span class="metric-value" id="totalMiners">0</span>
+                    </div>
+                    <div class="metric">
+                        <span class="online">✅ Online:</span>
+                        <span class="metric-value online" id="onlineMiners">0</span>
+                    </div>
+                    <div class="metric">
+                        <span class="offline">❌ Offline:</span>
+                        <span class="metric-value offline" id="offlineMiners">0</span>
+                    </div>
+                    <div class="metric">
+                        <span class="warning">⚠️ Problematic:</span>
+                        <span class="metric-value warning" id="problematicMiners">0</span>
+                    </div>
                 </div>
-                
-                <div class="stat-card">
-                    <h3>✅ Online</h3>
-                    <div class="stat-value online" id="onlineMiners">0</div>
-                    <p>Active miners</p>
+
+                <div class="card">
+                    <h3>⚡ Performance</h3>
+                    <div class="metric">
+                        <span>Total Hashrate:</span>
+                        <span class="metric-value info" id="hashrateValue">0.00 TH/s</span>
+                    </div>
+                    <div class="metric">
+                        <span>Total Power:</span>
+                        <span class="metric-value info" id="totalPower">0 W</span>
+                    </div>
+                    <div class="metric">
+                        <span>Efficiency:</span>
+                        <span class="metric-value info" id="efficiency">0.00 TH/W</span>
+                    </div>
                 </div>
-                
-                <div class="stat-card">
-                    <h3>❌ Offline</h3>
-                    <div class="stat-value offline" id="offlineMiners">0</div>
-                    <p>Inactive miners</p>
+
+                <div class="card">
+                    <h3>📈 Statistics</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-label">Uptime</div>
+                            <div class="stat-value online" id="uptimePercent">0%</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Health</div>
+                            <div class="stat-value" id="healthScore">0%</div>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="stat-card">
-                    <h3>⚡ Hashrate</h3>
-                    <div class="stat-value hashrate" id="totalHashrate">0.00 TH/s</div>
-                    <p>Current speed</p>
+
+                <div class="card miners-list">
+                    <h3>🔍 Miners List</h3>
+                    <div id="minersContainer">
+                        <div class="miner-item">
+                            <span>Loading miners data...</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-            
-            <div class="stat-card">
-                <h3>🕒 Last Update</h3>
-                <p id="lastUpdate">Never</p>
-                <p><small>Auto-updates every 10 seconds</small></p>
+
+            <div class="last-update">
+                Last updated: <span id="lastUpdateTime">Never</span>
+                | Next update in: <span id="countdown">60</span>s
             </div>
         </div>
     </div>
 
     <script>
-        // Firebase Configuration - ОБНОВИ ЭТИ ДАННЫЕ!
-        const FIREBASE_CONFIG = {
-            apiKey: "YOUR_API_KEY",
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC0lDv6gH2wLXeLz7qR7Q6Y2T3X8mZp9A8",
             authDomain: "mining-monitor-api.firebaseapp.com",
             databaseURL: "https://mining-monitor-api-default-rtdb.firebaseio.com",
             projectId: "mining-monitor-api",
-            storageBucket: "mining-monitor-api.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
+            storageBucket: "mining-monitor-api.firebasestorage.app",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdef123456"
         };
 
-        // Initialize Firebase
-        firebase.initializeApp(FIREBASE_CONFIG);
-        const database = firebase.database();
+        // Firebase app (initialize only once)
+        let firebaseApp = null;
+        let database = null;
 
-        function loadData() {
-            // Hide error, show loading
-            document.getElementById('error').style.display = 'none';
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('dashboard').style.display = 'none';
-            
+        // Initialize Firebase
+        function initializeFirebase() {
             try {
-                // Real-time listener
-                database.ref('/mining_data').on('value', (snapshot) => {
-                    const data = snapshot.val();
-                    
-                    if (data) {
-                        document.getElementById('loading').style.display = 'none';
-                        document.getElementById('error').style.display = 'none';
-                        document.getElementById('dashboard').style.display = 'block';
-                        updateDashboard(data);
-                    } else {
-                        showError('No data available from mining farm');
-                    }
-                }, (error) => {
-                    showError('Firebase error: ' + error.message);
-                });
+                if (typeof firebase === 'undefined') {
+                    console.warn('Firebase SDK not loaded');
+                    return false;
+                }
                 
+                if (!firebase.apps.length) {
+                    firebaseApp = firebase.initializeApp(firebaseConfig);
+                } else {
+                    firebaseApp = firebase.apps[0];
+                }
+                
+                database = firebase.database();
+                console.log('✅ Firebase initialized');
+                return true;
             } catch (error) {
-                showError('Connection error: ' + error.message);
+                console.error('❌ Firebase initialization error:', error);
+                return false;
             }
         }
-        
-        function updateDashboard(data) {
-            // Update main stats
+
+        // Load data from Firebase
+        async function loadFirebaseData() {
+            if (!database) {
+                if (!initializeFirebase()) {
+                    return null;
+                }
+            }
+
+            try {
+                const snapshot = await database.ref('/mining_data').once('value');
+                const data = snapshot.val();
+                
+                if (!data) {
+                    console.log('No data in Firebase');
+                    return null;
+                }
+
+                // Get the latest data from the first farm
+                const farms = Object.values(data);
+                if (farms.length === 0) {
+                    return null;
+                }
+
+                const latestFarm = farms[0];
+                const timestamps = Object.keys(latestFarm).sort((a, b) => b - a);
+                const latestData = latestFarm[timestamps[0]];
+
+                console.log('Firebase data loaded:', latestData);
+                return latestData;
+
+            } catch (error) {
+                console.error('Error loading Firebase data:', error);
+                return null;
+            }
+        }
+
+        // Load data from local API (fallback)
+        async function loadLocalData() {
+            try {
+                // Try different ports
+                const ports = [8080, 8081, 8082, 8083];
+                
+                for (const port of ports) {
+                    try {
+                        const response = await fetch(`http://localhost:${port}/api/status`, {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json',
+                            },
+                            mode: 'cors'
+                        });
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            console.log(`✅ Data loaded from local API (port ${port}):`, data);
+                            return data;
+                        }
+                    } catch (error) {
+                        console.log(`Port ${port} not available`);
+                    }
+                }
+                
+                // If local API fails, try to get data from Firebase
+                console.log('Trying Firebase as fallback...');
+                const firebaseData = await loadFirebaseData();
+                if (firebaseData) {
+                    return firebaseData;
+                }
+                
+                throw new Error('All local ports and Firebase failed');
+                
+            } catch (error) {
+                console.error('Error loading local data:', error);
+                throw error;
+            }
+        }
+
+        // Main data loading function
+        async function loadData() {
+            hideError();
+            showLoading();
+            
+            try {
+                const data = await loadLocalData();
+                displayData(data);
+                hideLoading();
+            } catch (error) {
+                console.error('Failed to load data:', error);
+                showError('Cannot connect to mining monitor. Please ensure the monitor is running.');
+                hideLoading();
+            }
+        }
+
+        // Load miners list
+        async function loadMiners() {
+            try {
+                const ports = [8080, 8081, 8082, 8083];
+                
+                for (const port of ports) {
+                    try {
+                        const response = await fetch(`http://localhost:${port}/api/miners`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            displayMiners(data.miners || []);
+                            return;
+                        }
+                    } catch (error) {
+                        console.log(`Port ${port} not available for miners`);
+                    }
+                }
+                
+                // If no local API, show message
+                document.getElementById('minersContainer').innerHTML = 
+                    '<div class="miner-item"><span>Miners data not available</span></div>';
+                    
+            } catch (error) {
+                console.error('Error loading miners:', error);
+                document.getElementById('minersContainer').innerHTML = 
+                    '<div class="miner-item"><span>Error loading miners</span></div>';
+            }
+        }
+
+        // Display main data
+        function displayData(data) {
+            if (!data) {
+                showError('No data received');
+                return;
+            }
+
+            // Update basic metrics
             document.getElementById('totalMiners').textContent = data.total_miners || 0;
             document.getElementById('onlineMiners').textContent = data.online_miners || 0;
             document.getElementById('offlineMiners').textContent = data.offline_miners || 0;
-            document.getElementById('totalHashrate').textContent = 
-                data.total_hashrate ? `${data.total_hashrate.toFixed(2)} TH/s` : '0.00 TH/s';
+            document.getElementById('problematicMiners').textContent = data.problematic_miners || 0;
             
-            // Update last update time
-            const lastUpdate = data.last_update ? new Date(data.last_update * 1000).toLocaleTimeString() : 'Never';
-            document.getElementById('lastUpdate').textContent = lastUpdate;
+            // Update hashrate
+            const hashrate = data.total_hashrate || 0;
+            document.getElementById('totalHashrate').textContent = hashrate.toFixed(2) + ' TH/s';
+            document.getElementById('hashrateValue').textContent = hashrate.toFixed(2) + ' TH/s';
+            
+            // Update power and efficiency
+            const power = data.total_power || 0;
+            document.getElementById('totalPower').textContent = power + ' W';
+            
+            const efficiency = power > 0 ? hashrate / power : 0;
+            document.getElementById('efficiency').textContent = efficiency.toFixed(3) + ' TH/W';
+            
+            // Calculate uptime and health
+            const totalMiners = data.total_miners || 1;
+            const onlineMiners = data.online_miners || 0;
+            const uptimePercent = (onlineMiners / totalMiners * 100).toFixed(1);
+            document.getElementById('uptimePercent').textContent = uptimePercent + '%';
+            
+            const healthScore = ((onlineMiners - data.problematic_miners) / totalMiners * 100).toFixed(1);
+            document.getElementById('healthScore').textContent = healthScore + '%';
+            
+            // Update timestamp
+            document.getElementById('lastUpdateTime').textContent = new Date().toLocaleTimeString();
+            
+            // Show dashboard
+            document.getElementById('dashboard').style.display = 'block';
         }
-        
-        function showError(message) {
-            document.getElementById('loading').style.display = 'none';
+
+        // Display miners list
+        function displayMiners(miners) {
+            const container = document.getElementById('minersContainer');
+            
+            if (!miners || miners.length === 0) {
+                container.innerHTML = '<div class="miner-item"><span>No miners found</span></div>';
+                return;
+            }
+            
+            let html = '';
+            
+            miners.forEach(miner => {
+                const statusClass = miner.status === 'online' ? 'status-online' : 
+                                 miner.status === 'warning' ? 'status-warning' : 'status-offline';
+                
+                const statusText = miner.status === 'online' ? '✅ Online' :
+                                miner.status === 'warning' ? '⚠️ Warning' : '❌ Offline';
+                
+                html += `
+                    <div class="miner-item">
+                        <div>
+                            <span class="miner-status ${statusClass}"></span>
+                            <strong>${miner.ip}</strong>
+                        </div>
+                        <div>${statusText}</div>
+                        <div>${miner.hashrate ? miner.hashrate.toFixed(2) + ' TH/s' : 'N/A'}</div>
+                        <div>${miner.temperature || 0}°C</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // UI helper functions
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
             document.getElementById('dashboard').style.display = 'none';
-            document.getElementById('error').style.display = 'block';
-            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('error').style.display = 'none';
         }
-        
-        // Initial load
-        loadData();
-        
-        // Telegram Mini App integration
-        if (window.Telegram && Telegram.WebApp) {
-            Telegram.WebApp.expand();
-            Telegram.WebApp.ready();
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.innerHTML = `❌ ${message}`;
+            errorDiv.style.display = 'block';
+            document.getElementById('dashboard').style.display = 'none';
+        }
+
+        function hideError() {
+            document.getElementById('error').style.display = 'none';
+        }
+
+        // Firebase status display
+        function showFirebaseStatus() {
+            const firebaseStatus = initializeFirebase() ? '✅ CONNECTED' : '❌ DISCONNECTED';
+            alert(`Firebase Status: ${firebaseStatus}\n\nMake sure you have configured Firebase correctly in the mining monitor.`);
+        }
+
+        // Auto-refresh functionality
+        let countdown = 60;
+        let countdownInterval;
+
+        function startAutoRefresh() {
+            countdownInterval = setInterval(() => {
+                countdown--;
+                document.getElementById('countdown').textContent = countdown;
+                
+                if (countdown <= 0) {
+                    countdown = 60;
+                    loadData();
+                }
+            }, 1000);
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🏭 Mining Monitor Web Dashboard v3.5.0');
+            console.log('Initializing...');
+            
+            // Try to initialize Firebase
+            initializeFirebase();
+            
+            // Load initial data
+            loadData();
+            
+            // Start auto-refresh
+            startAutoRefresh();
+            
+            // Load miners after a short delay
+            setTimeout(loadMiners, 2000);
+        });
+
+        // Handle page visibility changes
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                // Page became visible, refresh data
+                loadData();
+            }
+        });
+
+        // Error handling for uncaught errors
+        window.addEventListener('error', function(e) {
+            console.error('Global error:', e.error);
+        });
+
+        // Export functions for global access
+        window.loadData = loadData;
+        window.loadMiners = loadMiners;
+        window.showFirebaseStatus = showFirebaseStatus;
+    </script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    
+    <!-- Fallback if CDN fails -->
+    <script>
+        if (typeof firebase === 'undefined') {
+            console.warn('Firebase CDN failed to load');
+            document.addEventListener('DOMContentLoaded', function() {
+                document.getElementById('loading').innerHTML = 
+                    '<div class="error">⚠️ Firebase SDK not loaded. Some features may not work.</div>' +
+                    '<div class="loading">🔄 Loading basic data...</div>';
+            });
         }
     </script>
 </body>
