@@ -26,20 +26,56 @@ jobs:
       - name: Install dependencies
         run: npm install
         
-      - name: Copy and validate data
+      - name: Fix JSON structure for React
         run: |
           mkdir -p public/data
-          # Просто копируем данные
-          cp data/farm_data.json public/data/farm_data.json
+          node -e "
+          const fs = require('fs');
           
-          # Проверяем что файл существует и не пустой
-          if [ -s "public/data/farm_data.json" ]; then
-            echo "✅ farm_data.json copied successfully"
-            echo "File size: $(wc -c < public/data/farm_data.json) bytes"
-          else
-            echo "❌ farm_data.json is missing or empty"
-            exit 1
-          fi
+          // Читаем исходный JSON
+          const originalData = JSON.parse(fs.readFileSync('data/farm_data.json', 'utf8'));
+          
+          // Создаем новую структуру для React
+          const containers = originalData.containers || {};
+          const containerEntries = Object.entries(containers);
+          
+          // Вычисляем summary
+          const summary = {
+            total_containers: containerEntries.length,
+            total_miners: containerEntries.reduce((sum, [_, container]) => sum + (container.total_miners || 0), 0),
+            online_miners: containerEntries.reduce((sum, [_, container]) => sum + (container.online_miners || 0), 0),
+            total_hashrate: containerEntries.reduce((sum, [_, container]) => sum + (container.total_hashrate || 0), 0),
+            total_power: containerEntries.reduce((sum, [_, container]) => sum + (container.total_power || 0), 0)
+          };
+          
+          // Преобразуем контейнеры
+          const processedContainers = {};
+          containerEntries.forEach(([containerId, container]) => {
+            processedContainers[containerId] = {
+              stats: {
+                total_hashrate: container.total_hashrate,
+                total_power: container.total_power
+              },
+              miners: container.miners_data || [] // переименовываем miners_data -> miners
+            };
+          });
+          
+          // Создаем финальный объект
+          const processedData = {
+            ...originalData,
+            summary: summary,
+            containers: processedContainers
+          };
+          
+          console.log('Processed data:');
+          console.log('- Farm:', processedData.farm_name);
+          console.log('- Containers:', summary.total_containers);
+          console.log('- Miners:', summary.total_miners);
+          console.log('- Online:', summary.online_miners);
+          
+          // Сохраняем
+          fs.writeFileSync('public/data/farm_data.json', JSON.stringify(processedData, null, 2));
+          "
         
       - name: Build React app
         run: npm run build
