@@ -4,23 +4,23 @@ import '../styles/components/StatsGrid.css';
 const StatsGrid = ({ summary }) => {
     const stats = [
         {
-            title: 'Containers',
+            title: 'Контейнеры',
             value: summary?.total_containers || 0,
             icon: '🏗️'
         },
         {
-            title: 'Miners',
+            title: 'Майнеры',
             value: `${summary?.online_miners || 0}/${summary?.total_miners || 0}`,
             icon: '⛏️'
         },
         {
-            title: 'Hashrate',
-            value: `${(summary?.total_hashrate || 0).toLocaleString()} TH/s`,
+            title: 'Хешрейт',
+            value: `${(summary?.total_hashrate || 0).toLocaleString('ru-RU')} TH/s`,
             icon: '⚡'
         },
         {
-            title: 'Power',
-            value: `${summary?.total_power || 0} W`,
+            title: 'Мощность',
+            value: `${(summary?.total_power || 0).toLocaleString('ru-RU')} Вт`,
             icon: '🔋'
         }
     ];

@@ -2,28 +2,28 @@ import React from 'react';
 import { useFarmData } from '../hooks/useFarmData';
 import StatsGrid from './StatsGrid';
 import ContainerCard from './ContainerCard';
-import '../styles/components/Dashboard.css';;
+import '../styles/components/Dashboard.css';
 
 const Dashboard = () => {
     const { farmData, loading, error } = useFarmData();
 
     if (loading) {
-        return <div className="loading">Loading mining data...</div>;
+        return <div className="loading">Загрузка данных майнинга...</div>;
     }
 
     if (error) {
-        return <div className="error">Error: {error}</div>;
+        return <div className="error">Ошибка: {error}</div>;
     }
 
     if (!farmData) {
-        return <div className="no-data">No data available</div>;
+        return <div className="no-data">Нет данных</div>;
     }
 
     return (
         <div className="dashboard">
             <div className="dashboard-header">
-                <h1>{farmData.farm_name || 'Mining Farm'}</h1>
-                <p>Last update: {new Date(farmData.last_update).toLocaleString()}</p>
+                <h1>{farmData.farm_name || 'Майнинг Ферма'}</h1>
+                <p>Последнее обновление: {new Date(farmData.last_update).toLocaleString('ru-RU')}</p>
             </div>
             
             <StatsGrid summary={farmData.summary} />

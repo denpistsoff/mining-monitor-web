@@ -60,14 +60,13 @@ jobs:
             containers: processedContainers
           };
           
-          console.log('Обработанные данные:');
+          console.log('✅ Данные обработаны:');
           console.log('- Ферма:', processedData.farm_name);
           console.log('- Контейнеры:', summary.total_containers);
           console.log('- Майнеры:', summary.total_miners);
           console.log('- Онлайн:', summary.online_miners);
           
           fs.writeFileSync('public/data/farm_data.json', JSON.stringify(processedData, null, 2));
-          console.log('✅ Данные готовы для React');
           "
         
       - name: Build React app
@@ -78,7 +77,7 @@ jobs:
           mkdir -p build/data
           cp public/data/farm_data.json build/data/
           touch build/.nojekyll
-          echo "✅ Данные скопированы в билд"
+          echo "✅ Все файлы готовы для деплоя"
         
       - name: Setup Pages
         uses: actions/configure-pages@v4
