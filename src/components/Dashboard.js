@@ -2,7 +2,7 @@ import React from 'react';
 import { useFarmData } from '../hooks/useFarmData';
 import StatsGrid from './StatsGrid';
 import ContainerCard from './ContainerCard';
-import './Dashboard.css';
+import '../styles/components/Dashboard.css';;
 
 const Dashboard = () => {
     const { farmData, loading, error } = useFarmData();
