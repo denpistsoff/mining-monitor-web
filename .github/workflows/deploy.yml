@@ -28,56 +28,21 @@ jobs:
       - name: Install dependencies
         run: npm install
         
-      - name: Download farm data
+      - name: Download and process farm data
         run: |
           mkdir -p public/data
           echo "Downloading farm data..."
+          
+          # Скачиваем данные
           curl -s -o public/data/farm_data.json "https://raw.githubusercontent.com/denpistsoff/mining-monitor/main/data/farm_data.json" || echo "Download failed"
           
-      - name: Process JSON data
-        run: |
-          python3 << 'EOF'
-import json
-
-try:
-    # Читаем данные
-    with open('public/data/farm_data.json', 'r') as f:
-        data = json.load(f)
-    print('✅ JSON is valid')
-    
-    # Добавляем summary если его нет
-    if 'summary' not in data:
-        containers = data.get('containers', {})
-        data['summary'] = {
-            'total_containers': len(containers),
-            'total_miners': sum(c.get('total_miners', 0) for c in containers.values()),
-            'online_miners': sum(c.get('online_miners', 0) for c in containers.values()),
-            'total_hashrate': sum(c.get('total_hashrate', 0) for c in containers.values()),
-            'total_power': sum(c.get('total_power', 0) for c in containers.values())
-        }
-        print('✅ Added summary section')
-    
-    # Сохраняем обратно
-    with open('public/data/farm_data.json', 'w') as f:
-        json.dump(data, f, indent=2)
-        
-    print('Farm:', data.get('farm_name'))
-    print('Containers:', data['summary']['total_containers'])
-    print('Miners:', data['summary']['total_miners'])
-    
-except Exception as e:
-    print('❌ JSON error:', e)
-    # Создаем fallback
-    fallback = {
-        'farm_name': 'Fallback Farm',
-        'last_update': '2024-01-01T00:00:00',
-        'summary': {'total_containers': 0, 'total_miners': 0, 'online_miners': 0, 'total_hashrate': 0, 'total_power': 0},
-        'containers': {}
-    }
-    with open('public/data/farm_data.json', 'w') as f:
-        json.dump(fallback, f, indent=2)
-    print('✅ Created fallback data')
-EOF
+          # Простая проверка JSON
+          if python3 -m json.tool public/data/farm_data.json > /dev/null 2>&1; then
+            echo "✅ JSON is valid"
+          else
+            echo "❌ JSON is invalid, creating fallback"
+            echo '{"farm_name":"Fallback Farm","last_update":"2024-01-01T00:00:00","summary":{"total_containers":0,"total_miners":0,"online_miners":0,"total_hashrate":0,"total_power":0},"containers":{}}' > public/data/farm_data.json
+          fi
         
       - name: Build React app
         run: npm run build
