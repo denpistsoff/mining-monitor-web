@@ -1,5 +1,5 @@
 import React from 'react';
-import './StatsGrid.css';
+import '../styles/components/StatsGrid.css';
 
 const StatsGrid = ({ summary }) => {
     const stats = [
