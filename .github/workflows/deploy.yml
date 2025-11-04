@@ -28,33 +28,64 @@ jobs:
       - name: Install dependencies
         run: npm install
         
-      - name: Download and validate farm data
+      - name: Download farm data
         run: |
           mkdir -p public/data
-          echo "Downloading farm data..."
+          echo "🔍 Downloading farm data..."
           
-          # Пробуем скачать данные
-          if curl -s -f -o temp_data.json "https://raw.githubusercontent.com/denpistsoff/mining-monitor/main/data/farm_data.json"; then
-            echo "Download successful"
-            
-            # Проверяем валидность JSON
-            if python3 -c "import json; json.load(open('temp_data.json'))" 2>/dev/null; then
-              echo "✅ JSON is valid"
-              mv temp_data.json public/data/farm_data.json
-            else
-              echo "❌ Invalid JSON, using fallback"
-              echo '{"last_update": "2024-01-01T00:00:00", "summary": {"total_containers": 0, "total_miners": 0, "online_miners": 0, "total_hashrate": 0, "total_power": 0}, "containers": {}}' > public/data/farm_data.json
-            fi
-          else
-            echo "❌ Download failed, using fallback"
-            echo '{"last_update": "2024-01-01T00:00:00", "summary": {"total_containers": 0, "total_miners": 0, "online_miners": 0, "total_hashrate": 0, "total_power": 0}, "containers": {}}' > public/data/farm_data.json
-          fi
+          # Скачиваем данные
+          curl -s -o public/data/farm_data.json "https://raw.githubusercontent.com/denpistsoff/mining-monitor/main/data/farm_data.json" || echo "Download failed"
           
-          echo "Final data file:"
-          ls -la public/data/farm_data.json
+          echo "=== DATA VALIDATION ==="
+          echo "File size: $(wc -c < public/data/farm_data.json) bytes"
+          echo "First 500 chars:"
+          head -c 500 public/data/farm_data.json
+          echo ""
+          echo "=== JSON STRUCTURE ==="
+          python3 -c "
+import json
+try:
+    with open('public/data/farm_data.json', 'r') as f:
+        data = json.load(f)
+    print('✅ JSON valid')
+    print(f'Farm name: {data.get(\"farm_name\", \"NOT FOUND\")}')
+    print(f'Containers: {len(data.get(\"containers\", {}))}')
+    print(f'Last update: {data.get(\"last_update\", \"NOT FOUND\")}')
+    
+    # Проверяем структуру summary
+    if 'summary' in data:
+        summary = data['summary']
+        print(f'Summary - Containers: {summary.get(\"total_containers\", \"NOT FOUND\")}')
+        print(f'Summary - Miners: {summary.get(\"total_miners\", \"NOT FOUND\")}')
+    else:
+        print('❌ No summary section found')
+        
+except Exception as e:
+    print(f'❌ JSON error: {e}')
+          "
+          
+          # Создаем копию для билда
+          cp -r public/data build/ 2>/dev/null || mkdir -p build/data && cp public/data/farm_data.json build/data/
+          touch build/.nojekyll
         
       - name: Build React app
-        run: npm run build
+        run: |
+          echo "🏗️ Building React app..."
+          npm run build
+          echo "=== BUILD FILES ==="
+          find build/ -name "*.json" | head -10
+          ls -la build/data/ 2>/dev/null || echo "No data directory in build"
+        
+      - name: Verify build contains data
+        run: |
+          echo "=== VERIFYING BUILD ==="
+          if [ -f "build/data/farm_data.json" ]; then
+            echo "✅ farm_data.json found in build"
+            echo "Build file size: $(wc -c < build/data/farm_data.json) bytes"
+          else
+            echo "❌ farm_data.json NOT found in build"
+            find build/ -name "*.json" | head -10
+          fi
         
       - name: Setup Pages
         uses: actions/configure-pages@v4
