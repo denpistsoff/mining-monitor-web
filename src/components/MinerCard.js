@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import '../styles/components/MinerCard.css';
+import '/home/runner/work/mining-monitor-web/mining-monitor-web/src/styles/components/MinerView.css';
 
 const MinerCard = ({ miner, showContainer = false }) => {
     const [isExpanded, setIsExpanded] = useState(false);
