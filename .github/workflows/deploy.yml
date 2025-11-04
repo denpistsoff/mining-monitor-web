@@ -4,7 +4,6 @@ on:
   push:
     branches: [ main ]
   workflow_dispatch:
-  # Добавьте триггер по расписанию
   schedule:
     - cron: '*/5 * * * *'  # Каждые 5 минут
 
@@ -19,24 +18,24 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+        with:
+          token: ${{ secrets.PAT }}  # Добавьте эту строку
+          
       - name: Download latest farm data
         run: |
           mkdir -p public/data
-          # Скачиваем актуальные данные
-          curl -s -o public/data/farm_data.json "https://raw.githubusercontent.com/denpistsoff/mining-monitor-web/main/data/farm_data.json" || echo "Download failed"
+          curl -s -o public/data/farm_data.json "https://raw.githubusercontent.com/denpistsoff/mining-monitor/main/data/farm_data.json" || echo "Download failed"
           
       - name: Commit and push if data changed
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add public/data/farm_data.json
-          git diff --staged --quiet || git commit -m "Auto-update farm data"
-          git push
+          git diff --staged --quiet || (git commit -m "Auto-update farm data" && git push)
 
   build:
     runs-on: ubuntu-latest
-    needs: update-data  # Ждем обновления данных
+    needs: update-data
     steps:
       - name: Checkout
         uses: actions/checkout@v4
