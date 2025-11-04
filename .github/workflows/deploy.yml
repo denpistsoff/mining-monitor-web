@@ -26,12 +26,20 @@ jobs:
       - name: Install dependencies
         run: npm install
         
-      - name: Copy local data
+      - name: Copy and validate data
         run: |
           mkdir -p public/data
-          # Копируем данные ИЗ ЭТОГО РЕПОЗИТОРИЯ
+          # Просто копируем данные
           cp data/farm_data.json public/data/farm_data.json
-          echo "✅ Using local farm_data.json"
+          
+          # Проверяем что файл существует и не пустой
+          if [ -s "public/data/farm_data.json" ]; then
+            echo "✅ farm_data.json copied successfully"
+            echo "File size: $(wc -c < public/data/farm_data.json) bytes"
+          else
+            echo "❌ farm_data.json is missing or empty"
+            exit 1
+          fi
         
       - name: Build React app
         run: npm run build
