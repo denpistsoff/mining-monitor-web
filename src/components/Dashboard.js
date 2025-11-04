@@ -1,125 +1,44 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useFarmData } from '../hooks/useFarmData';
 import StatsGrid from './StatsGrid';
 import ContainerCard from './ContainerCard';
-import { MiningMonitorAPI } from '../utils/firebase';
-import '../styles/components/Dashboard.css';
+import './Dashboard.css';
 
-const Dashboard = ({ farmName }) => {
-  const [farmData, setFarmData] = useState(null);
-  const [minersData, setMinersData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [lastUpdate, setLastUpdate] = useState(null);
+const Dashboard = () => {
+    const { farmData, loading, error } = useFarmData();
 
-  useEffect(() => {
-    const api = new MiningMonitorAPI(farmName);
-    
-    // Подписка на данные майнеров
-    const unsubscribeMiners = api.subscribeToMiners((data) => {
-      if (data) {
-        setMinersData(data);
-        setLastUpdate(new Date());
-        setLoading(false);
-      }
-    });
+    if (loading) {
+        return <div className="loading">Loading mining data...</div>;
+    }
 
-    // Подписка на данные фермы
-    const unsubscribeFarm = api.subscribeToFarmData((data) => {
-      if (data) {
-        setFarmData(data);
-      }
-    });
+    if (error) {
+        return <div className="error">Error: {error}</div>;
+    }
 
-    // Периодическое обновление
-    const interval = setInterval(() => {
-      setLastUpdate(new Date());
-    }, 30000);
+    if (!farmData) {
+        return <div className="no-data">No data available</div>;
+    }
 
-    return () => {
-      unsubscribeMiners();
-      unsubscribeFarm();
-      clearInterval(interval);
-    };
-  }, [farmName]);
-
-  if (loading) {
     return (
-      <div className="dashboard-loading">
-        <div className="loading-spinner large"></div>
-        <p>Загружаем данные майнеров...</p>
-      </div>
+        <div className="dashboard">
+            <div className="dashboard-header">
+                <h1>{farmData.farm_name || 'Mining Farm'}</h1>
+                <p>Last update: {new Date(farmData.last_update).toLocaleString()}</p>
+            </div>
+            
+            <StatsGrid summary={farmData.summary} />
+            
+            <div className="containers-grid">
+                {Object.entries(farmData.containers).map(([containerId, container]) => (
+                    <ContainerCard
+                        key={containerId}
+                        containerId={containerId}
+                        container={container}
+                    />
+                ))}
+            </div>
+        </div>
     );
-  }
-
-  if (!minersData) {
-    return (
-      <div className="dashboard-error">
-        <div className="error-icon">⚠️</div>
-        <h3>Нет данных</h3>
-        <p>Не удалось загрузить данные майнеров</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="dashboard">
-      <div className="dashboard-header">
-        <div className="dashboard-title">
-          <h2>Обзор фермы</h2>
-          {lastUpdate && (
-            <span className="last-update">
-              Обновлено: {lastUpdate.toLocaleTimeString('ru-RU')}
-            </span>
-          )}
-        </div>
-        <button 
-          className="btn btn-primary"
-          onClick={() => window.location.reload()}
-        >
-          🔄 Обновить
-        </button>
-      </div>
-
-      {/* Общая статистика */}
-      <StatsGrid stats={minersData.total_stats} />
-
-      {/* Контейнеры с майнерами */}
-      <section className="containers-section">
-        <h3 className="section-title">Контейнеры</h3>
-        <div className="containers-grid">
-          {Object.entries(minersData.containers || {}).map(([containerId, container]) => (
-            <ContainerCard
-              key={containerId}
-              containerId={containerId}
-              container={container}
-            />
-          ))}
-        </div>
-      </section>
-
-      {/* Быстрый статус */}
-      <section className="quick-stats">
-        <h3 className="section-title">Быстрый статус</h3>
-        <div className="quick-stats-grid">
-          <div className="quick-stat">
-            <span className="stat-label">Всего майнеров</span>
-            <span className="stat-value">{minersData.total_stats?.total_miners || 0}</span>
-          </div>
-          <div className="quick-stat">
-            <span className="stat-label">Онлайн</span>
-            <span className="stat-value success">{minersData.total_stats?.online_miners || 0}</span>
-          </div>
-          <div className="quick-stat">
-            <span className="stat-label">Офлайн</span>
-            <span className="stat-value danger">{minersData.total_stats?.offline_miners || 0}</span>
-          </div>
-          <div className="quick-stat">
-            <span className="stat-label">Проблемы</span>
-            <span className="stat-value warning">{minersData.total_stats?.problematic_miners || 0}</span>
-          </div>
-        </div>
-      </section>
-    </div>
-  );
 };
 
 export default Dashboard;

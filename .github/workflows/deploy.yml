@@ -26,8 +26,25 @@ jobs:
       - name: Install dependencies
         run: npm install
         
+      - name: Download farm data
+        run: |
+          mkdir -p public/data
+          # Пробуем скачать актуальные данные из репозитория
+          curl -s -o public/data/farm_data.json "https://raw.githubusercontent.com/denpistsoff/mining-monitor-web/main/data/farm_data.json" || echo "No data file yet"
+          # Если файла нет, создаем заглушку
+          if [ ! -f "public/data/farm_data.json" ]; then
+            echo '{"last_update": "2024-01-01T00:00:00", "summary": {"total_containers": 0, "total_miners": 0, "online_miners": 0, "total_hashrate": 0, "total_power": 0}, "containers": {}}' > public/data/farm_data.json
+          fi
+        
       - name: Build React app
         run: npm run build
+        
+      - name: Copy fresh data to build
+        run: |
+          # Копируем данные в билд директорию
+          cp -r public/data build/
+          # Создаем .nojekyll для правильной работы
+          touch build/.nojekyll
         
       - name: Setup Pages
         uses: actions/configure-pages@v4
