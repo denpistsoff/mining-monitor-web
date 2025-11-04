@@ -20,13 +20,6 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v3
         
-      - name: Create data directory
-        run: mkdir -p data
-        
-      - name: Download farm data
-        run: |
-          curl -s -o data/farm_data.json "https://raw.githubusercontent.com/denpistsoff/mining-monitor-web/main/data/farm_data.json" || echo "No data file yet"
-        
       - name: Create index.html
         run: |
           cat > index.html << 'EOF'
@@ -98,7 +91,7 @@ jobs:
                           `;
                       }
                       document.getElementById('containers').innerHTML = containersHTML || '<p>No data</p>';
-                      document.getElementById('updateTime').textContent = new Date().toLocaleString();
+                      document.getElementById('updateTime').textContent = new Date(data.last_update).toLocaleString();
                   }
 
                   loadData();
