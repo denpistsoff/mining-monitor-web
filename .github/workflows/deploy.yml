@@ -1,43 +1,100 @@
-import React from 'react';
-import '../styles/components/StatsGrid.css';
+name: Deploy React App to GitHub Pages
 
-const StatsGrid = ({ summary }) => {
-    const stats = [
-        {
-            title: 'Контейнеры',
-            value: summary?.total_containers || 0,
-            icon: '🏗️'
-        },
-        {
-            title: 'Майнеры',
-            value: `${summary?.online_miners || 0}/${summary?.total_miners || 0}`,
-            icon: '⛏️'
-        },
-        {
-            title: 'Хешрейт',
-            value: `${(summary?.total_hashrate || 0).toLocaleString('ru-RU')} TH/s`,
-            icon: '⚡'
-        },
-        {
-            title: 'Мощность',
-            value: `${(summary?.total_power || 0).toLocaleString('ru-RU')} Вт`,
-            icon: '🔋'
-        }
-    ];
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
 
-    return (
-        <div className="stats-grid">
-            {stats.map((stat, index) => (
-                <div key={index} className="stat-card">
-                    <div className="stat-icon">{stat.icon}</div>
-                    <div className="stat-content">
-                        <h3>{stat.title}</h3>
-                        <div className="stat-value">{stat.value}</div>
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
-};
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
-export default StatsGrid;
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm install
+        
+      - name: Fix JSON structure for React
+        run: |
+          mkdir -p public/data
+          node -e "
+          const fs = require('fs');
+          const originalData = JSON.parse(fs.readFileSync('data/farm_data.json', 'utf8'));
+          const containers = originalData.containers || {};
+          const containerEntries = Object.entries(containers);
+          
+          const summary = {
+            total_containers: containerEntries.length,
+            total_miners: containerEntries.reduce((sum, [_, container]) => sum + (container.total_miners || 0), 0),
+            online_miners: containerEntries.reduce((sum, [_, container]) => sum + (container.online_miners || 0), 0),
+            total_hashrate: containerEntries.reduce((sum, [_, container]) => sum + (container.total_hashrate || 0), 0),
+            total_power: containerEntries.reduce((sum, [_, container]) => sum + (container.total_power || 0), 0)
+          };
+          
+          const processedContainers = {};
+          containerEntries.forEach(([containerId, container]) => {
+            processedContainers[containerId] = {
+              stats: {
+                total_hashrate: container.total_hashrate,
+                total_power: container.total_power
+              },
+              miners: container.miners_data || []
+            };
+          });
+          
+          const processedData = {
+            ...originalData,
+            summary: summary,
+            containers: processedContainers
+          };
+          
+          console.log('Обработанные данные:');
+          console.log('- Ферма:', processedData.farm_name);
+          console.log('- Контейнеры:', summary.total_containers);
+          console.log('- Майнеры:', summary.total_miners);
+          console.log('- Онлайн:', summary.online_miners);
+          
+          fs.writeFileSync('public/data/farm_data.json', JSON.stringify(processedData, null, 2));
+          console.log('✅ Данные готовы для React');
+          "
+        
+      - name: Build React app
+        run: npm run build
+        
+      - name: Copy data to build
+        run: |
+          mkdir -p build/data
+          cp public/data/farm_data.json build/data/
+          touch build/.nojekyll
+          echo "✅ Данные скопированы в билд"
+        
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./build
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
