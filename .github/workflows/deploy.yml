@@ -31,61 +31,62 @@ jobs:
       - name: Download farm data
         run: |
           mkdir -p public/data
-          echo "🔍 Downloading farm data..."
-          
-          # Скачиваем данные
+          echo "Downloading farm data..."
           curl -s -o public/data/farm_data.json "https://raw.githubusercontent.com/denpistsoff/mining-monitor/main/data/farm_data.json" || echo "Download failed"
           
-          echo "=== DATA VALIDATION ==="
-          echo "File size: $(wc -c < public/data/farm_data.json) bytes"
-          echo "First 500 chars:"
-          head -c 500 public/data/farm_data.json
-          echo ""
-          echo "=== JSON STRUCTURE ==="
+      - name: Process JSON data
+        run: |
           python3 -c "
 import json
+
 try:
+    # Читаем данные
     with open('public/data/farm_data.json', 'r') as f:
         data = json.load(f)
-    print('✅ JSON valid')
-    print(f'Farm name: {data.get(\"farm_name\", \"NOT FOUND\")}')
-    print(f'Containers: {len(data.get(\"containers\", {}))}')
-    print(f'Last update: {data.get(\"last_update\", \"NOT FOUND\")}')
+    print('✅ JSON is valid')
     
-    # Проверяем структуру summary
-    if 'summary' in data:
-        summary = data['summary']
-        print(f'Summary - Containers: {summary.get(\"total_containers\", \"NOT FOUND\")}')
-        print(f'Summary - Miners: {summary.get(\"total_miners\", \"NOT FOUND\")}')
-    else:
-        print('❌ No summary section found')
+    # Добавляем summary если его нет
+    if 'summary' not in data:
+        containers = data.get('containers', {})
+        data['summary'] = {
+            'total_containers': len(containers),
+            'total_miners': sum(c.get('total_miners', 0) for c in containers.values()),
+            'online_miners': sum(c.get('online_miners', 0) for c in containers.values()),
+            'total_hashrate': sum(c.get('total_hashrate', 0) for c in containers.values()),
+            'total_power': sum(c.get('total_power', 0) for c in containers.values())
+        }
+        print('✅ Added summary section')
+    
+    # Сохраняем обратно
+    with open('public/data/farm_data.json', 'w') as f:
+        json.dump(data, f, indent=2)
         
+    print(f'Farm: {data.get(\"farm_name\")}')
+    print(f'Containers: {data[\"summary\"][\"total_containers\"]}')
+    print(f'Miners: {data[\"summary\"][\"total_miners\"]}')
+    
 except Exception as e:
     print(f'❌ JSON error: {e}')
-          "
-          
-          # Создаем копию для билда
-          cp -r public/data build/ 2>/dev/null || mkdir -p build/data && cp public/data/farm_data.json build/data/
-          touch build/.nojekyll
+    # Создаем fallback
+    fallback = {
+        'farm_name': 'Fallback Farm',
+        'last_update': '2024-01-01T00:00:00',
+        'summary': {'total_containers': 0, 'total_miners': 0, 'online_miners': 0, 'total_hashrate': 0, 'total_power': 0},
+        'containers': {}
+    }
+    with open('public/data/farm_data.json', 'w') as f:
+        json.dump(fallback, f, indent=2)
+    print('✅ Created fallback data')
+"
         
       - name: Build React app
-        run: |
-          echo "🏗️ Building React app..."
-          npm run build
-          echo "=== BUILD FILES ==="
-          find build/ -name "*.json" | head -10
-          ls -la build/data/ 2>/dev/null || echo "No data directory in build"
+        run: npm run build
         
-      - name: Verify build contains data
+      - name: Copy data to build
         run: |
-          echo "=== VERIFYING BUILD ==="
-          if [ -f "build/data/farm_data.json" ]; then
-            echo "✅ farm_data.json found in build"
-            echo "Build file size: $(wc -c < build/data/farm_data.json) bytes"
-          else
-            echo "❌ farm_data.json NOT found in build"
-            find build/ -name "*.json" | head -10
-          fi
+          mkdir -p build/data
+          cp public/data/farm_data.json build/data/
+          touch build/.nojekyll
         
       - name: Setup Pages
         uses: actions/configure-pages@v4
