@@ -36,7 +36,7 @@ jobs:
           
       - name: Process JSON data
         run: |
-          python3 -c "
+          python3 << 'EOF'
 import json
 
 try:
@@ -61,12 +61,12 @@ try:
     with open('public/data/farm_data.json', 'w') as f:
         json.dump(data, f, indent=2)
         
-    print(f'Farm: {data.get(\"farm_name\")}')
-    print(f'Containers: {data[\"summary\"][\"total_containers\"]}')
-    print(f'Miners: {data[\"summary\"][\"total_miners\"]}')
+    print('Farm:', data.get('farm_name'))
+    print('Containers:', data['summary']['total_containers'])
+    print('Miners:', data['summary']['total_miners'])
     
 except Exception as e:
-    print(f'❌ JSON error: {e}')
+    print('❌ JSON error:', e)
     # Создаем fallback
     fallback = {
         'farm_name': 'Fallback Farm',
@@ -77,7 +77,7 @@ except Exception as e:
     with open('public/data/farm_data.json', 'w') as f:
         json.dump(fallback, f, indent=2)
     print('✅ Created fallback data')
-"
+EOF
         
       - name: Build React app
         run: npm run build
