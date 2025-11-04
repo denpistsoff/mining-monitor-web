@@ -4,8 +4,6 @@ on:
   push:
     branches: [ main ]
   workflow_dispatch:
-  schedule:
-    - cron: '*/5 * * * *'
 
 permissions:
   contents: read
@@ -28,90 +26,12 @@ jobs:
       - name: Install dependencies
         run: npm install
         
-      - name: Download and debug farm data
+      - name: Copy local data
         run: |
           mkdir -p public/data
-          echo "🔍 Downloading farm data..."
-          
-          # Скачиваем с подробным логом
-          curl -v -s -o public/data/raw_data.json "https://raw.githubusercontent.com/denpistsoff/mining-monitor/main/data/farm_data.json" 2> curl_log.txt
-          
-          echo "=== CURL LOG ==="
-          cat curl_log.txt
-          
-          echo "=== DOWNLOADED CONTENT (first 500 chars) ==="
-          head -c 500 public/data/raw_data.json
-          echo ""
-          
-          echo "=== FILE INFO ==="
-          file public/data/raw_data.json
-          ls -la public/data/raw_data.json
-          
-          # Пробуем починить JSON если нужно
-          echo "=== ATTEMPTING TO FIX JSON ==="
-          python3 -c "
-import json
-import re
-
-try:
-    with open('public/data/raw_data.json', 'r') as f:
-        content = f.read().strip()
-    
-    print('Original content length:', len(content))
-    print('First 200 chars:', content[:200])
-    
-    # Пробуем разные методы очистки
-    cleaned_content = content
-    
-    # Убираем BOM если есть
-    if content.startswith('\ufeff'):
-        cleaned_content = content[1:]
-        print('Removed BOM')
-    
-    # Убираем лишние пробелы в начале/конце
-    cleaned_content = cleaned_content.strip()
-    
-    # Пробуем распарсить
-    data = json.loads(cleaned_content)
-    print('✅ JSON parsed successfully after cleaning')
-    
-    # Сохраняем чистый JSON
-    with open('public/data/farm_data.json', 'w') as f:
-        json.dump(data, f, indent=2)
-        
-except json.JSONDecodeError as e:
-    print(f'❌ JSON decode error: {e}')
-    print('Trying to find JSON in response...')
-    
-    # Ищем JSON в HTML или другом содержимом
-    json_match = re.search(r'\{.*\}', content, re.DOTALL)
-    if json_match:
-        print('Found potential JSON in response')
-        try:
-            data = json.loads(json_match.group())
-            print('✅ Extracted JSON successfully')
-            with open('public/data/farm_data.json', 'w') as f:
-                json.dump(data, f, indent=2)
-        except:
-            print('Failed to parse extracted JSON')
-            # Создаем fallback
-            raise
-    else:
-        print('No JSON found in response')
-        raise
-except Exception as e:
-    print(f'❌ Other error: {e}')
-    # Создаем fallback данные
-    fallback = {
-        'farm_name': 'Fallback Farm - Download Failed',
-        'last_update': '2024-01-01T00:00:00',
-        'summary': {'total_containers': 0, 'total_miners': 0, 'online_miners': 0, 'total_hashrate': 0, 'total_power': 0},
-        'containers': {}
-    }
-    with open('public/data/farm_data.json', 'w') as f:
-        json.dump(fallback, f, indent=2)
-    print('✅ Created fallback data')
-"
+          # Копируем данные ИЗ ЭТОГО РЕПОЗИТОРИЯ
+          cp data/farm_data.json public/data/farm_data.json
+          echo "✅ Using local farm_data.json"
         
       - name: Build React app
         run: npm run build
