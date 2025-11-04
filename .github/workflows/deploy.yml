@@ -1,8 +1,8 @@
-name: Deploy React App to GitHub Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
   workflow_dispatch:
 
 permissions:
@@ -10,44 +10,109 @@ permissions:
   pages: write
   id-token: write
 
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          cache: 'npm'
-          
-      - name: Install dependencies
-        run: npm install
-        
-      - name: Build
-        run: npm run build
-        
       - name: Setup Pages
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@v3
+        
+      - name: Create data directory
+        run: mkdir -p data
+        
+      - name: Download farm data
+        run: |
+          curl -s -o data/farm_data.json "https://raw.githubusercontent.com/denpistsoff/mining-monitor-web/main/data/farm_data.json" || echo "No data file yet"
+        
+      - name: Create index.html
+        run: |
+          cat > index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="ru">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Mining Monitor</title>
+              <style>
+                  * { margin: 0; padding: 0; box-sizing: border-box; }
+                  body { font-family: system-ui, sans-serif; background: #0f0f23; color: white; padding: 20px; }
+                  .container { max-width: 1200px; margin: 0 auto; }
+                  header { text-align: center; margin-bottom: 30px; }
+                  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+                  .card { background: #1a1a2e; padding: 20px; border-radius: 10px; text-align: center; }
+                  .card h3 { color: #4ecca3; margin-bottom: 10px; }
+                  .card .value { font-size: 24px; font-weight: bold; }
+                  .container-card { background: #16213e; padding: 15px; border-radius: 8px; margin-bottom: 10px; }
+                  .miner { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #2d2d4d; }
+                  .online { color: #4ecca3; }
+                  .offline { color: #ff6b6b; }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <header>
+                      <h1>🤖 Mining Monitor</h1>
+                      <p>Last update: <span id="updateTime">-</span></p>
+                  </header>
+                  <div class="cards" id="summary"></div>
+                  <div id="containers"></div>
+              </div>
+              
+              <script>
+                  async function loadData() {
+                      try {
+                          const response = await fetch('./data/farm_data.json?t=' + Date.now());
+                          const data = await response.json();
+                          render(data);
+                      } catch (error) {
+                          document.getElementById('containers').innerHTML = '<p>Error loading data</p>';
+                      }
+                  }
+
+                  function render(data) {
+                      // Summary cards
+                      document.getElementById('summary').innerHTML = `
+                          <div class="card"><h3>Containers</h3><div class="value">${data.summary?.total_containers || 0}</div></div>
+                          <div class="card"><h3>Miners</h3><div class="value">${data.summary?.online_miners || 0}/${data.summary?.total_miners || 0}</div></div>
+                          <div class="card"><h3>Hashrate</h3><div class="value">${data.summary?.total_hashrate || 0} TH/s</div></div>
+                          <div class="card"><h3>Power</h3><div class="value">${data.summary?.total_power || 0} W</div></div>
+                      `;
+
+                      // Containers
+                      let containersHTML = '';
+                      for (const [id, container] of Object.entries(data.containers || {})) {
+                          containersHTML += `
+                              <div class="container-card">
+                                  <h3>${id}</h3>
+                                  <div>Miners: ${container.online_miners}/${container.total_miners}</div>
+                                  ${container.miners.map(miner => `
+                                      <div class="miner">
+                                          <span>${miner.ip}</span>
+                                          <span class="${miner.status}">${miner.hashrate} TH/s</span>
+                                      </div>
+                                  `).join('')}
+                              </div>
+                          `;
+                      }
+                      document.getElementById('containers').innerHTML = containersHTML || '<p>No data</p>';
+                      document.getElementById('updateTime').textContent = new Date().toLocaleString();
+                  }
+
+                  loadData();
+                  setInterval(loadData, 30000);
+              </script>
+          </body>
+          </html>
+          EOF
         
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v2
         with:
-          path: ./build
-
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
+          path: .
+          
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v2
