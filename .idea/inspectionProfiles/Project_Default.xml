@@ -1,0 +1,23 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <list>
+          <option value="python-telegram-bot" />
+          <option value="tqdm" />
+          <option value="requests" />
+          <option value="psutil" />
+          <option value="aiohttp" />
+          <option value="async-timeout" />
+          <option value="charset-normalizer" />
+          <option value="attrs" />
+          <option value="multidict" />
+          <option value="yarl" />
+          <option value="frozenlist" />
+          <option value="aiosignal" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
