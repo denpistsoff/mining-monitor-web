@@ -29,7 +29,7 @@ const Login = ({ onLogin }) => {
     const handleAutoLogin = async (savedUser, savedPass) => {
         setIsLoading(true);
         try {
-            const response = await fetch('/data/auth/credentials.json');
+            const response = await fetch('./data/auth/credentials.json');
             if (!response.ok) throw new Error('Auth file not found');
 
             const authData = await response.json();
@@ -55,7 +55,7 @@ const Login = ({ onLogin }) => {
         setIsLoading(true);
 
         try {
-            const response = await fetch('/data/auth/credentials.json');
+            const response = await fetch('./data/auth/credentials.json');
             if (!response.ok) throw new Error('Auth file not found');
 
             const authData = await response.json();

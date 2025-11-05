@@ -29,7 +29,11 @@ jobs:
       - name: Create auth credentials
         run: |
           mkdir -p public/data/auth
-          echo '${{ secrets.AUTH_CREDENTIALS }}' > public/data/auth/credentials.json
+          AUTH_JSON='${{ secrets.AUTH_CREDENTIALS }}'
+          echo "$AUTH_JSON" > public/data/auth/credentials.json
+          echo "✅ Auth file created"
+          echo "File content:"
+          cat public/data/auth/credentials.json
 
       - name: Fix JSON structure for React
         run: |
@@ -78,6 +82,9 @@ jobs:
           cp public/data/farm_data.json build/data/
           mkdir -p build/data/auth
           cp public/data/auth/credentials.json build/data/auth/
+          echo "✅ Build files prepared:"
+          ls -la build/data/
+          ls -la build/data/auth/
           touch build/.nojekyll
 
       - name: Setup Pages
