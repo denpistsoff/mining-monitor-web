@@ -16,16 +16,21 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
-          
+
       - name: Install dependencies
         run: npm install
-        
+
+      - name: Create auth credentials
+        run: |
+          mkdir -p public/data/auth
+          echo '${{ secrets.AUTH_CREDENTIALS }}' > public/data/auth/credentials.json
+
       - name: Fix JSON structure for React
         run: |
           mkdir -p public/data
@@ -63,19 +68,21 @@ jobs:
           console.log('✅ Данные обработаны');
           fs.writeFileSync('public/data/farm_data.json', JSON.stringify(processedData, null, 2));
           "
-        
+
       - name: Build React app
         run: npm run build
-        
+
       - name: Copy data to build
         run: |
           mkdir -p build/data
           cp public/data/farm_data.json build/data/
+          mkdir -p build/data/auth
+          cp public/data/auth/credentials.json build/data/auth/
           touch build/.nojekyll
-        
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
-        
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
