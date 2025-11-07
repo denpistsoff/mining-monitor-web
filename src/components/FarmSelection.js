@@ -6,154 +6,66 @@ const FarmSelection = () => {
     const [farms, setFarms] = useState([]);
     const [loading, setLoading] = useState(true);
     const [lastUpdate, setLastUpdate] = useState(null);
-    const [debugInfo, setDebugInfo] = useState('');
     const navigate = useNavigate();
 
-    // Функция для добавления отладочной информации
-    const addDebug = (message) => {
-        console.log(message);
-        setDebugInfo(prev => prev + '\n' + new Date().toLocaleTimeString() + ' - ' + message);
-    };
-
-    // Пробуем конкретные пути для farm_data_VISOKOVKA.json
-    const testAllPaths = async (farmName) => {
-        const baseUrl = window.location.origin;
+    // Правильные пути для JSON файлов (они лежат в public/data/)
+    const loadFarmData = async (farmName) => {
         const paths = [
-            // Относительные пути
-            `../data/farm_data_${farmName}.json`,
-            `./../data/farm_data_${farmName}.json`,
-            `../../data/farm_data_${farmName}.json`,
-            `data/farm_data_${farmName}.json`,
-            `/data/farm_data_${farmName}.json`,
-            // Абсолютные пути
-            `${baseUrl}/data/farm_data_${farmName}.json`,
-            `${baseUrl}/mining-monitor-web/data/farm_data_${farmName}.json`,
-            // Прямые ссылки на GitHub
-            `https://raw.githubusercontent.com/denpistsoff/mining-monitor-web/main/data/farm_data_${farmName}.json`
+            `/data/farm_data_${farmName}.json?t=${Date.now()}`,  // Главный путь
+            `./data/farm_data_${farmName}.json?t=${Date.now()}`, // Резервный путь
+            `data/farm_data_${farmName}.json?t=${Date.now()}`    // Еще один вариант
         ];
 
-        addDebug(`🔍 Тестируем пути для ${farmName}:`);
+        console.log(`🔍 Ищем ферму: ${farmName}`);
 
         for (const path of paths) {
             try {
-                addDebug(`   Пробуем: ${path}`);
-                const response = await fetch(path + '?t=' + Date.now());
-                addDebug(`   Статус: ${response.status} ${response.statusText}`);
+                console.log(`   Пробуем: ${path}`);
+                const response = await fetch(path);
 
                 if (response.ok) {
                     const data = await response.json();
-                    addDebug(`   ✅ УСПЕХ: Файл найден по пути: ${path}`);
-                    return { success: true, data: data, path: path };
+                    console.log(`   ✅ НАЙДЕНО: ${farmName} по пути ${path}`);
+                    return data;
+                } else {
+                    console.log(`   ❌ Не найдено: ${path} (статус: ${response.status})`);
                 }
             } catch (error) {
-                addDebug(`   ❌ ОШИБКА: ${error.message}`);
+                console.log(`   ❌ Ошибка: ${path} - ${error.message}`);
             }
         }
 
-        addDebug(`   ❌ Все пути не сработали для ${farmName}`);
-        return { success: false, data: null, path: null };
+        console.log(`   ❌ Ферма ${farmName} не найдена ни по одному пути`);
+        return null;
     };
 
-    // Основная функция загрузки всех ферм
-    const loadAllFarms = async () => {
-        setLoading(true);
-        setDebugInfo('🔄 Начинаем загрузку ферм...\n');
+    // Сканируем все возможные фермы
+    const scanForFarmFiles = async () => {
+        console.log('🔍 Сканируем фермы...');
 
-        addDebug('=== НАЧАЛО СКАНИРОВАНИЯ ===');
+        // Список ферм для проверки (добавляй сюда новые имена)
+        const farmNamesToCheck = [
+            'VISOKOVKA',
+            'DESKTOP-TO75OLC',
+            'FARM1',
+            'FARM2',
+            'MAIN',
+            'MINING',
+            'WORKER'
+        ];
 
-        try {
-            // Тестируем конкретно VISOKOVKA
-            addDebug('\n🎯 ТЕСТИРУЕМ FARM_DATA_VISOKOVKA.JSON:');
-            const visokovkaTest = await testAllPaths('VISOKOVKA');
+        const foundFarms = [];
 
-            // Тестируем DESKTOP-TO75OLC для сравнения
-            addDebug('\n🎯 ТЕСТИРУЕМ FARM_DATA_DESKTOP-TO75OLC.JSON:');
-            const desktopTest = await testAllPaths('DESKTOP-TO75OLC');
-
-            const foundFarms = [];
-
-            // Добавляем найденные фермы
-            if (visokovkaTest.success) {
-                const stats = calculateFarmStats(visokovkaTest.data, 'VISOKOVKA');
-                foundFarms.push({
-                    name: 'VISOKOVKA',
-                    ...stats,
-                    debugPath: visokovkaTest.path
-                });
-                addDebug(`✅ ДОБАВЛЕНА ФЕРМА: VISOKOVKA (путь: ${visokovkaTest.path})`);
+        // Проверяем каждую ферму
+        for (const farmName of farmNamesToCheck) {
+            const farmData = await loadFarmData(farmName);
+            if (farmData) {
+                foundFarms.push(farmName);
             }
-
-            if (desktopTest.success) {
-                const stats = calculateFarmStats(desktopTest.data, 'DESKTOP-TO75OLC');
-                foundFarms.push({
-                    name: 'DESKTOP-TO75OLC',
-                    ...stats,
-                    debugPath: desktopTest.path
-                });
-                addDebug(`✅ ДОБАВЛЕНА ФЕРМА: DESKTOP-TO75OLC (путь: ${desktopTest.path})`);
-            }
-
-            // Также пробуем найти другие фермы сканированием папки
-            addDebug('\n🔍 СКАНИРУЕМ ПАПКУ DATA/:');
-            try {
-                const dirResponse = await fetch('../data/');
-                if (dirResponse.ok) {
-                    const text = await dirResponse.text();
-                    addDebug('✅ Папка data/ доступна');
-
-                    // Парсим HTML для поиска файлов
-                    const parser = new DOMParser();
-                    const html = parser.parseFromString(text, 'text/html');
-                    const links = html.querySelectorAll('a[href]');
-
-                    addDebug(`📁 Найдено ссылок в папке: ${links.length}`);
-
-                    links.forEach(link => {
-                        const fileName = link.getAttribute('href');
-                        addDebug(`   Файл: ${fileName}`);
-
-                        if (fileName && fileName.startsWith('farm_data_') && fileName.endsWith('.json')) {
-                            const farmName = fileName.replace('farm_data_', '').replace('.json', '');
-                            addDebug(`   🎯 НАЙДЕН ФАЙЛ ФЕРМЫ: ${farmName}`);
-
-                            // Если этой фермы еще нет в списке, добавляем
-                            if (!foundFarms.find(f => f.name === farmName)) {
-                                foundFarms.push({
-                                    name: farmName,
-                                    miners: 0,
-                                    onlineMiners: 0,
-                                    hashrate: 0,
-                                    status: 'unknown',
-                                    isEmpty: true,
-                                    debugPath: 'из сканирования папки'
-                                });
-                            }
-                        }
-                    });
-                } else {
-                    addDebug(`❌ Папка data/ недоступна: ${dirResponse.status}`);
-                }
-            } catch (dirError) {
-                addDebug(`❌ Ошибка сканирования папки: ${dirError.message}`);
-            }
-
-            // Сортируем и устанавливаем фермы
-            foundFarms.sort((a, b) => a.name.localeCompare(b.name));
-            setFarms(foundFarms);
-            setLastUpdate(new Date().toLocaleTimeString('ru-RU'));
-
-            addDebug(`\n=== РЕЗУЛЬТАТ: найдено ${foundFarms.length} ферм ===`);
-            foundFarms.forEach(farm => {
-                addDebug(`   📊 ${farm.name}: статус ${farm.status}, путь: ${farm.debugPath}`);
-            });
-
-        } catch (error) {
-            addDebug(`❌ КРИТИЧЕСКАЯ ОШИБКА: ${error.message}`);
-            console.error('Ошибка загрузки ферм:', error);
-        } finally {
-            setLoading(false);
-            addDebug('=== СКАНИРОВАНИЕ ЗАВЕРШЕНО ===');
         }
+
+        console.log(`🎯 Найдено ферм: ${foundFarms.length}`, foundFarms);
+        return foundFarms;
     };
 
     // Рассчитываем статистику фермы
@@ -203,10 +115,48 @@ const FarmSelection = () => {
         };
     };
 
+    // Основная функция загрузки
+    const loadAllFarms = async () => {
+        setLoading(true);
+        console.log('🔄 Начинаем загрузку ферм...');
+
+        try {
+            // 1. Находим все файлы ферм
+            const farmNames = await scanForFarmFiles();
+
+            // 2. Загружаем данные для каждой фермы
+            const farmsData = [];
+
+            for (const farmName of farmNames) {
+                const farmData = await loadFarmData(farmName);
+                const stats = calculateFarmStats(farmData, farmName);
+
+                farmsData.push({
+                    name: farmName,
+                    ...stats
+                });
+            }
+
+            // 3. Сортируем по имени
+            farmsData.sort((a, b) => a.name.localeCompare(b.name));
+
+            setFarms(farmsData);
+            setLastUpdate(new Date().toLocaleTimeString('ru-RU'));
+
+            console.log(`✅ Загружено ферм: ${farmsData.length}`);
+
+        } catch (error) {
+            console.error('❌ Ошибка:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // Первая загрузка
     useEffect(() => {
         loadAllFarms();
 
+        // Автообновление
         const interval = setInterval(loadAllFarms, 60000);
         return () => clearInterval(interval);
     }, []);
@@ -247,7 +197,7 @@ const FarmSelection = () => {
                 <div className="header-top">
                     <div>
                         <h1>🏭 Выбор площадки</h1>
-                        <p>Отладочный режим - ищем farm_data_*.json</p>
+                        <p>Ищет файлы в <code>/data/farm_data_*.json</code></p>
                     </div>
                     <button
                         className="btn btn-primary refresh-btn"
@@ -261,7 +211,7 @@ const FarmSelection = () => {
                 <div className="header-stats">
                     <span>Найдено ферм: <strong>{farms.length}</strong></span>
                     {lastUpdate && <span>Обновлено: <strong>{lastUpdate}</strong></span>}
-                    <span>Режим: <strong>отладка</strong></span>
+                    <span>Путь: <strong>/data/</strong></span>
                 </div>
             </div>
 
@@ -275,22 +225,21 @@ const FarmSelection = () => {
                     >
                         <div className="farm-header">
                             <div className="farm-icon">
-                                {farm.status === 'unknown' ? '🔍' :
-                                    farm.isEmpty ? '🏗️' : '⛏️'}
+                                {farm.isEmpty ? '🏗️' : '⛏️'}
                             </div>
                             <div className="farm-info">
                                 <h3>{farm.name}</h3>
                                 <span className={`farm-status ${farm.status}`}>
                                     {getStatusIcon(farm.status)} {getStatusText(farm.status)}
                                 </span>
-                                {farm.debugPath && (
-                                    <div className="farm-debug-path">
-                                        📍 {farm.debugPath}
-                                    </div>
-                                )}
                                 {farm.lastUpdate && (
                                     <div className="farm-update-time">
                                         📅 {farm.lastUpdate}
+                                    </div>
+                                )}
+                                {farm.isEmpty && (
+                                    <div className="farm-empty-notice">
+                                        ⚠️ Ферма настроена, майнеры появятся позже
                                     </div>
                                 )}
                             </div>
@@ -313,45 +262,37 @@ const FarmSelection = () => {
 
                         <div className="farm-actions">
                             <button className="btn btn-primary">
-                                {farm.status === 'unknown' ? '🔍 Исследовать' :
-                                    farm.isEmpty ? '👀 Просмотр' : '📊 Мониторинг'}
+                                {farm.isEmpty ? '👀 Просмотр' : '📊 Мониторинг'}
                             </button>
                         </div>
                     </div>
                 ))}
             </div>
 
-            {/* Отладочная информация */}
-            <div className="debug-panel">
-                <h3>📊 Отладочная информация:</h3>
-                <div className="debug-content">
-                    <pre>{debugInfo}</pre>
-                </div>
-                <div className="debug-actions">
-                    <button
-                        className="btn btn-secondary"
-                        onClick={() => setDebugInfo('')}
-                    >
-                        🧹 Очистить лог
-                    </button>
-                    <button
-                        className="btn btn-secondary"
-                        onClick={() => {
-                            const testUrl = '../data/farm_data_VISOKOVKA.json';
-                            addDebug(`\n🔗 Тестируем прямой переход: ${testUrl}`);
-                            window.open(testUrl, '_blank');
-                        }}
-                    >
-                        🔗 Проверить файл
-                    </button>
-                </div>
-            </div>
-
-            {farms.length === 0 && !loading && (
+            {/* Сообщение если нет ферм */}
+            {!loading && farms.length === 0 && (
                 <div className="no-farms">
-                    <div className="no-farms-icon">🔍</div>
+                    <div className="no-farms-icon">🏭</div>
                     <h3>Фермы не найдены</h3>
-                    <p>Проверьте отладочную информацию выше</p>
+                    <p>Добавьте файлы в папку <code>public/data/</code></p>
+                    <div className="help-text">
+                        <p>Формат: <code>farm_data_НАЗВАНИЕ.json</code></p>
+                        <p>Пример: <code>farm_data_VISOKOVKA.json</code></p>
+                        <p style={{marginTop: '10px', fontSize: '0.9rem', color: '#666'}}>
+                            Открой консоль браузера (F12) чтобы увидеть детали поиска
+                        </p>
+                    </div>
+                    <button className="btn btn-primary" onClick={handleRefresh}>
+                        🔄 Проверить снова
+                    </button>
+                </div>
+            )}
+
+            {/* Уведомление об автообновлении */}
+            {farms.length > 0 && (
+                <div className="auto-update-notice">
+                    <p>🔄 Автообновление каждую минуту</p>
+                    <p>Последнее обновление: {lastUpdate}</p>
                 </div>
             )}
         </div>
