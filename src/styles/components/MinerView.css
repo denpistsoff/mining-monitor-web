@@ -116,6 +116,62 @@
     border-color: var(--accent-primary);
 }
 
+.size-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #252525;
+}
+
+.size-controls label {
+    font-weight: 700;
+    color: var(--accent-primary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.size-buttons {
+    display: flex;
+    gap: 8px;
+    flex: 1;
+}
+
+.size-btn {
+    flex: 1;
+    padding: 12px 16px;
+    background: var(--bg-secondary);
+    border: 1px solid #333;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.size-btn:hover {
+    background: var(--bg-tertiary);
+    transform: translateY(-2px);
+    border-color: var(--accent-secondary);
+}
+
+.size-btn.active {
+    background: var(--gradient-primary);
+    color: #000;
+    border-color: var(--accent-primary);
+    box-shadow: 0 4px 12px rgba(0, 245, 160, 0.3);
+}
+
 .actions-panel {
     display: flex;
     gap: 10px;
@@ -142,6 +198,11 @@
     color: #000;
 }
 
+.action-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 245, 160, 0.3);
+}
+
 .action-btn.secondary {
     background: var(--bg-tertiary);
     color: var(--text-primary);
@@ -151,6 +212,11 @@
 .action-btn.warning {
     background: var(--accent-warning);
     color: #000;
+}
+
+.action-btn.warning:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
 }
 
 .action-btn.danger {
@@ -203,72 +269,50 @@
     .miners-grid {
         grid-template-columns: 1fr;
     }
-    /* Добавить в конец MinerView.css */
 
     .size-controls {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        margin-top: 15px;
-        padding-top: 15px;
-        border-top: 1px solid #252525;
-    }
-
-    .size-controls label {
-        font-weight: 700;
-        color: var(--accent-primary);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-size: 0.9rem;
-        white-space: nowrap;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
     }
 
     .size-buttons {
-        display: flex;
-        gap: 8px;
-        flex: 1;
+        width: 100%;
     }
 
     .size-btn {
-        flex: 1;
-        padding: 10px 16px;
-        background: var(--bg-secondary);
-        border: 1px solid #333;
-        border-radius: var(--radius-md);
-        color: var(--text-secondary);
+        padding: 10px 12px;
         font-size: 0.8rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: var(--transition-fast);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .miners-view {
+        padding: 15px;
     }
 
-    .size-btn:hover {
-        background: var(--bg-tertiary);
-        transform: translateY(-2px);
+    .miners-header h1 {
+        font-size: 1.5rem;
     }
 
-    .size-btn.active {
-        background: var(--gradient-primary);
-        color: #000;
-        border-color: var(--accent-primary);
+    .filters-panel {
+        padding: 15px;
     }
 
-    @media (max-width: 768px) {
-        .size-controls {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 10px;
-        }
+    .container-filter {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
 
-        .size-buttons {
-            width: 100%;
-        }
+    .container-filter select {
+        min-width: 100%;
+        width: 100%;
+    }
 
-        .size-btn {
-            padding: 8px 12px;
-            font-size: 0.75rem;
-        }
+    .size-btn {
+        flex-direction: column;
+        gap: 4px;
+        padding: 8px;
     }
 }

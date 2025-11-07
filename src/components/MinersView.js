@@ -51,6 +51,14 @@ const MinersView = ({ farmNameProp }) => {
         return ['all', ...uniqueContainers];
     }, [allMiners]);
 
+    const handleMassRestart = () => {
+        alert('Функция "Массовый перезапуск" в разработке');
+    };
+
+    const handleRefreshData = () => {
+        window.location.reload();
+    };
+
     if (loading) {
         return (
             <div className="miners-view">
@@ -167,13 +175,10 @@ const MinersView = ({ farmNameProp }) => {
             </div>
 
             <div className="actions-panel">
-                <button className="action-btn primary">
+                <button className="action-btn primary" onClick={handleRefreshData}>
                     ОБНОВИТЬ ДАННЫЕ
                 </button>
-                <button className="action-btn secondary">
-                    ЭКСПОРТ ОТЧЕТА
-                </button>
-                <button className="action-btn warning">
+                <button className="action-btn warning" onClick={handleMassRestart}>
                     МАССОВЫЙ ПЕРЕЗАПУСК
                 </button>
             </div>

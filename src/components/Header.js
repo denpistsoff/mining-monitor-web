@@ -8,7 +8,7 @@ const Header = ({ activeTab, onTabChange, farmName, onLogout, unreadAlertsCount 
     ];
 
     const handleBack = () => {
-        window.location.href = '/';
+        window.location.href = 'https://denpistsoff.github.io/mining-monitor-web';
     };
 
     const handleAction = (action) => {
