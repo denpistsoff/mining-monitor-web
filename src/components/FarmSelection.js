@@ -85,7 +85,7 @@ const FarmSelection = () => {
             if (foundFarms.length > 0) break; // Если нашли фермы, останавливаемся
         }
 
-        console.log(`🎯 Найдено ферм: ${foundFarms.length}`, foundFarms);
+        console.log(`🎯 Найдено файлов ферм: ${foundFarms.length}`, foundFarms);
         return foundFarms;
     };
 
@@ -100,37 +100,54 @@ const FarmSelection = () => {
 
         for (const path of paths) {
             try {
+                console.log(`📡 Пробуем загрузить: ${path}`);
                 const response = await fetch(path);
                 if (response.ok) {
                     const data = await response.json();
+                    console.log(`✅ Успешно загружена ферма: ${farmName}`, data);
                     return data;
                 }
             } catch (error) {
-                // Пробуем следующий путь
+                console.log(`❌ Ошибка загрузки ${path}:`, error);
             }
         }
+        console.log(`❌ Не удалось загрузить данные для фермы: ${farmName}`);
         return null;
     };
 
-    // Рассчитываем статистику фермы
-    const calculateFarmStats = (farmData) => {
-        if (!farmData || !farmData.containers) {
-            return { miners: 0, onlineMiners: 0, hashrate: 0, status: 'offline' };
+    // Рассчитываем статистику фермы (теперь работает с пустыми контейнерами)
+    const calculateFarmStats = (farmData, farmName) => {
+        if (!farmData) {
+            return {
+                miners: 0,
+                onlineMiners: 0,
+                hashrate: 0,
+                status: 'offline',
+                isEmpty: true
+            };
         }
 
-        const containers = Object.values(farmData.containers);
+        // Проверяем есть ли контейнеры и майнеры
+        const containers = farmData.containers || {};
+        const containerArray = Object.values(containers);
 
-        const onlineMiners = containers.reduce((sum, container) =>
+        const onlineMiners = containerArray.reduce((sum, container) =>
             sum + (container.online_miners || 0), 0);
 
-        const totalMiners = containers.reduce((sum, container) =>
+        const totalMiners = containerArray.reduce((sum, container) =>
             sum + (container.total_miners || 0), 0);
 
-        const hashrate = containers.reduce((sum, container) =>
+        const hashrate = containerArray.reduce((sum, container) =>
             sum + (container.total_hashrate || 0), 0);
 
+        // Определяем статус
         let status = 'offline';
-        if (onlineMiners === totalMiners && totalMiners > 0) {
+        let isEmpty = false;
+
+        if (totalMiners === 0 && onlineMiners === 0) {
+            status = 'empty'; // Нет майнеров
+            isEmpty = true;
+        } else if (onlineMiners === totalMiners && totalMiners > 0) {
             status = 'online';
         } else if (onlineMiners > 0) {
             status = 'warning';
@@ -141,7 +158,10 @@ const FarmSelection = () => {
             onlineMiners: onlineMiners,
             hashrate: hashrate,
             status: status,
-            lastUpdate: farmData.last_update
+            isEmpty: isEmpty,
+            lastUpdate: farmData.last_update,
+            farmName: farmData.farm_name || farmName,
+            timestamp: farmData.timestamp
         };
     };
 
@@ -159,13 +179,12 @@ const FarmSelection = () => {
 
             for (const farmName of farmNames) {
                 const farmData = await loadFarmData(farmName);
-                if (farmData) {
-                    const stats = calculateFarmStats(farmData);
-                    farmsData.push({
-                        name: farmName,
-                        ...stats
-                    });
-                }
+                const stats = calculateFarmStats(farmData, farmName);
+
+                farmsData.push({
+                    name: farmName,
+                    ...stats
+                });
             }
 
             // 3. Сортируем фермы по имени
@@ -174,7 +193,7 @@ const FarmSelection = () => {
             setFarms(farmsData);
             setLastUpdate(new Date().toLocaleTimeString('ru-RU'));
 
-            console.log(`✅ Успешно загружено ${farmsData.length} ферм`);
+            console.log(`✅ Успешно загружено ${farmsData.length} ферм:`, farmsData);
 
         } catch (error) {
             console.error('❌ Ошибка загрузки ферм:', error);
@@ -207,7 +226,8 @@ const FarmSelection = () => {
             case 'online': return '🟢';
             case 'warning': return '🟡';
             case 'offline': return '🔴';
-            default: return '⚪';
+            case 'empty': return '⚪';
+            default: return '❓';
         }
     };
 
@@ -216,6 +236,7 @@ const FarmSelection = () => {
             case 'online': return 'Онлайн';
             case 'warning': return 'Проблемы';
             case 'offline': return 'Офлайн';
+            case 'empty': return 'Нет майнеров';
             default: return 'Неизвестно';
         }
     };
@@ -254,7 +275,9 @@ const FarmSelection = () => {
                         onClick={() => handleFarmSelect(farm.name)}
                     >
                         <div className="farm-header">
-                            <div className="farm-icon">⛏️</div>
+                            <div className="farm-icon">
+                                {farm.isEmpty ? '🏗️' : '⛏️'}
+                            </div>
                             <div className="farm-info">
                                 <h3>{farm.name}</h3>
                                 <span className={`farm-status ${farm.status}`}>
@@ -265,6 +288,11 @@ const FarmSelection = () => {
                                         📅 {farm.lastUpdate}
                                     </div>
                                 )}
+                                {farm.isEmpty && (
+                                    <div className="farm-empty-notice">
+                                        ⚠️ Ферма настроена, майнеры появятся позже
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -272,18 +300,20 @@ const FarmSelection = () => {
                             <div className="farm-stat">
                                 <span className="stat-label">Майнеры</span>
                                 <span className="stat-value">
-                                    {farm.onlineMiners}/{farm.miners}
+                                    {farm.isEmpty ? '0' : `${farm.onlineMiners}/${farm.miners}`}
                                 </span>
                             </div>
                             <div className="farm-stat">
                                 <span className="stat-label">Хешрейт</span>
-                                <span className="stat-value">{farm.hashrate.toFixed(2)} TH/s</span>
+                                <span className="stat-value">
+                                    {farm.isEmpty ? '0' : `${farm.hashrate.toFixed(2)}`} TH/s
+                                </span>
                             </div>
                         </div>
 
                         <div className="farm-actions">
                             <button className="btn btn-primary">
-                                📊 Перейти к мониторингу
+                                {farm.isEmpty ? '👀 Просмотр' : '📊 Мониторинг'}
                             </button>
                         </div>
                     </div>
@@ -311,6 +341,9 @@ const FarmSelection = () => {
                 <div className="auto-update-notice">
                     <p>🔄 Система автоматически сканирует папку data/ каждую минуту</p>
                     <p>Последнее сканирование: {lastUpdate}</p>
+                    <p style={{fontSize: '0.8rem', marginTop: '5px'}}>
+                        Найдено файлов: {farms.length} | Следующая проверка через 1 минуту
+                    </p>
                 </div>
             )}
         </div>

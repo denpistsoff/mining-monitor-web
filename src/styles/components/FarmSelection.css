@@ -228,4 +228,34 @@
         flex-direction: column;
         text-align: center;
     }
+    /* Добавь эти стили в FarmSelection.css */
+
+    .farm-empty .farm-status.empty {
+        background: rgba(156, 163, 175, 0.2);
+        color: var(--text-muted);
+        border: 1px solid rgba(156, 163, 175, 0.3);
+    }
+
+    .farm-empty-notice {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-top: 5px;
+        padding: 4px 8px;
+        background: rgba(156, 163, 175, 0.1);
+        border-radius: 6px;
+        border-left: 3px solid #9ca3af;
+    }
+
+    .farm-empty::before {
+        background: linear-gradient(135deg, #9ca3af, #6b7280) !important;
+    }
+
+    /* Стиль для ферм без майнеров */
+    .farm-stat .stat-value {
+        color: var(--text-primary);
+    }
+
+    .farm-empty .farm-stat .stat-value {
+        color: var(--text-muted);
+    }
 }
