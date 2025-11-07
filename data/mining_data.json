@@ -1,23 +1,43 @@
 {
-  "timestamp": 1762536056.7120357,
+  "timestamp": 1762536155.9424336,
   "farm_name": "DESKTOP-TO75OLC",
   "json_filename": "mining_data.json",
-  "last_update": "2025-11-07 22:20:56",
+  "last_update": "2025-11-07 22:22:35",
   "containers": {
     "1й": {
       "total_miners": 1,
       "online_miners": 1,
-      "total_hashrate": 131.6045225,
-      "total_power": 3569.0,
+      "total_hashrate": 132.44099348,
+      "total_power": 3570.0,
       "problematic_count": 0,
       "users_count": 1,
       "miners_data": [
         {
           "ip": "192.168.88.181",
           "type": "whatsminer",
-          "hashrate": 131.6045225,
-          "temperature": 71.81,
-          "power": 3569,
+          "hashrate": 132.44099348,
+          "temperature": 72.19,
+          "power": 3570,
+          "pool": "DenisForght.001@ru.btc.viabtc.io",
+          "status": "online",
+          "problem_reason": null
+        }
+      ]
+    },
+    "2й": {
+      "total_miners": 1,
+      "online_miners": 1,
+      "total_hashrate": 132.44099348,
+      "total_power": 3570.0,
+      "problematic_count": 0,
+      "users_count": 1,
+      "miners_data": [
+        {
+          "ip": "192.168.88.181",
+          "type": "whatsminer",
+          "hashrate": 132.44099348,
+          "temperature": 72.19,
+          "power": 3570,
           "pool": "DenisForght.001@ru.btc.viabtc.io",
           "status": "online",
           "problem_reason": null
