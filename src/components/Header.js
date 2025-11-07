@@ -9,7 +9,7 @@ const Header = ({ activeTab, onTabChange, farmName, onLogout }) => {
     ];
 
     const handleBack = () => {
-        window.history.back();
+        window.location.href = '/';
     };
 
     const handleAction = (action) => {

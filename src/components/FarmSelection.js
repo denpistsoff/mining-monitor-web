@@ -90,7 +90,7 @@ const FarmSelection = () => {
     }, []);
 
     const handleFarmClick = (farmName) => {
-        // Прямой переход на дашборд фермы
+        // Переход на дашборд фермы
         navigate(`/farm/${farmName}/dashboard`);
     };
 

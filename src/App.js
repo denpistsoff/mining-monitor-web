@@ -1,67 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import FarmSelection from './components/FarmSelection';
-import Dashboard from './components/Dashboard';
-import MinersView from './components/MinersView';
-import AlertsPanel from './components/AlertsPanel';
+import FarmLayout from './components/FarmLayout';
 import Login from './components/Login';
-import Header from './components/Header';
 import './styles/dark-theme.css';
 import './App.css';
-
-// Компонент-обертка для страниц с Header
-const FarmPageWrapper = ({ children, farmName, activeTab }) => {
-    const navigate = useNavigate();
-
-    const handleTabChange = (tabId) => {
-        navigate(`/farm/${farmName}/${tabId}`);
-    };
-
-    const handleLogout = () => {
-        localStorage.removeItem('miningAuth');
-        window.location.href = '/';
-    };
-
-    return (
-        <div className="farm-layout">
-            <Header
-                farmName={farmName}
-                activeTab={activeTab}
-                onTabChange={handleTabChange}
-                onLogout={handleLogout}
-            />
-            {children}
-        </div>
-    );
-};
-
-// Простые компоненты страниц
-const DashboardPage = () => {
-    const pathFarmName = window.location.pathname.split('/')[2];
-    return (
-        <FarmPageWrapper farmName={pathFarmName} activeTab="dashboard">
-            <Dashboard farmNameProp={pathFarmName} />
-        </FarmPageWrapper>
-    );
-};
-
-const MinersPage = () => {
-    const pathFarmName = window.location.pathname.split('/')[2];
-    return (
-        <FarmPageWrapper farmName={pathFarmName} activeTab="miners">
-            <MinersView farmNameProp={pathFarmName} />
-        </FarmPageWrapper>
-    );
-};
-
-const AlertsPage = () => {
-    const pathFarmName = window.location.pathname.split('/')[2];
-    return (
-        <FarmPageWrapper farmName={pathFarmName} activeTab="alerts">
-            <AlertsPanel farmNameProp={pathFarmName} />
-        </FarmPageWrapper>
-    );
-};
 
 function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -119,9 +62,7 @@ function App() {
             <div className="app">
                 <Routes>
                     <Route path="/" element={<FarmSelection />} />
-                    <Route path="/farm/:farmName/dashboard" element={<DashboardPage />} />
-                    <Route path="/farm/:farmName/miners" element={<MinersPage />} />
-                    <Route path="/farm/:farmName/alerts" element={<AlertsPage />} />
+                    <Route path="/farm/:farmName/*" element={<FarmLayout />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </div>

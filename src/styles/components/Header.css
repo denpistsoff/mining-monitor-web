@@ -4,7 +4,6 @@
     position: sticky;
     top: 0;
     z-index: 100;
-    backdrop-filter: blur(10px);
 }
 
 .header-top {
@@ -33,9 +32,6 @@
     letter-spacing: 0.5px;
     text-transform: uppercase;
     transition: var(--transition-fast);
-    display: flex;
-    align-items: center;
-    gap: 6px;
 }
 
 .back-button:hover {
@@ -118,7 +114,6 @@
     transform: translateY(-1px);
 }
 
-/* Навигационные вкладки */
 .header-nav {
     display: flex;
     padding: 0;
@@ -172,12 +167,6 @@
     width: 80%;
 }
 
-.tab-text {
-    position: relative;
-    z-index: 2;
-}
-
-/* Адаптивность для шапки */
 @media (max-width: 768px) {
     .header-top {
         flex-direction: column;
@@ -212,28 +201,5 @@
     .nav-tab {
         padding: 12px 8px;
         font-size: 0.8rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .header-top {
-        padding: 12px 16px;
-    }
-
-    .header-nav {
-        flex-direction: column;
-    }
-
-    .nav-tab {
-        padding: 10px;
-    }
-
-    .action-buttons {
-        flex-direction: column;
-        gap: 4px;
-    }
-
-    .tab-indicator {
-        display: none;
     }
 }
