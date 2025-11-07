@@ -7,7 +7,6 @@ const FarmSelection = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    // АБСОЛЮТНЫЕ ПУТИ к файлам
     const FARM_FILES = [
         {
             name: 'VISOKOVKA',
@@ -19,29 +18,20 @@ const FarmSelection = () => {
         }
     ];
 
-    // Загружаем данные фермы по абсолютному пути
     const loadFarmData = async (farmFile) => {
         try {
-            console.log(`🔄 Загружаем: ${farmFile.url}`);
             const response = await fetch(farmFile.url + '?t=' + Date.now());
-
             if (response.ok) {
-                const data = await response.json();
-                console.log(`✅ УСПЕХ: ${farmFile.name} загружена`);
-                return data;
-            } else {
-                console.log(`❌ ОШИБКА: ${farmFile.name} - ${response.status}`);
+                return await response.json();
             }
         } catch (error) {
-            console.log(`❌ ОШИБКА: ${farmFile.name} - ${error.message}`);
+            console.error(`Ошибка загрузки ${farmFile.name}:`, error);
         }
         return null;
     };
 
-    // Загружаем все фермы
     const loadFarms = async () => {
         setLoading(true);
-        console.log('=== ЗАГРУЗКА ФЕРМ ПО АБСОЛЮТНЫМ ПУТЯМ ===');
 
         const farmsList = [];
 
@@ -88,15 +78,12 @@ const FarmSelection = () => {
             }
         }
 
-        console.log('=== РЕЗУЛЬТАТЫ ===', farmsList);
         setFarms(farmsList);
         setLoading(false);
     };
 
     useEffect(() => {
         loadFarms();
-
-        // Автообновление
         const interval = setInterval(loadFarms, 60000);
         return () => clearInterval(interval);
     }, []);
@@ -109,25 +96,22 @@ const FarmSelection = () => {
 
     const getStatusInfo = (status) => {
         switch (status) {
-            case 'online': return { icon: '🟢', text: 'Онлайн', class: 'online' };
-            case 'warning': return { icon: '🟡', text: 'Проблемы', class: 'warning' };
-            case 'offline': return { icon: '🔴', text: 'Офлайн', class: 'offline' };
-            case 'empty': return { icon: '⚪', text: 'Нет майнеров', class: 'empty' };
-            case 'not-found': return { icon: '❌', text: 'Файл не найден', class: 'not-found' };
-            default: return { icon: '❓', text: 'Неизвестно', class: 'unknown' };
+            case 'online': return { text: 'ОНЛАЙН', class: 'online' };
+            case 'warning': return { text: 'ПРОБЛЕМЫ', class: 'warning' };
+            case 'offline': return { text: 'ОФФЛАЙН', class: 'offline' };
+            case 'empty': return { text: 'ПУСТО', class: 'empty' };
+            case 'not-found': return { text: 'НЕ НАЙДЕНО', class: 'not-found' };
+            default: return { text: 'НЕИЗВЕСТНО', class: 'unknown' };
         }
     };
 
     return (
         <div className="farm-selection">
-            <div className="header">
-                <h1>🏭 Майнинг Фермы</h1>
-                <div className="header-info">
-                    <div>Абсолютные пути к GitHub</div>
-                    <button onClick={loadFarms} disabled={loading}>
-                        {loading ? '🔄' : '🔄'} Обновить
-                    </button>
-                </div>
+            <div className="background-glow"></div>
+
+            <div className="hero-section">
+                <h1 className="hero-title">MINING MONITOR</h1>
+                <p className="hero-subtitle">СИСТЕМА МОНИТОРИНГА МАЙНИНГ ФЕРМ</p>
             </div>
 
             <div className="farms-grid">
@@ -137,78 +121,100 @@ const FarmSelection = () => {
                     return (
                         <div
                             key={farm.name}
-                            className={`farm-card farm-${status.class}`}
+                            className={`farm-card ${status.class}`}
                             onClick={() => handleFarmClick(farm.name)}
                         >
-                            <div className="farm-header">
-                                <div className="farm-icon">
-                                    {farm.exists ? '⛏️' : '📁'}
+                            <div className="farm-accent"></div>
+
+                            <div className="farm-content">
+                                <div className="farm-header">
+                                    <div className="farm-icon">
+                                        <div className="icon-wrapper">
+                                            {farm.exists ? 'M' : 'F'}
+                                        </div>
+                                    </div>
+                                    <div className="farm-titles">
+                                        <h3 className="farm-name">{farm.name}</h3>
+                                        <div className="farm-display-name">
+                                            {farm.displayName}
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="farm-info">
-                                    <div className="farm-name">{farm.name}</div>
-                                    <div className="farm-url">
-                                        <a href={farm.url} target="_blank" onClick={e => e.stopPropagation()}>
-                                            🔗 Прямая ссылка
+
+                                <div className={`status-indicator ${status.class}`}>
+                                    <span className="status-text">{status.text}</span>
+                                </div>
+
+                                {farm.exists ? (
+                                    <>
+                                        <div className="stats-grid">
+                                            <div className="stat-item">
+                                                <div className="stat-value">{farm.onlineMiners}/{farm.miners}</div>
+                                                <div className="stat-label">МАЙНЕРЫ</div>
+                                            </div>
+                                            <div className="stat-item">
+                                                <div className="stat-value">{farm.hashrate.toFixed(1)}</div>
+                                                <div className="stat-label">TH/S</div>
+                                            </div>
+                                            <div className="stat-item">
+                                                <div className="stat-value">{Object.keys(farm.containers || {}).length}</div>
+                                                <div className="stat-label">КОНТЕЙНЕРЫ</div>
+                                            </div>
+                                        </div>
+
+                                        {farm.lastUpdate && (
+                                            <div className="update-info">
+                                                <div className="update-text">Обновлено: {farm.lastUpdate}</div>
+                                            </div>
+                                        )}
+
+                                        <button className="action-button">
+                                            ОТКРЫТЬ ДАШБОРД
+                                        </button>
+                                    </>
+                                ) : (
+                                    <div className="error-state">
+                                        <div className="error-text">Файл данных не найден</div>
+                                        <a
+                                            href={farm.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="file-link"
+                                            onClick={e => e.stopPropagation()}
+                                        >
+                                            Проверить URL
                                         </a>
                                     </div>
-                                </div>
+                                )}
                             </div>
-
-                            <div className={`farm-status ${status.class}`}>
-                                {status.icon} {status.text}
-                            </div>
-
-                            {farm.exists ? (
-                                <>
-                                    <div className="farm-stats">
-                                        <div className="stat">
-                                            <span>Майнеры:</span>
-                                            <span>{farm.onlineMiners}/{farm.miners}</span>
-                                        </div>
-                                        <div className="stat">
-                                            <span>Хешрейт:</span>
-                                            <span>{farm.hashrate.toFixed(2)} TH/s</span>
-                                        </div>
-                                    </div>
-
-                                    {farm.lastUpdate && (
-                                        <div className="update-time">
-                                            📅 {farm.lastUpdate}
-                                        </div>
-                                    )}
-
-                                    <div className="farm-action">
-                                        <button className="action-btn">
-                                            📊 Открыть дашборд
-                                        </button>
-                                    </div>
-                                </>
-                            ) : (
-                                <div className="file-info">
-                                    ❌ Файл не найден по URL
-                                    <div className="url-info">
-                                        {farm.url}
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     );
                 })}
             </div>
 
-            <div className="debug-panel">
-                <h3>Информация:</h3>
-                <div>Используются абсолютные пути к raw.githubusercontent.com</div>
-                <div>Найдено: {farms.filter(f => f.exists).length} из {farms.length}</div>
-                <div>Автообновление: каждую минуту</div>
+            <div className="control-panel">
+                <div className="panel-content">
+                    <div className="panel-info">
+                        <div className="info-item">
+                            <span className="info-label">ВСЕГО ФЕРМ:</span>
+                            <span className="info-value">{farms.length}</span>
+                        </div>
+                        <div className="info-item">
+                            <span className="info-label">АКТИВНЫХ:</span>
+                            <span className="info-value">{farms.filter(f => f.exists && f.status === 'online').length}</span>
+                        </div>
+                        <div className="info-item">
+                            <span className="info-label">ОБНОВЛЕНИЕ:</span>
+                            <span className="info-value">АВТОМАТИЧЕСКОЕ</span>
+                        </div>
+                    </div>
 
-                <div className="test-links">
-                    <h4>Проверь файлы:</h4>
-                    {FARM_FILES.map(farm => (
-                        <a key={farm.name} href={farm.url} target="_blank">
-                            {farm.name} - {farm.url}
-                        </a>
-                    ))}
+                    <button
+                        className={`refresh-button ${loading ? 'loading' : ''}`}
+                        onClick={loadFarms}
+                    >
+                        {loading ? 'ОБНОВЛЕНИЕ...' : 'ОБНОВИТЬ'}
+                    </button>
                 </div>
             </div>
         </div>

@@ -1,22 +1,12 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import '../styles/components/Header.css';
 
 const Header = ({ activeTab, onTabChange, farmName, onLogout }) => {
-    const navigate = useNavigate();
     const tabs = [
-        { id: 'dashboard', label: '🏠 Дашборд', icon: '🏠' },
-        { id: 'miners', label: '🖥️ Асики', icon: '🖥️' },
-        { id: 'alerts', label: '🚨 Оповещения', icon: '🚨' }
+        { id: 'dashboard', label: 'Дашборд' },
+        { id: 'miners', label: 'Асики' },
+        { id: 'alerts', label: 'Оповещения' }
     ];
-
-    const handleFarmSelect = () => {
-        navigate('/');
-    };
-
-    const handleAction = (action) => {
-        alert(`Функция "${action}" в разработке`);
-    };
 
     return (
         <header className="header">
@@ -24,31 +14,30 @@ const Header = ({ activeTab, onTabChange, farmName, onLogout }) => {
                 <div className="header-left">
                     <button
                         className="back-button"
-                        onClick={handleFarmSelect}
-                        title="Выбор фермы"
+                        onClick={() => window.history.back()}
                     >
-                        ◀️ Назад
+                        НАЗАД
                     </button>
-                    <h1 className="header-title">⛏️ Mining Monitor</h1>
+                    <h1 className="header-title">MINING MONITOR</h1>
                 </div>
 
                 <div className="header-controls">
-                    <div className="farm-name">🏭 {farmName}</div>
+                    <div className="farm-name">{farmName}</div>
 
                     <div className="action-buttons">
                         <button
                             className="action-btn"
-                            onClick={() => handleAction('Перезапуск')}
+                            onClick={() => alert('Функция в разработке')}
                             title="Перезапуск"
                         >
-                            🔄
+                            ПЕРЕЗАПУСК
                         </button>
                         <button
                             className="action-btn"
-                            onClick={() => handleAction('Диагностика')}
+                            onClick={() => alert('Функция в разработке')}
                             title="Диагностика"
                         >
-                            🔧
+                            ДИАГНОСТИКА
                         </button>
                     </div>
 
@@ -57,7 +46,7 @@ const Header = ({ activeTab, onTabChange, farmName, onLogout }) => {
                         onClick={onLogout}
                         title="Выйти"
                     >
-                        🚪
+                        ВЫХОД
                     </button>
                 </div>
             </div>
@@ -69,7 +58,6 @@ const Header = ({ activeTab, onTabChange, farmName, onLogout }) => {
                         className={`nav-tab ${activeTab === tab.id ? 'active' : ''}`}
                         onClick={() => onTabChange(tab.id)}
                     >
-                        <span className="tab-icon">{tab.icon}</span>
                         {tab.label}
                     </button>
                 ))}

@@ -1,21 +1,19 @@
 import React, { useState } from 'react';
 import { useFarmData } from '../hooks/useFarmData';
 import MinerCard from './MinerCard';
-import '../styles/components/MinerView.css';
+import '../styles/components/MinersView.css';
 
-const MinersView = () => {
-    const { farmData, loading, error } = useFarmData();
+const MinersView = ({ farmName }) => {
+    const { farmData, loading, error } = useFarmData(farmName);
     const [selectedContainer, setSelectedContainer] = useState('all');
     const [activeTab, setActiveTab] = useState('online');
 
-    if (loading) return <div className="loading">Загрузка майнеров...</div>;
-    if (error) return <div className="error">Ошибка: {error}</div>;
-    if (!farmData) return <div className="no-data">Нет данных</div>;
+    if (loading) return <div className="loading">ЗАГРУЗКА МАЙНЕРОВ</div>;
+    if (error) return <div className="error">ОШИБКА: {error}</div>;
+    if (!farmData) return <div className="no-data">НЕТ ДАННЫХ</div>;
 
-    // Получаем все контейнеры
     const containers = farmData.containers || {};
-    
-    // Фильтруем майнеров
+
     const getAllMiners = () => {
         let allMiners = [];
         Object.entries(containers).forEach(([containerId, container]) => {
@@ -31,13 +29,11 @@ const MinersView = () => {
 
     const filterMiners = (miners) => {
         let filtered = miners;
-        
-        // Фильтр по контейнеру
+
         if (selectedContainer !== 'all') {
             filtered = filtered.filter(miner => miner.containerId === selectedContainer);
         }
-        
-        // Фильтр по статусу
+
         switch (activeTab) {
             case 'online':
                 filtered = filtered.filter(miner => miner.status === 'online');
@@ -51,7 +47,7 @@ const MinersView = () => {
             default:
                 break;
         }
-        
+
         return filtered;
     };
 
@@ -63,7 +59,7 @@ const MinersView = () => {
         const online = allMiners.filter(m => m.status === 'online').length;
         const problematic = allMiners.filter(m => m.status === 'problematic' || m.problem_reason).length;
         const offline = allMiners.filter(m => m.status === 'offline').length;
-        
+
         return { total, online, problematic, offline };
     };
 
@@ -72,75 +68,72 @@ const MinersView = () => {
     return (
         <div className="miners-view">
             <div className="miners-header">
-                <h1>🖥️ Управление майнерами</h1>
+                <h1>УПРАВЛЕНИЕ МАЙНЕРАМИ</h1>
                 <div className="miners-stats">
-                    <div className="stat-item">Всего: <strong>{stats.total}</strong></div>
-                    <div className="stat-item online">Онлайн: <strong>{stats.online}</strong></div>
-                    <div className="stat-item problematic">Проблемы: <strong>{stats.problematic}</strong></div>
-                    <div className="stat-item offline">Офлайн: <strong>{stats.offline}</strong></div>
+                    <div className="stat-item">ВСЕГО: <strong>{stats.total}</strong></div>
+                    <div className="stat-item online">ОНЛАЙН: <strong>{stats.online}</strong></div>
+                    <div className="stat-item problematic">ПРОБЛЕМЫ: <strong>{stats.problematic}</strong></div>
+                    <div className="stat-item offline">ОФФЛАЙН: <strong>{stats.offline}</strong></div>
                 </div>
             </div>
 
-            {/* Фильтры */}
             <div className="filters-panel">
                 <div className="container-filter">
-                    <label>🗂️ Контейнер:</label>
-                    <select 
-                        value={selectedContainer} 
+                    <label>КОНТЕЙНЕР:</label>
+                    <select
+                        value={selectedContainer}
                         onChange={(e) => setSelectedContainer(e.target.value)}
                     >
-                        <option value="all">Все контейнеры</option>
+                        <option value="all">ВСЕ КОНТЕЙНЕРЫ</option>
                         {Object.keys(containers).map(containerId => (
                             <option key={containerId} value={containerId}>
-                                Контейнер {containerId}
+                                КОНТЕЙНЕР {containerId}
                             </option>
                         ))}
                     </select>
                 </div>
 
                 <div className="tab-buttons">
-                    <button 
+                    <button
                         className={`tab-btn ${activeTab === 'online' ? 'active' : ''}`}
                         onClick={() => setActiveTab('online')}
                     >
-                        🟢 Онлайн ({stats.online})
+                        ОНЛАЙН ({stats.online})
                     </button>
-                    <button 
+                    <button
                         className={`tab-btn ${activeTab === 'problematic' ? 'active' : ''}`}
                         onClick={() => setActiveTab('problematic')}
                     >
-                        🟡 Проблемные ({stats.problematic})
+                        ПРОБЛЕМНЫЕ ({stats.problematic})
                     </button>
-                    <button 
+                    <button
                         className={`tab-btn ${activeTab === 'offline' ? 'active' : ''}`}
                         onClick={() => setActiveTab('offline')}
                     >
-                        🔴 Офлайн ({stats.offline})
+                        ОФФЛАЙН ({stats.offline})
                     </button>
                 </div>
             </div>
 
-            {/* Действия */}
             <div className="actions-panel">
-                <button className="action-btn primary">
-                    🔄 Обновить все
+                <button className="action-btn primary" onClick={() => alert('Функция в разработке')}>
+                    ОБНОВИТЬ ВСЕ
                 </button>
-                <button className="action-btn secondary">
-                    ⚡ Перезапустить онлайн
+                <button className="action-btn secondary" onClick={() => alert('Функция в разработке')}>
+                    ПЕРЕЗАПУСТИТЬ ОНЛАЙН
                 </button>
-                <button className="action-btn warning">
-                    🔧 Диагностика проблемных
+                <button className="action-btn warning" onClick={() => alert('Функция в разработке')}>
+                    ДИАГНОСТИКА ПРОБЛЕМНЫХ
                 </button>
-                <button className="action-btn danger">
-                    🚨 Включить офлайн
+                <button className="action-btn danger" onClick={() => alert('Функция в разработке')}>
+                    ВКЛЮЧИТЬ ОФФЛАЙН
                 </button>
             </div>
 
-            {/* Список майнеров */}
             <div className="miners-grid">
                 {filteredMiners.length > 0 ? (
                     filteredMiners.map((miner, index) => (
-                        <MinerCard 
+                        <MinerCard
                             key={`${miner.ip}-${index}`}
                             miner={miner}
                             showContainer={selectedContainer === 'all'}
@@ -148,8 +141,8 @@ const MinersView = () => {
                     ))
                 ) : (
                     <div className="no-miners-message">
-                        <h3>🤷‍♂️ Майнеры не найдены</h3>
-                        <p>Попробуйте изменить фильтры</p>
+                        <h3>МАЙНЕРЫ НЕ НАЙДЕНЫ</h3>
+                        <p>Измените фильтры для поиска</p>
                     </div>
                 )}
             </div>

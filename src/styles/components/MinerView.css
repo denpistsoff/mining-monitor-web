@@ -1,202 +1,206 @@
 .miners-view {
-  padding: 20px;
-  color: #e0e0e0;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .miners-header {
-  margin-bottom: 25px;
-  text-align: center;
+    margin-bottom: 25px;
+    text-align: center;
 }
 
 .miners-header h1 {
-  font-size: 2rem;
-  margin-bottom: 15px;
-  color: #ffffff;
-  text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    font-size: 2rem;
+    margin-bottom: 15px;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .miners-stats {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  flex-wrap: wrap;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
 }
 
 .stat-item {
-  padding: 10px 20px;
-  background: #2a2a2a;
-  border-radius: 10px;
-  border: 1px solid #444;
-  font-size: 0.9rem;
+    padding: 10px 20px;
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    border: 1px solid #252525;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .stat-item strong {
-  color: #00ffea;
-  font-size: 1.1rem;
+    color: var(--accent-primary);
+    font-size: 1.1rem;
 }
 
-.stat-item.online strong { color: #00ff88; }
-.stat-item.problematic strong { color: #ffaa00; }
-.stat-item.offline strong { color: #ff4444; }
+.stat-item.online strong { color: var(--accent-success); }
+.stat-item.problematic strong { color: var(--accent-warning); }
+.stat-item.offline strong { color: var(--accent-danger); }
 
-/* Фильтры */
 .filters-panel {
-  background: #1e1e1e;
-  padding: 20px;
-  border-radius: 15px;
-  margin-bottom: 20px;
-  border: 1px solid #333;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    background: var(--bg-card);
+    padding: 20px;
+    border-radius: var(--radius-lg);
+    margin-bottom: 20px;
+    border: 1px solid #252525;
 }
 
 .container-filter {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
 }
 
 .container-filter label {
-  font-weight: bold;
-  color: #00ffea;
+    font-weight: 700;
+    color: var(--accent-primary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.9rem;
 }
 
 .container-filter select {
-  background: #2a2a2a;
-  color: #fff;
-  border: 1px solid #444;
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 0.9rem;
-  min-width: 200px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid #333;
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    min-width: 200px;
 }
 
 .container-filter select:focus {
-  outline: none;
-  border-color: #00ffea;
-  box-shadow: 0 0 10px rgba(0, 255, 234, 0.3);
+    outline: none;
+    border-color: var(--accent-primary);
 }
 
-/* Кнопки вкладок */
 .tab-buttons {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 .tab-btn {
-  flex: 1;
-  min-width: 150px;
-  padding: 12px 20px;
-  background: #2a2a2a;
-  border: 1px solid #444;
-  border-radius: 10px;
-  color: #ccc;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
+    flex: 1;
+    min-width: 150px;
+    padding: 12px 20px;
+    background: var(--bg-secondary);
+    border: 1px solid #333;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .tab-btn:hover {
-  background: #333;
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+    background: var(--bg-tertiary);
+    transform: translateY(-2px);
 }
 
 .tab-btn.active {
-  background: linear-gradient(135deg, #00ffea, #0088ff);
-  color: #000;
-  font-weight: bold;
-  border-color: #00ffea;
-  box-shadow: 0 0 20px rgba(0, 255, 234, 0.4);
+    background: var(--gradient-primary);
+    color: #000;
+    border-color: var(--accent-primary);
 }
 
-/* Панель действий */
 .actions-panel {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 25px;
-  flex-wrap: wrap;
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
 }
 
 .action-btn {
-  padding: 12px 20px;
-  border: none;
-  border-radius: 10px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: bold;
-  flex: 1;
-  min-width: 160px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    flex: 1;
+    min-width: 160px;
 }
 
 .action-btn.primary {
-  background: linear-gradient(135deg, #00ff88, #00cc66);
-  color: #000;
+    background: var(--gradient-primary);
+    color: #000;
 }
 
 .action-btn.secondary {
-  background: linear-gradient(135deg, #0088ff, #0066cc);
-  color: #fff;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid #333;
 }
 
 .action-btn.warning {
-  background: linear-gradient(135deg, #ffaa00, #ff8800);
-  color: #000;
+    background: var(--accent-warning);
+    color: #000;
 }
 
 .action-btn.danger {
-  background: linear-gradient(135deg, #ff4444, #cc0000);
-  color: #fff;
+    background: var(--accent-danger);
+    color: #fff;
 }
 
 .action-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+    transform: translateY(-2px);
 }
 
-/* Сетка майнеров */
 .miners-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
 }
 
 .no-miners-message {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 60px 20px;
-  background: #1e1e1e;
-  border-radius: 15px;
-  border: 2px dashed #444;
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: 2px dashed #333;
 }
 
 .no-miners-message h3 {
-  color: #888;
-  margin-bottom: 10px;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
 }
 
 .no-miners-message p {
-  color: #666;
+    color: var(--text-muted);
 }
 
-/* Адаптивность */
 @media (max-width: 768px) {
-  .miners-stats {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .tab-buttons {
-    flex-direction: column;
-  }
-  
-  .actions-panel {
-    flex-direction: column;
-  }
-  
-  .miners-grid {
-    grid-template-columns: 1fr;
-  }
+    .miners-stats {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .tab-buttons {
+        flex-direction: column;
+    }
+
+    .actions-panel {
+        flex-direction: column;
+    }
+
+    .miners-grid {
+        grid-template-columns: 1fr;
+    }
 }

@@ -4,34 +4,33 @@ import '../styles/components/StatsGrid.css';
 const StatsGrid = ({ summary }) => {
     const stats = [
         {
-            title: 'Контейнеры',
+            title: 'КОНТЕЙНЕРЫ',
             value: summary?.total_containers || 0,
-            icon: '🏗️'
+            color: 'primary'
         },
         {
-            title: 'Майнеры',
+            title: 'МАЙНЕРЫ',
             value: `${summary?.online_miners || 0}/${summary?.total_miners || 0}`,
-            icon: '⛏️'
+            color: 'secondary'
         },
         {
-            title: 'Хешрейт',
-            value: `${(summary?.total_hashrate || 0).toLocaleString('ru-RU')} TH/s`,
-            icon: '⚡'
+            title: 'ХЕШРЕЙТ',
+            value: `${(summary?.total_hashrate || 0).toLocaleString('ru-RU')} TH/S`,
+            color: 'accent'
         },
         {
-            title: 'Мощность',
-            value: `${(summary?.total_power || 0).toLocaleString('ru-RU')} Вт`,
-            icon: '🔋'
+            title: 'МОЩНОСТЬ',
+            value: `${(summary?.total_power || 0).toLocaleString('ru-RU')} ВТ`,
+            color: 'warning'
         }
     ];
 
     return (
         <div className="stats-grid">
             {stats.map((stat, index) => (
-                <div key={index} className="stat-card">
-                    <div className="stat-icon">{stat.icon}</div>
+                <div key={index} className={`stat-card stat-${stat.color}`}>
                     <div className="stat-content">
-                        <h3>{stat.title}</h3>
+                        <div className="stat-title">{stat.title}</div>
                         <div className="stat-value">{stat.value}</div>
                     </div>
                 </div>

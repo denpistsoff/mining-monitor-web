@@ -1,251 +1,233 @@
 .miner-card {
-  background: linear-gradient(135deg, #2a2a2a, #1e1e1e);
-  border-radius: 15px;
-  padding: 20px;
-  border: 1px solid #333;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-  position: relative;
-  overflow: hidden;
-}
-
-.miner-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #00ffea, #0088ff);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.miner-card:hover::before {
-  opacity: 1;
+    background: var(--bg-card);
+    border: 1px solid #252525;
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin: 8px;
+    transition: var(--transition-fast);
 }
 
 .miner-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-  border-color: #444;
+    border-color: var(--accent-primary);
+    transform: translateY(-2px);
 }
 
-.miner-card.miner-online {
-  border-left: 4px solid #00ff88;
+.miner-online {
+    border-left: 4px solid var(--accent-success);
 }
 
-.miner-card.miner-offline {
-  border-left: 4px solid #ff4444;
+.miner-offline {
+    border-left: 4px solid var(--accent-danger);
 }
 
-.miner-card.miner-problematic {
-  border-left: 4px solid #ffaa00;
+.miner-problematic {
+    border-left: 4px solid var(--accent-warning);
 }
 
 .miner-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
 }
 
 .miner-identity {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
 }
 
 .miner-icon {
-  font-size: 1.5rem;
-  background: rgba(0, 255, 234, 0.1);
-  padding: 8px;
-  border-radius: 10px;
+    width: 40px;
+    height: 40px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--accent-primary);
+    border: 1px solid #333;
+    font-size: 0.9rem;
 }
 
 .miner-info {
-  display: flex;
-  flex-direction: column;
+    flex: 1;
 }
 
 .miner-ip {
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: #ffffff;
-  margin-bottom: 4px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
 }
 
 .miner-meta {
-  display: flex;
-  gap: 10px;
-  font-size: 0.8rem;
-  color: #888;
+    display: flex;
+    gap: 12px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.miner-type {
+    text-transform: uppercase;
+    font-weight: 600;
 }
 
 .miner-container {
-  background: rgba(0, 136, 255, 0.2);
-  padding: 2px 8px;
-  border-radius: 8px;
-  color: #0088ff;
+    color: var(--accent-primary);
+    font-weight: 600;
 }
 
 .miner-status {
-  text-align: right;
+    flex-shrink: 0;
 }
 
 .status-indicator {
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: bold;
-  background: rgba(255, 255, 255, 0.1);
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .status-indicator.online {
-  background: rgba(0, 255, 136, 0.2);
-  color: #00ff88;
+    background: rgba(0, 255, 136, 0.1);
+    color: var(--accent-success);
+    border: 1px solid rgba(0, 255, 136, 0.3);
 }
 
 .status-indicator.offline {
-  background: rgba(255, 68, 68, 0.2);
-  color: #ff4444;
+    background: rgba(255, 68, 68, 0.1);
+    color: var(--accent-danger);
+    border: 1px solid rgba(255, 68, 68, 0.3);
 }
 
 .status-indicator.problematic {
-  background: rgba(255, 170, 0, 0.2);
-  color: #ffaa00;
+    background: rgba(255, 170, 0, 0.1);
+    color: var(--accent-warning);
+    border: 1px solid rgba(255, 170, 0, 0.3);
 }
 
 .miner-stats {
-  margin-bottom: 15px;
+    margin-bottom: 12px;
 }
 
 .stat-row {
-  display: flex;
-  gap: 15px;
-  margin-bottom: 10px;
+    display: flex;
+    gap: 16px;
+    margin-bottom: 8px;
 }
 
 .stat-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #252525;
 }
 
 .stat-label {
-  font-size: 0.8rem;
-  color: #888;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
 }
 
 .stat-value {
-  font-size: 0.9rem;
-  font-weight: bold;
-  color: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
 }
 
 .stat-value.pool {
-  color: #00ffea;
-  cursor: help;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .miner-problem {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 12px;
-  background: rgba(255, 170, 0, 0.1);
-  border: 1px solid rgba(255, 170, 0, 0.3);
-  border-radius: 8px;
-  margin-bottom: 15px;
-}
-
-.problem-icon {
-  font-size: 1.2rem;
+    background: rgba(255, 170, 0, 0.1);
+    border: 1px solid rgba(255, 170, 0, 0.3);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    margin-bottom: 12px;
 }
 
 .problem-text {
-  color: #ffaa00;
-  font-size: 0.9rem;
-  flex: 1;
+    font-size: 0.8rem;
+    color: var(--accent-warning);
+    font-weight: 600;
 }
 
 .miner-actions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.btn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: bold;
-  flex: 1;
-  min-width: 100px;
-}
-
-.btn-sm {
-  padding: 6px 12px;
-  font-size: 0.75rem;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, #00ff88, #00cc66);
-  color: #000;
-}
-
-.btn-secondary {
-  background: linear-gradient(135deg, #0088ff, #0066cc);
-  color: #fff;
-}
-
-.btn-warning {
-  background: linear-gradient(135deg, #ffaa00, #ff8800);
-  color: #000;
-}
-
-.btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 .miner-details {
-  margin-top: 15px;
-  padding-top: 15px;
-  border-top: 1px solid #333;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #252525;
 }
 
 .detail-section h4 {
-  color: #00ffea;
-  margin-bottom: 10px;
-  font-size: 0.9rem;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .detail-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 10px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 8px;
 }
 
 .detail-item {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 6px;
-  font-size: 0.8rem;
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid #252525;
+    font-size: 0.8rem;
 }
 
 .detail-item span {
-  color: #888;
+    color: var(--text-secondary);
 }
 
 .detail-item strong {
-  color: #fff;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .miner-header {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .miner-status {
+        align-self: flex-start;
+    }
+
+    .stat-row {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .miner-actions {
+        flex-direction: column;
+    }
+
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
 }
