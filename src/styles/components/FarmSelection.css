@@ -1,72 +1,74 @@
 .farm-selection {
+    padding: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
     min-height: 100vh;
-    background: var(--bg-primary);
-    padding: 40px 20px;
+    background: #0f0f0f;
 }
 
-.selection-header {
-    margin-bottom: 50px;
-}
-
-.header-top {
+.header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 15px;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    border: 1px solid #333;
 }
 
-.refresh-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.header h1 {
+    color: #00ff88;
+    margin: 0;
+    font-size: 2rem;
 }
 
-.header-stats {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-    font-size: 0.9rem;
-    color: var(--text-secondary);
+.header-info {
+    text-align: right;
 }
 
-.header-stats span {
-    background: var(--bg-secondary);
-    padding: 8px 12px;
-    border-radius: var(--radius-sm);
-}
-
-.selection-header h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+.header-info div {
+    color: #888;
     margin-bottom: 10px;
+    font-size: 0.9rem;
 }
 
-.selection-header p {
-    color: var(--text-secondary);
-    font-size: 1.1rem;
+.header button {
+    background: #00ff88;
+    color: black;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.header button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .farms-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 25px;
-    max-width: 1200px;
-    margin: 0 auto;
+    gap: 20px;
+    margin-bottom: 30px;
 }
 
 .farm-card {
-    background: var(--bg-card);
-    border-radius: var(--radius-lg);
-    padding: 25px;
-    border: 2px solid transparent;
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 20px;
     cursor: pointer;
-    transition: var(--transition-normal);
+    border: 1px solid #333;
+    transition: all 0.3s;
     position: relative;
-    overflow: hidden;
+}
+
+.farm-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 255, 136, 0.15);
+    border-color: #00ff88;
 }
 
 .farm-card::before {
@@ -76,310 +78,124 @@
     left: 0;
     right: 0;
     height: 4px;
+    border-radius: 12px 12px 0 0;
 }
 
-.farm-online::before { background: var(--gradient-success); }
-.farm-warning::before { background: var(--gradient-warning); }
-.farm-offline::before { background: var(--gradient-danger); }
-
-.farm-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--accent-blue);
-}
+.farm-card.farm-online::before { background: #00ff88; }
+.farm-card.farm-warning::before { background: #ffaa00; }
+.farm-card.farm-offline::before { background: #ff4444; }
+.farm-card.farm-empty::before { background: #666; }
+.farm-card.farm-not-found::before { background: #ff4444; }
 
 .farm-header {
     display: flex;
     align-items: center;
     gap: 15px;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 .farm-icon {
     font-size: 2rem;
-    background: var(--bg-secondary);
-    padding: 15px;
-    border-radius: var(--radius-md);
 }
 
-.farm-info h3 {
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: var(--text-primary);
+.farm-info {
+    flex: 1;
+}
+
+.farm-name {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: white;
     margin-bottom: 5px;
+}
+
+.farm-display-name {
+    font-size: 0.9rem;
+    color: #888;
+    font-style: italic;
 }
 
 .farm-status {
-    font-size: 0.85rem;
-    font-weight: 500;
-    padding: 4px 10px;
-    border-radius: 12px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-weight: bold;
     display: inline-block;
-    margin-bottom: 5px;
 }
 
-.farm-status.online {
-    background: rgba(16, 185, 129, 0.2);
-    color: var(--accent-green);
-}
-
-.farm-status.warning {
-    background: rgba(245, 158, 11, 0.2);
-    color: var(--accent-orange);
-}
-
-.farm-status.offline {
-    background: rgba(239, 68, 68, 0.2);
-    color: var(--accent-red);
-}
-
-.farm-update-time {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-}
+.farm-status.online { background: rgba(0, 255, 136, 0.1); color: #00ff88; }
+.farm-status.warning { background: rgba(255, 170, 0, 0.1); color: #ffaa00; }
+.farm-status.offline { background: rgba(255, 68, 68, 0.1); color: #ff4444; }
+.farm-status.empty { background: rgba(102, 102, 102, 0.1); color: #888; }
+.farm-status.not-found { background: rgba(255, 68, 68, 0.1); color: #ff4444; }
 
 .farm-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
-.farm-stat {
-    text-align: center;
-    padding: 15px;
-    background: var(--bg-secondary);
-    border-radius: var(--radius-md);
+.stat {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    padding: 5px 0;
+    border-bottom: 1px solid #333;
 }
 
-.stat-label {
-    display: block;
+.stat .label {
+    color: #888;
+}
+
+.stat .value {
+    color: white;
+    font-weight: bold;
+}
+
+.update-time {
     font-size: 0.8rem;
-    color: var(--text-secondary);
-    margin-bottom: 5px;
-}
-
-.stat-value {
-    display: block;
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--text-primary);
-}
-
-.farm-actions {
+    color: #666;
     text-align: center;
+    margin-bottom: 15px;
 }
 
-.no-farms {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--text-muted);
-    max-width: 500px;
-    margin: 0 auto;
-}
-
-.no-farms-icon {
-    font-size: 4rem;
-    margin-bottom: 20px;
-    opacity: 0.5;
-}
-
-.help-text {
+.file-info {
+    color: #ff6666;
     font-size: 0.9rem;
-    color: var(--text-secondary);
-    margin: 15px 0;
+    text-align: center;
+    margin: 20px 0;
+    padding: 10px;
+    background: rgba(255, 68, 68, 0.1);
+    border-radius: 6px;
 }
 
-.auto-update-notice {
+.farm-action {
     text-align: center;
-    margin-top: 40px;
+}
+
+.action-btn {
+    background: #333;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    width: 100%;
+}
+
+.action-btn:hover {
+    background: #444;
+}
+
+.debug-info {
+    background: #1a1a1a;
     padding: 20px;
-    background: var(--bg-secondary);
-    border-radius: var(--radius-md);
-    color: var(--text-secondary);
+    border-radius: 12px;
+    border: 1px solid #333;
+    color: #888;
     font-size: 0.9rem;
 }
 
-/* Адаптивность */
-@media (max-width: 768px) {
-    .farm-selection {
-        padding: 20px 15px;
-    }
-
-    .header-top {
-        flex-direction: column;
-        gap: 15px;
-    }
-
-    .header-stats {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .selection-header h1 {
-        font-size: 2rem;
-    }
-
-    .farms-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .farm-header {
-        flex-direction: column;
-        text-align: center;
-    }
-    /* Добавь эти стили в FarmSelection.css */
-
-    .farm-empty .farm-status.empty {
-        background: rgba(156, 163, 175, 0.2);
-        color: var(--text-muted);
-        border: 1px solid rgba(156, 163, 175, 0.3);
-    }
-
-    .farm-empty-notice {
-        font-size: 0.75rem;
-        color: var(--text-muted);
-        margin-top: 5px;
-        padding: 4px 8px;
-        background: rgba(156, 163, 175, 0.1);
-        border-radius: 6px;
-        border-left: 3px solid #9ca3af;
-    }
-
-    .farm-empty::before {
-        background: linear-gradient(135deg, #9ca3af, #6b7280) !important;
-    }
-
-    /* Стиль для ферм без майнеров */
-    .farm-stat .stat-value {
-        color: var(--text-primary);
-    }
-
-    .farm-empty .farm-stat .stat-value {
-        color: var(--text-muted);
-    }
-    .debug-panel {
-        background: var(--bg-card);
-        border-radius: var(--radius-lg);
-        padding: 20px;
-        margin-top: 30px;
-        border: 1px solid var(--accent-blue);
-    }
-
-    .debug-panel h3 {
-        color: var(--accent-blue);
-        margin-bottom: 15px;
-    }
-
-    .debug-content {
-        background: var(--bg-primary);
-        border-radius: var(--radius-md);
-        padding: 15px;
-        max-height: 300px;
-        overflow-y: auto;
-        font-family: 'Courier New', monospace;
-        font-size: 0.8rem;
-        color: var(--text-primary);
-        border: 1px solid var(--bg-tertiary);
-    }
-
-    .debug-content pre {
-        white-space: pre-wrap;
-        word-wrap: break-word;
-        margin: 0;
-    }
-
-    .debug-actions {
-        display: flex;
-        gap: 10px;
-        margin-top: 15px;
-    }
-
-    .farm-debug-path {
-        font-size: 0.7rem;
-        color: var(--text-muted);
-        margin-top: 3px;
-        font-family: 'Courier New', monospace;
-    }
-    /* Новые стили статусов */
-    .farm-not-found {
-        border-left: 4px solid #9ca3af;
-    }
-
-    .farm-error {
-        border-left: 4px solid #ef4444;
-    }
-
-    .farm-empty {
-        border-left: 4px solid #6b7280;
-    }
-
-    .farm-unknown {
-        border-left: 4px solid #8b5cf6;
-    }
-
-    .farm-status.not-found {
-        background: rgba(156, 163, 175, 0.2);
-        color: #6b7280;
-    }
-
-    .farm-status.error {
-        background: rgba(239, 68, 68, 0.2);
-        color: #dc2626;
-    }
-
-    .farm-status.empty {
-        background: rgba(107, 114, 128, 0.2);
-        color: #6b7280;
-    }
-
-    .farm-status.unknown {
-        background: rgba(139, 92, 246, 0.2);
-        color: #7c3aed;
-    }
-
-    .farm-help {
-        font-size: 0.7rem;
-        color: var(--text-muted);
-        margin-top: 5px;
-        font-family: 'Courier New', monospace;
-    }
-
-    .farm-list-info {
-        background: var(--bg-secondary);
-        padding: 20px;
-        border-radius: var(--radius-lg);
-        margin-top: 30px;
-    }
-
-    .farm-names-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin: 10px 0;
-    }
-
-    .farm-name-tag {
-        background: var(--bg-card);
-        padding: 4px 8px;
-        border-radius: 6px;
-        font-size: 0.8rem;
-        font-family: 'Courier New', monospace;
-        border: 1px solid var(--bg-tertiary);
-    }
-
-    .loading-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.7);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        z-index: 1000;
-    }
+.debug-info h3 {
+    color: #00ff88;
+    margin-top: 0;
 }

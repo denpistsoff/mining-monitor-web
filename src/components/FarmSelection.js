@@ -4,240 +4,175 @@ import '../styles/components/FarmSelection.css';
 
 const FarmSelection = () => {
     const [farms, setFarms] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [lastUpdate, setLastUpdate] = useState(null);
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    // Функция для проверки существования файла фермы
-    const checkFarmFile = async (farmName) => {
-        try {
-            const response = await fetch(`/data/farm_data_${farmName}.json?t=${Date.now()}`);
-            return response.ok;
-        } catch (error) {
-            return false;
-        }
-    };
+    // Список ферм для проверки
+    const FARM_NAMES = ['VISOKOVKA', 'DESKTOP-TO75OLC'];
 
     // Загружаем данные фермы
     const loadFarmData = async (farmName) => {
         try {
             const response = await fetch(`/data/farm_data_${farmName}.json?t=${Date.now()}`);
             if (response.ok) {
-                return await response.json();
+                const data = await response.json();
+                return data;
             }
         } catch (error) {
-            console.error(`Ошибка загрузки ${farmName}:`, error);
+            console.log(`Ошибка загрузки ${farmName}:`, error);
         }
         return null;
     };
 
-    // Основная функция загрузки всех ферм
-    const loadAllFarms = async () => {
+    // Загружаем все фермы
+    const loadFarms = async () => {
         setLoading(true);
-        console.log('🔄 Загружаем фермы...');
 
-        try {
-            // Список ферм для проверки (добавляй сюда новые)
-            const farmNamesToCheck = [
-                'VISOKOVKA',
-                'DESKTOP-TO75OLC',
-                'FARM1',
-                'FARM2',
-                'MAIN'
-            ];
+        const farmsList = [];
 
-            const farmsData = [];
+        for (const farmName of FARM_NAMES) {
+            const data = await loadFarmData(farmName);
 
-            // Проверяем каждую ферму
-            for (const farmName of farmNamesToCheck) {
-                console.log(`🔍 Проверяем ферму: ${farmName}`);
+            if (data) {
+                // Файл найден и загружен
+                const containers = data.containers || {};
+                const containerList = Object.values(containers);
 
-                const exists = await checkFarmFile(farmName);
-                console.log(`   Файл существует: ${exists}`);
+                const totalMiners = containerList.reduce((sum, c) => sum + (c.total_miners || 0), 0);
+                const onlineMiners = containerList.reduce((sum, c) => sum + (c.online_miners || 0), 0);
+                const hashrate = containerList.reduce((sum, c) => sum + (c.total_hashrate || 0), 0);
 
-                if (exists) {
-                    const farmData = await loadFarmData(farmName);
-                    console.log(`   Данные загружены:`, farmData);
-
-                    if (farmData) {
-                        // Ферма с данными
-                        const containers = farmData.containers || {};
-                        const containerArray = Object.values(containers);
-
-                        const onlineMiners = containerArray.reduce((sum, container) =>
-                            sum + (container.online_miners || 0), 0);
-
-                        const totalMiners = containerArray.reduce((sum, container) =>
-                            sum + (container.total_miners || 0), 0);
-
-                        const hashrate = containerArray.reduce((sum, container) =>
-                            sum + (container.total_hashrate || 0), 0);
-
-                        let status = 'empty';
-                        if (totalMiners > 0) {
-                            if (onlineMiners === totalMiners) {
-                                status = 'online';
-                            } else if (onlineMiners > 0) {
-                                status = 'warning';
-                            } else {
-                                status = 'offline';
-                            }
-                        }
-
-                        farmsData.push({
-                            name: farmName,
-                            miners: totalMiners,
-                            onlineMiners: onlineMiners,
-                            hashrate: hashrate,
-                            status: status,
-                            lastUpdate: farmData.last_update,
-                            hasData: true
-                        });
-                    } else {
-                        // Файл есть, но данные не загрузились
-                        farmsData.push({
-                            name: farmName,
-                            miners: 0,
-                            onlineMiners: 0,
-                            hashrate: 0,
-                            status: 'error',
-                            lastUpdate: null,
-                            hasData: false
-                        });
-                    }
-                } else {
-                    // Файла нет - все равно показываем
-                    farmsData.push({
-                        name: farmName,
-                        miners: 0,
-                        onlineMiners: 0,
-                        hashrate: 0,
-                        status: 'not-found',
-                        lastUpdate: null,
-                        hasData: false
-                    });
+                let status = 'empty';
+                if (totalMiners > 0) {
+                    status = onlineMiners === totalMiners ? 'online' :
+                        onlineMiners > 0 ? 'warning' : 'offline';
                 }
+
+                farmsList.push({
+                    name: farmName,
+                    displayName: data.farm_name || farmName, // Берем имя из JSON или используем имя файла
+                    status: status,
+                    miners: totalMiners,
+                    onlineMiners: onlineMiners,
+                    hashrate: hashrate,
+                    lastUpdate: data.last_update,
+                    exists: true,
+                    containers: containers
+                });
+            } else {
+                // Файл не найден
+                farmsList.push({
+                    name: farmName,
+                    displayName: farmName,
+                    status: 'not-found',
+                    miners: 0,
+                    onlineMiners: 0,
+                    hashrate: 0,
+                    lastUpdate: null,
+                    exists: false,
+                    containers: {}
+                });
             }
-
-            console.log('📊 Результат:', farmsData);
-            setFarms(farmsData);
-            setLastUpdate(new Date().toLocaleTimeString('ru-RU'));
-
-        } catch (error) {
-            console.error('❌ Ошибка загрузки ферм:', error);
-        } finally {
-            setLoading(false);
         }
+
+        console.log('Загруженные фермы:', farmsList);
+        setFarms(farmsList);
+        setLoading(false);
     };
 
     useEffect(() => {
-        loadAllFarms();
-        const interval = setInterval(loadAllFarms, 60000);
+        loadFarms();
+
+        // Автообновление каждую минуту
+        const interval = setInterval(loadFarms, 60000);
         return () => clearInterval(interval);
     }, []);
 
-    const handleFarmSelect = (farmName) => {
+    const handleFarmClick = (farmName) => {
         navigate(`/farm/${farmName}/dashboard`);
-    };
-
-    const handleRefresh = () => {
-        loadAllFarms();
     };
 
     const getStatusInfo = (status) => {
         switch (status) {
-            case 'online':
-                return { icon: '🟢', text: 'Онлайн', color: 'online' };
-            case 'warning':
-                return { icon: '🟡', text: 'Проблемы', color: 'warning' };
-            case 'offline':
-                return { icon: '🔴', text: 'Офлайн', color: 'offline' };
-            case 'empty':
-                return { icon: '⚪', text: 'Нет майнеров', color: 'empty' };
-            case 'error':
-                return { icon: '❌', text: 'Ошибка данных', color: 'error' };
-            case 'not-found':
-                return { icon: '🔍', text: 'Файл не найден', color: 'not-found' };
-            default:
-                return { icon: '❓', text: 'Неизвестно', color: 'unknown' };
+            case 'online': return { icon: '🟢', text: 'Онлайн', class: 'online' };
+            case 'warning': return { icon: '🟡', text: 'Проблемы', class: 'warning' };
+            case 'offline': return { icon: '🔴', text: 'Офлайн', class: 'offline' };
+            case 'empty': return { icon: '⚪', text: 'Нет майнеров', class: 'empty' };
+            case 'not-found': return { icon: '❌', text: 'Файл не найден', class: 'not-found' };
+            default: return { icon: '❓', text: 'Неизвестно', class: 'unknown' };
         }
     };
 
     return (
         <div className="farm-selection">
-            <div className="selection-header">
-                <div className="header-top">
-                    <div>
-                        <h1>🏭 Выбор площадки</h1>
-                        <p>Все проверяемые фермы</p>
-                    </div>
-                    <button
-                        className="btn btn-primary refresh-btn"
-                        onClick={handleRefresh}
-                        disabled={loading}
-                    >
+            <div className="header">
+                <h1>🏭 Майнинг Фермы</h1>
+                <div className="header-info">
+                    <div>Файлы: /data/farm_data_*.json</div>
+                    <button onClick={loadFarms} disabled={loading}>
                         {loading ? '🔄' : '🔄'} Обновить
                     </button>
                 </div>
-
-                <div className="header-stats">
-                    <span>Проверено: <strong>{farms.length}</strong></span>
-                    {lastUpdate && <span>Обновлено: <strong>{lastUpdate}</strong></span>}
-                    <span>Путь: <strong>/data/</strong></span>
-                </div>
             </div>
 
-            {/* Сетка ферм - показываем ВСЕ */}
             <div className="farms-grid">
-                {farms.map((farm) => {
-                    const statusInfo = getStatusInfo(farm.status);
+                {farms.map(farm => {
+                    const status = getStatusInfo(farm.status);
 
                     return (
                         <div
                             key={farm.name}
-                            className={`farm-card farm-${statusInfo.color}`}
-                            onClick={() => handleFarmSelect(farm.name)}
+                            className={`farm-card farm-${status.class}`}
+                            onClick={() => handleFarmClick(farm.name)}
                         >
                             <div className="farm-header">
                                 <div className="farm-icon">
-                                    {farm.hasData ? '⛏️' : '📁'}
+                                    {farm.exists ? '⛏️' : '📁'}
                                 </div>
                                 <div className="farm-info">
-                                    <h3>{farm.name}</h3>
-                                    <span className={`farm-status farm-${statusInfo.color}`}>
-                                        {statusInfo.icon} {statusInfo.text}
-                                    </span>
+                                    <div className="farm-name">{farm.name}</div>
+                                    <div className="farm-display-name">
+                                        {farm.displayName !== farm.name && `(${farm.displayName})`}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className={`farm-status ${status.class}`}>
+                                {status.icon} {status.text}
+                            </div>
+
+                            {farm.exists ? (
+                                <>
+                                    <div className="farm-stats">
+                                        <div className="stat">
+                                            <span className="label">Майнеры:</span>
+                                            <span className="value">{farm.onlineMiners}/{farm.miners}</span>
+                                        </div>
+                                        <div className="stat">
+                                            <span className="label">Хешрейт:</span>
+                                            <span className="value">{farm.hashrate.toFixed(2)} TH/s</span>
+                                        </div>
+                                        <div className="stat">
+                                            <span className="label">Контейнеры:</span>
+                                            <span className="value">{Object.keys(farm.containers).length}</span>
+                                        </div>
+                                    </div>
+
                                     {farm.lastUpdate && (
-                                        <div className="farm-update-time">
+                                        <div className="update-time">
                                             📅 {farm.lastUpdate}
                                         </div>
                                     )}
-                                    {!farm.hasData && (
-                                        <div className="farm-help">
-                                            Файл: farm_data_{farm.name}.json
-                                        </div>
-                                    )}
+                                </>
+                            ) : (
+                                <div className="file-info">
+                                    ❌ Файл farm_data_{farm.name}.json не найден в папке /data/
                                 </div>
-                            </div>
+                            )}
 
-                            <div className="farm-stats">
-                                <div className="farm-stat">
-                                    <span className="stat-label">Майнеры</span>
-                                    <span className="stat-value">
-                                        {farm.miners > 0 ? `${farm.onlineMiners}/${farm.miners}` : '0'}
-                                    </span>
-                                </div>
-                                <div className="farm-stat">
-                                    <span className="stat-label">Хешрейт</span>
-                                    <span className="stat-value">
-                                        {farm.hashrate > 0 ? `${farm.hashrate.toFixed(2)}` : '0'} TH/s
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div className="farm-actions">
-                                <button className={`btn ${farm.hasData ? 'btn-primary' : 'btn-secondary'}`}>
-                                    {farm.hasData ? '📊 Мониторинг' : '👀 Просмотр'}
+                            <div className="farm-action">
+                                <button className="action-btn">
+                                    {farm.exists ? '📊 Открыть' : '👀 Проверить'}
                                 </button>
                             </div>
                         </div>
@@ -245,27 +180,12 @@ const FarmSelection = () => {
                 })}
             </div>
 
-            {/* Информация о проверяемых фермах */}
-            <div className="farm-list-info">
-                <h4>🔍 Проверяемые фермы:</h4>
-                <div className="farm-names-list">
-                    {farms.map(farm => (
-                        <span key={farm.name} className="farm-name-tag">
-                            {farm.name}
-                        </span>
-                    ))}
-                </div>
-                <p style={{marginTop: '10px', fontSize: '0.9rem', color: '#666'}}>
-                    Файлы ищутся в: <code>public/data/farm_data_НАЗВАНИЕ.json</code>
-                </p>
+            <div className="debug-info">
+                <h3>Отладочная информация:</h3>
+                <div>Проверяемые фермы: {FARM_NAMES.join(', ')}</div>
+                <div>Найдено файлов: {farms.filter(f => f.exists).length}</div>
+                <div>Путь к файлам: /data/farm_data_НАЗВАНИЕ.json</div>
             </div>
-
-            {loading && (
-                <div className="loading-overlay">
-                    <div className="loading-spinner"></div>
-                    <p>Загрузка списка ферм...</p>
-                </div>
-            )}
         </div>
     );
 };
