@@ -258,4 +258,47 @@
     .farm-empty .farm-stat .stat-value {
         color: var(--text-muted);
     }
+    .debug-panel {
+        background: var(--bg-card);
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        margin-top: 30px;
+        border: 1px solid var(--accent-blue);
+    }
+
+    .debug-panel h3 {
+        color: var(--accent-blue);
+        margin-bottom: 15px;
+    }
+
+    .debug-content {
+        background: var(--bg-primary);
+        border-radius: var(--radius-md);
+        padding: 15px;
+        max-height: 300px;
+        overflow-y: auto;
+        font-family: 'Courier New', monospace;
+        font-size: 0.8rem;
+        color: var(--text-primary);
+        border: 1px solid var(--bg-tertiary);
+    }
+
+    .debug-content pre {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        margin: 0;
+    }
+
+    .debug-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .farm-debug-path {
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        margin-top: 3px;
+        font-family: 'Courier New', monospace;
+    }
 }
