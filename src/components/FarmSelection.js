@@ -1,169 +1,126 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/components/FarmSelection.css';
 
 const FarmSelection = () => {
     const [farms, setFarms] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [lastUpdate, setLastUpdate] = useState(null);
     const navigate = useNavigate();
-    const farmsCacheRef = useRef(new Map());
 
-    const loadFarms = async (force = false) => {
-        try {
-            setLoading(true);
+    // Список ферм для проверки
+    const FARM_NAMES = ['DESKTOP-TO75OLC', 'FARM-1', 'FARM-2', 'MAIN-FARM'];
 
-            const indexPaths = [
-                `/data/farms_index.json?t=${Date.now()}`,
-                `./data/farms_index.json?t=${Date.now()}`,
-                `/mining-monitor-web/data/farms_index.json?t=${Date.now()}`
-            ];
+    // Загружаем данные фермы
+    const loadFarmData = async (farmName) => {
+        const paths = [
+            `../data/farm_data_${farmName}.json?t=${Date.now()}`,
+            `./../data/farm_data_${farmName}.json?t=${Date.now()}`,
+            `data/farm_data_${farmName}.json?t=${Date.now()}`,
+            `/data/farm_data_${farmName}.json?t=${Date.now()}`
+        ];
 
-            let farmsList = [];
-            let indexData = null;
-
-            // Загружаем индекс ферм
-            for (const path of indexPaths) {
-                try {
-                    const response = await fetch(path);
-                    if (response.ok) {
-                        indexData = await response.json();
-                        farmsList = indexData.farms || [];
-                        console.log('✅ Loaded farms index:', farmsList.length, 'farms');
-                        break;
-                    }
-                } catch (e) {
-                    console.log(`Failed to load index from ${path}:`, e);
-                }
-            }
-
-            // Если индекс не найден, сканируем файлы
-            if (farmsList.length === 0) {
-                console.log('Scanning for farm files...');
-                farmsList = await scanForFarmFiles();
-            }
-
-            // Загружаем данные для каждой фермы
-            const farmsWithData = await Promise.all(
-                farmsList.map(async (farm) => {
-                    const cacheKey = farm.name;
-
-                    // Проверяем кеш (обновляем каждые 30 секунд)
-                    const cached = farmsCacheRef.current.get(cacheKey);
-                    const now = Date.now();
-                    if (!force && cached && (now - cached.timestamp < 30000)) {
-                        return cached.data;
-                    }
-
-                    try {
-                        const farmResponse = await fetch(`/data/farm_data_${farm.name}.json?t=${now}`);
-                        if (farmResponse.ok) {
-                            const farmData = await farmResponse.json();
-
-                            const stats = calculateFarmStats(farmData);
-                            const farmInfo = {
-                                name: farm.name,
-                                ...stats,
-                                lastUpdate: farmData.last_update || farmData.timestamp
-                            };
-
-                            // Сохраняем в кеш
-                            farmsCacheRef.current.set(cacheKey, {
-                                data: farmInfo,
-                                timestamp: now
-                            });
-
-                            return farmInfo;
-                        }
-                    } catch (e) {
-                        console.error(`Error loading farm ${farm.name}:`, e);
-                    }
-                    return null;
-                })
-            );
-
-            const validFarms = farmsWithData.filter(farm => farm !== null);
-            setFarms(validFarms);
-            setLastUpdate(new Date().toLocaleTimeString('ru-RU'));
-
-            if (validFarms.length === 0 && !force) {
-                // Fallback для первой загрузки
-                setTimeout(() => loadFarms(true), 5000);
-            }
-
-        } catch (error) {
-            console.error('Error loading farms:', error);
-            setError('Ошибка загрузки списка ферм');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const scanForFarmFiles = async () => {
-        // Пробуем загрузить известные фермы
-        const knownFarms = ['DESKTOP-TO75OLC', 'FARM-1', 'FARM-2', 'MAIN-FARM'];
-        const foundFarms = [];
-
-        for (const farmName of knownFarms) {
+        for (const path of paths) {
             try {
-                const response = await fetch(`/data/farm_data_${farmName}.json?t=${Date.now()}`);
+                console.log(`Пробуем путь: ${path}`);
+                const response = await fetch(path);
                 if (response.ok) {
-                    foundFarms.push({ name: farmName });
+                    const data = await response.json();
+                    console.log(`✅ Найдена ферма: ${farmName}`);
+                    return data;
                 }
-            } catch (e) {
-                // Файл не найден - пропускаем
+            } catch (error) {
+                console.log(`❌ Ошибка загрузки ${path}:`, error);
             }
         }
-
-        return foundFarms;
+        return null;
     };
 
+    // Рассчитываем статистику фермы
     const calculateFarmStats = (farmData) => {
-        const containers = farmData.containers || {};
-        const containerArray = Object.values(containers);
+        if (!farmData || !farmData.containers) {
+            return { miners: 0, onlineMiners: 0, hashrate: 0, status: 'offline' };
+        }
 
-        const onlineMiners = containerArray.reduce((sum, container) =>
+        const containers = Object.values(farmData.containers);
+
+        const onlineMiners = containers.reduce((sum, container) =>
             sum + (container.online_miners || 0), 0);
 
-        const totalMiners = containerArray.reduce((sum, container) =>
+        const totalMiners = containers.reduce((sum, container) =>
             sum + (container.total_miners || 0), 0);
 
-        const hashrate = containerArray.reduce((sum, container) =>
+        const hashrate = containers.reduce((sum, container) =>
             sum + (container.total_hashrate || 0), 0);
 
         let status = 'offline';
-        if (onlineMiners === totalMiners && totalMiners > 0) status = 'online';
-        else if (onlineMiners > 0) status = 'warning';
+        if (onlineMiners === totalMiners && totalMiners > 0) {
+            status = 'online';
+        } else if (onlineMiners > 0) {
+            status = 'warning';
+        }
 
         return {
             miners: totalMiners,
             onlineMiners: onlineMiners,
             hashrate: hashrate,
-            status: status
+            status: status,
+            lastUpdate: farmData.last_update
         };
     };
 
+    // Загружаем все фермы
+    const loadAllFarms = async () => {
+        setLoading(true);
+        console.log('🔄 Начинаем загрузку ферм...');
+
+        const farmsData = [];
+
+        // Проверяем каждую ферму
+        for (const farmName of FARM_NAMES) {
+            const farmData = await loadFarmData(farmName);
+            if (farmData) {
+                const stats = calculateFarmStats(farmData);
+                farmsData.push({
+                    name: farmName,
+                    ...stats
+                });
+            }
+        }
+
+        setFarms(farmsData);
+        setLastUpdate(new Date().toLocaleTimeString('ru-RU'));
+        setLoading(false);
+
+        console.log(`✅ Загружено ферм: ${farmsData.length}`);
+        if (farmsData.length === 0) {
+            console.log('❌ Не найдено ни одной фермы. Проверьте:');
+            console.log('1. Файлы в папке data/');
+            console.log('2. Формат имен: farm_data_НАЗВАНИЕ.json');
+            console.log('3. Доступность файлов по сети');
+        }
+    };
+
+    // Первая загрузка
     useEffect(() => {
-        // Первая загрузка
-        loadFarms(true);
+        loadAllFarms();
 
-        // Обновляем каждую минуту
-        const interval = setInterval(() => {
-            loadFarms();
-        }, 60000); // 1 минута
-
+        // Автообновление каждую минуту
+        const interval = setInterval(loadAllFarms, 60000);
         return () => clearInterval(interval);
     }, []);
 
+    // Обработчик выбора фермы
     const handleFarmSelect = (farmName) => {
         navigate(`/farm/${farmName}/dashboard`);
     };
 
+    // Обработчик обновления
     const handleRefresh = () => {
-        loadFarms(true);
+        loadAllFarms();
     };
 
+    // Иконки статусов
     const getStatusIcon = (status) => {
         switch (status) {
             case 'online': return '🟢';
@@ -173,6 +130,7 @@ const FarmSelection = () => {
         }
     };
 
+    // Текст статусов
     const getStatusText = (status) => {
         switch (status) {
             case 'online': return 'Онлайн';
@@ -182,27 +140,14 @@ const FarmSelection = () => {
         }
     };
 
-    if (loading && farms.length === 0) {
-        return (
-            <div className="farm-selection">
-                <div className="loading">
-                    <div className="loading-spinner large"></div>
-                    <p>Загрузка списка ферм...</p>
-                    <p style={{fontSize: '0.9rem', color: '#666'}}>
-                        Данные обновляются автоматически каждую минуту
-                    </p>
-                </div>
-            </div>
-        );
-    }
-
     return (
         <div className="farm-selection">
+            {/* Шапка */}
             <div className="selection-header">
                 <div className="header-top">
                     <div>
                         <h1>🏭 Выбор площадки</h1>
-                        <p>Выберите ферму для мониторинга</p>
+                        <p>Фермы загружаются из папки data/</p>
                     </div>
                     <button
                         className="btn btn-primary refresh-btn"
@@ -215,15 +160,14 @@ const FarmSelection = () => {
 
                 <div className="header-stats">
                     <span>Найдено ферм: <strong>{farms.length}</strong></span>
-                    {lastUpdate && (
-                        <span>Обновлено: <strong>{lastUpdate}</strong></span>
-                    )}
+                    {lastUpdate && <span>Обновлено: <strong>{lastUpdate}</strong></span>}
                     <span>Следующее обновление: <strong>через 1 минуту</strong></span>
                 </div>
             </div>
 
+            {/* Сетка ферм */}
             <div className="farms-grid">
-                {farms.map((farm, index) => (
+                {farms.map((farm) => (
                     <div
                         key={farm.name}
                         className={`farm-card farm-${farm.status}`}
@@ -238,7 +182,7 @@ const FarmSelection = () => {
                                 </span>
                                 {farm.lastUpdate && (
                                     <div className="farm-update-time">
-                                        📅 {new Date(farm.lastUpdate).toLocaleString('ru-RU')}
+                                        📅 {farm.lastUpdate}
                                     </div>
                                 )}
                             </div>
@@ -266,30 +210,44 @@ const FarmSelection = () => {
                 ))}
             </div>
 
-            {farms.length === 0 && !loading && (
+            {/* Сообщение если нет ферм */}
+            {!loading && farms.length === 0 && (
                 <div className="no-farms">
                     <div className="no-farms-icon">🏭</div>
                     <h3>Фермы не найдены</h3>
-                    <p>Добавьте JSON файлы в папку <code>data/</code> на GitHub</p>
-                    <p style={{fontSize: '0.9rem', color: '#888', marginTop: '10px'}}>
-                        Система автоматически обнаружит новые фермы в течение 1 минуты
-                    </p>
+                    <p>Добавьте JSON файлы в папку <code>data/</code></p>
+                    <div className="help-text">
+                        <p>Формат имен: <code>farm_data_НАЗВАНИЕ.json</code></p>
+                        <p>Пример: <code>farm_data_DESKTOP-TO75OLC.json</code></p>
+                    </div>
                     <button
                         className="btn btn-primary"
                         onClick={handleRefresh}
-                        style={{marginTop: '15px'}}
                     >
                         🔄 Проверить снова
                     </button>
                 </div>
             )}
 
+            {/* Уведомление об автообновлении */}
             {farms.length > 0 && (
                 <div className="auto-update-notice">
-                    <p>🔄 Данные автоматически обновляются каждую минуту</p>
+                    <p>🔄 Данные обновляются автоматически каждую минуту</p>
                     <p>Последнее обновление: {lastUpdate}</p>
                 </div>
             )}
+
+            {/* Отладочная информация */}
+            <div className="debug-info">
+                <details>
+                    <summary>Отладочная информация</summary>
+                    <div>
+                        <p>Проверяемые фермы: {FARM_NAMES.join(', ')}</p>
+                        <p>Текущий URL: {window.location.href}</p>
+                        <p>Проверьте консоль браузера для подробной отладки</p>
+                    </div>
+                </details>
+            </div>
         </div>
     );
 };

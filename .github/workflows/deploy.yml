@@ -31,55 +31,9 @@ jobs:
           mkdir -p public/data/auth
           AUTH_JSON='${{ secrets.AUTH_CREDENTIALS }}'
           echo "$AUTH_JSON" > public/data/auth/credentials.json
-          echo "✅ Auth file created"
-
-      - name: Copy farm data files
-        run: |
-          mkdir -p public/data
-          echo "📁 Copying JSON files..."
-          
-          # Копируем все существующие JSON файлы
-          if [ -d "data" ]; then
-            echo "📂 Found data directory, copying files..."
-            cp -r data/*.json public/data/ 2>/dev/null || echo "No JSON files to copy"
-          fi
-          
-          # Создаем индекс ферм
-          node -e "
-          const fs = require('fs');
-          const farms = [];
-          
-          if (fs.existsSync('public/data')) {
-            const files = fs.readdirSync('public/data');
-            console.log('📂 Files in public/data:', files);
-          
-            files.forEach(file => {
-              if (file.startsWith('farm_data_') && file.endsWith('.json')) {
-                const farmName = file.replace('farm_data_', '').replace('.json', '');
-                farms.push({
-                  name: farmName,
-                  file: file
-                });
-                console.log('🏭 Found farm:', farmName);
-              }
-            });
-          }
-          
-          console.log('✅ Total farms found:', farms.length);
-          fs.writeFileSync('public/data/farms_index.json', JSON.stringify({ farms }, null, 2));
-          "
 
       - name: Build React app
         run: npm run build
-
-      - name: Copy data to build
-        run: |
-          mkdir -p build/data
-          cp -r public/data/* build/data/ 2>/dev/null || echo "No data files to copy"
-          touch build/.nojekyll
-          echo "✅ Build completed"
-          echo "📁 Build data files:"
-          ls -la build/data/ 2>/dev/null || echo "No data files in build"
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
