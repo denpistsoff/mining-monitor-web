@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import '../styles/components/AlertsPanel.css';
 
-const AlertsPanel = () => {
+const AlertsPanel = ({ farmName }) => {
+    // остальной код без изменений
     const { farmName } = useOutletContext();
     const [alerts, setAlerts] = useState([]);
     const [isExpanded, setIsExpanded] = useState(true);

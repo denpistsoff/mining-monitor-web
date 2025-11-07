@@ -22,11 +22,7 @@ const FarmSelection = () => {
         try {
             const response = await fetch(farmFile.url + '?t=' + Date.now());
             if (response.ok) {
-                const data = await response.json();
-                console.log(`✅ Данные загружены: ${farmFile.name}`, data);
-                return data;
-            } else {
-                console.log(`❌ Файл не найден: ${farmFile.name} - ${response.status}`);
+                return await response.json();
             }
         } catch (error) {
             console.error(`Ошибка загрузки ${farmFile.name}:`, error);
@@ -36,12 +32,10 @@ const FarmSelection = () => {
 
     const loadFarms = async () => {
         setLoading(true);
-        console.log('=== ЗАГРУЗКА ФЕРМ ===');
 
         const farmsList = [];
 
         for (const farmFile of FARM_FILES) {
-            console.log(`🔍 Загружаем ферму: ${farmFile.name}`);
             const data = await loadFarmData(farmFile);
 
             if (data) {
@@ -68,17 +62,9 @@ const FarmSelection = () => {
                     hashrate: hashrate,
                     containers: totalContainers,
                     lastUpdate: data.last_update,
-                    exists: true,
-                    url: farmFile.url,
-                    rawData: data // Сохраняем сырые данные для отладки
-                });
-                console.log(`✅ Ферма добавлена: ${farmFile.name}`, {
-                    containers: totalContainers,
-                    miners: totalMiners,
-                    hashrate: hashrate
+                    exists: true
                 });
             } else {
-                console.log(`❌ Ферма не найдена: ${farmFile.name}`);
                 farmsList.push({
                     name: farmFile.name,
                     displayName: farmFile.name,
@@ -88,13 +74,11 @@ const FarmSelection = () => {
                     hashrate: 0,
                     containers: 0,
                     lastUpdate: null,
-                    exists: false,
-                    url: farmFile.url
+                    exists: false
                 });
             }
         }
 
-        console.log('=== РЕЗУЛЬТАТЫ ===', farmsList);
         setFarms(farmsList);
         setLoading(false);
     };
@@ -106,14 +90,8 @@ const FarmSelection = () => {
     }, []);
 
     const handleFarmClick = (farmName) => {
-        const farm = farms.find(f => f.name === farmName);
-        if (farm && farm.exists) {
-            console.log(`🎯 Переход к ферме: ${farmName}`, farm);
-            navigate(`/farm/${farmName}/dashboard`);
-        } else {
-            console.log(`❌ Ферма не найдена: ${farmName}`);
-            alert(`Ферма ${farmName} не найдена или данные недоступны`);
-        }
+        // Прямой переход на дашборд фермы
+        navigate(`/farm/${farmName}/dashboard`);
     };
 
     const getStatusInfo = (status) => {
@@ -197,15 +175,6 @@ const FarmSelection = () => {
                                 ) : (
                                     <div className="error-state">
                                         <div className="error-text">Файл данных не найден</div>
-                                        <a
-                                            href={farm.url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="file-link"
-                                            onClick={e => e.stopPropagation()}
-                                        >
-                                            ПРОВЕРИТЬ URL
-                                        </a>
                                     </div>
                                 )}
                             </div>
@@ -225,10 +194,6 @@ const FarmSelection = () => {
                             <span className="info-label">АКТИВНЫХ:</span>
                             <span className="info-value">{farms.filter(f => f.exists && f.status === 'online').length}</span>
                         </div>
-                        <div className="info-item">
-                            <span className="info-label">КОНТЕЙНЕРОВ:</span>
-                            <span className="info-value">{farms.reduce((sum, f) => sum + f.containers, 0)}</span>
-                        </div>
                     </div>
 
                     <button
@@ -238,14 +203,6 @@ const FarmSelection = () => {
                         {loading ? 'ОБНОВЛЕНИЕ...' : 'ОБНОВИТЬ'}
                     </button>
                 </div>
-            </div>
-
-            {/* Отладочная информация */}
-            <div className="debug-panel">
-                <h4>ОТЛАДОЧНАЯ ИНФОРМАЦИЯ</h4>
-                <div>Проверяемые фермы: {FARM_FILES.map(f => f.name).join(', ')}</div>
-                <div>Найдено: {farms.filter(f => f.exists).length} из {farms.length}</div>
-                <div>Откройте консоль браузера для подробной информации</div>
             </div>
         </div>
     );

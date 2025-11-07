@@ -4,7 +4,8 @@ import { useFarmData } from '../hooks/useFarmData';
 import MinerCard from './MinerCard';
 import '../styles/components/MinerView.css';
 
-const MinersView = () => {
+const MinersView = ({ farmName }) => {
+    // остальной код без изменений
     const { farmName } = useOutletContext();
     const { farmData, loading, error } = useFarmData(farmName);
     const [selectedContainer, setSelectedContainer] = useState('all');

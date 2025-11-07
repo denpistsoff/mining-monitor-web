@@ -5,7 +5,8 @@ import StatsGrid from './StatsGrid';
 import ContainerCard from './ContainerCard';
 import '../styles/components/Dashboard.css';
 
-const Dashboard = () => {
+const Dashboard = ({ farmName }) => {
+    // остальной код без изменений
     const { farmName } = useOutletContext();
     const { farmData, loading, error } = useFarmData(farmName);
 
