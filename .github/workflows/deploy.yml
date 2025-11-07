@@ -33,71 +33,40 @@ jobs:
           echo "$AUTH_JSON" > public/data/auth/credentials.json
           echo "✅ Auth file created"
 
-      - name: Process farm data files
+      - name: Copy farm data files
         run: |
           mkdir -p public/data
-          # Копируем и обрабатываем все farm_data_*.json файлы
-          for file in data/farm_data_*.json; do
-            if [ -f "$file" ]; then
-              filename=$(basename "$file")
-              farm_name="${filename#farm_data_}"
-              farm_name="${farm_name%.json}"
-              echo "Processing farm: $farm_name"
+          echo "📁 Copying JSON files..."
           
-              # Обрабатываем JSON структуру
-              node -e "
-              const fs = require('fs');
-              const originalData = JSON.parse(fs.readFileSync('$file', 'utf8'));
-              const containers = originalData.containers || {};
-              const containerEntries = Object.entries(containers);
-          
-              const summary = {
-                total_containers: containerEntries.length,
-                total_miners: containerEntries.reduce((sum, [_, container]) => sum + (container.total_miners || 0), 0),
-                online_miners: containerEntries.reduce((sum, [_, container]) => sum + (container.online_miners || 0), 0),
-                total_hashrate: containerEntries.reduce((sum, [_, container]) => sum + (container.total_hashrate || 0), 0),
-                total_power: containerEntries.reduce((sum, [_, container]) => sum + (container.total_power || 0), 0)
-              };
-          
-              const processedContainers = {};
-              containerEntries.forEach(([containerId, container]) => {
-                processedContainers[containerId] = {
-                  stats: {
-                    total_hashrate: container.total_hashrate,
-                    total_power: container.total_power
-                  },
-                  miners: container.miners_data || []
-                };
-              });
-          
-              const processedData = {
-                ...originalData,
-                summary: summary,
-                containers: processedContainers
-              };
-          
-              fs.writeFileSync('public/data/farm_data_$farm_name.json', JSON.stringify(processedData, null, 2));
-              "
-            fi
-          done
+          # Копируем все существующие JSON файлы
+          if [ -d "data" ]; then
+            echo "📂 Found data directory, copying files..."
+            cp -r data/*.json public/data/ 2>/dev/null || echo "No JSON files to copy"
+          fi
           
           # Создаем индекс ферм
           node -e "
           const fs = require('fs');
           const farms = [];
           
-          fs.readdirSync('data').forEach(file => {
-            if (file.startsWith('farm_data_') && file.endsWith('.json')) {
-              const farmName = file.replace('farm_data_', '').replace('.json', '');
-              farms.push({
-                name: farmName,
-                file: file
-              });
-            }
-          });
+          if (fs.existsSync('public/data')) {
+            const files = fs.readdirSync('public/data');
+            console.log('📂 Files in public/data:', files);
           
+            files.forEach(file => {
+              if (file.startsWith('farm_data_') && file.endsWith('.json')) {
+                const farmName = file.replace('farm_data_', '').replace('.json', '');
+                farms.push({
+                  name: farmName,
+                  file: file
+                });
+                console.log('🏭 Found farm:', farmName);
+              }
+            });
+          }
+          
+          console.log('✅ Total farms found:', farms.length);
           fs.writeFileSync('public/data/farms_index.json', JSON.stringify({ farms }, null, 2));
-          console.log('✅ Farms index created with', farms.length, 'farms');
           "
 
       - name: Build React app
@@ -106,9 +75,11 @@ jobs:
       - name: Copy data to build
         run: |
           mkdir -p build/data
-          cp -r public/data/* build/data/
+          cp -r public/data/* build/data/ 2>/dev/null || echo "No data files to copy"
           touch build/.nojekyll
-          echo "✅ Build files prepared"
+          echo "✅ Build completed"
+          echo "📁 Build data files:"
+          ls -la build/data/ 2>/dev/null || echo "No data files in build"
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

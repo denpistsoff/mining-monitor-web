@@ -5,8 +5,34 @@
 }
 
 .selection-header {
-    text-align: center;
     margin-bottom: 50px;
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.refresh-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-stats {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.header-stats span {
+    background: var(--bg-secondary);
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
 }
 
 .selection-header h1 {
@@ -88,6 +114,8 @@
     font-weight: 500;
     padding: 4px 10px;
     border-radius: 12px;
+    display: inline-block;
+    margin-bottom: 5px;
 }
 
 .farm-status.online {
@@ -103,6 +131,11 @@
 .farm-status.offline {
     background: rgba(239, 68, 68, 0.2);
     color: var(--accent-red);
+}
+
+.farm-update-time {
+    font-size: 0.75rem;
+    color: var(--text-muted);
 }
 
 .farm-stats {
@@ -141,6 +174,8 @@
     text-align: center;
     padding: 60px 20px;
     color: var(--text-muted);
+    max-width: 500px;
+    margin: 0 auto;
 }
 
 .no-farms-icon {
@@ -149,10 +184,30 @@
     opacity: 0.5;
 }
 
+.auto-update-notice {
+    text-align: center;
+    margin-top: 40px;
+    padding: 20px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
 /* Адаптивность */
 @media (max-width: 768px) {
     .farm-selection {
         padding: 20px 15px;
+    }
+
+    .header-top {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .header-stats {
+        flex-direction: column;
+        gap: 10px;
     }
 
     .selection-header h1 {
