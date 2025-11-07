@@ -4,6 +4,7 @@
     position: sticky;
     top: 0;
     z-index: 100;
+    backdrop-filter: blur(10px);
 }
 
 .header-top {
@@ -17,52 +18,60 @@
 .header-left {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 24px;
 }
 
 .back-button {
     background: var(--bg-secondary);
     border: 1px solid #333;
     color: var(--text-primary);
-    padding: 8px 16px;
-    border-radius: var(--radius-sm);
+    padding: 10px 16px;
+    border-radius: var(--radius-md);
     cursor: pointer;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     font-weight: 600;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
     transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .back-button:hover {
     background: var(--bg-tertiary);
     border-color: var(--accent-primary);
+    transform: translateX(-2px);
+}
+
+.header-title-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .header-title {
-    font-size: 1.5rem;
-    font-weight: 700;
+    font-size: 1.4rem;
+    font-weight: 800;
     background: var(--gradient-primary);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     margin: 0;
+    letter-spacing: 1px;
+}
+
+.farm-display {
+    font-size: 0.9rem;
+    color: var(--accent-primary);
+    font-weight: 600;
+    letter-spacing: 0.5px;
 }
 
 .header-controls {
     display: flex;
     align-items: center;
-    gap: 16px;
-}
-
-.farm-name {
-    background: var(--bg-secondary);
-    padding: 8px 16px;
-    border-radius: var(--radius-sm);
-    color: var(--accent-primary);
-    font-weight: 600;
-    border: 1px solid #333;
-    font-size: 0.9rem;
+    gap: 12px;
 }
 
 .action-buttons {
@@ -79,7 +88,7 @@
     cursor: pointer;
     font-size: 0.75rem;
     font-weight: 600;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
     transition: var(--transition-fast);
 }
@@ -87,48 +96,54 @@
 .action-btn:hover {
     background: var(--bg-tertiary);
     border-color: var(--accent-primary);
+    transform: translateY(-1px);
 }
 
 .logout-button {
     background: rgba(255, 68, 68, 0.1);
     border: 1px solid rgba(255, 68, 68, 0.3);
     color: var(--accent-danger);
-    padding: 8px 16px;
-    border-radius: var(--radius-sm);
+    padding: 10px 20px;
+    border-radius: var(--radius-md);
     cursor: pointer;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     font-weight: 600;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
     transition: var(--transition-fast);
 }
 
 .logout-button:hover {
     background: rgba(255, 68, 68, 0.2);
+    transform: translateY(-1px);
 }
 
+/* Навигационные вкладки */
 .header-nav {
     display: flex;
-    padding: 0 24px;
-    gap: 0;
+    padding: 0;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid #252525;
 }
 
 .nav-tab {
     flex: 1;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 16px 10px;
     background: transparent;
     border: none;
     color: var(--text-secondary);
-    font-size: 0.9rem;
-    font-weight: 600;
+    font-size: 0.85rem;
+    font-weight: 700;
     cursor: pointer;
     transition: var(--transition-fast);
-    border-bottom: 3px solid transparent;
+    position: relative;
     text-transform: uppercase;
     letter-spacing: 1px;
+    gap: 6px;
 }
 
 .nav-tab:hover {
@@ -138,10 +153,31 @@
 
 .nav-tab.active {
     color: var(--accent-primary);
-    border-bottom-color: var(--accent-primary);
     background: rgba(255, 107, 0, 0.1);
 }
 
+.tab-indicator {
+    width: 0;
+    height: 3px;
+    background: var(--gradient-primary);
+    border-radius: 2px;
+    transition: var(--transition-fast);
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.nav-tab.active .tab-indicator {
+    width: 80%;
+}
+
+.tab-text {
+    position: relative;
+    z-index: 2;
+}
+
+/* Адаптивность для шапки */
 @media (max-width: 768px) {
     .header-top {
         flex-direction: column;
@@ -149,17 +185,55 @@
         align-items: flex-start;
     }
 
+    .header-left {
+        width: 100%;
+        justify-content: space-between;
+    }
+
     .header-controls {
         width: 100%;
         justify-content: space-between;
     }
 
-    .action-buttons {
-        gap: 4px;
+    .back-button {
+        font-size: 0.75rem;
+        padding: 8px 12px;
     }
 
     .action-btn, .logout-button {
-        font-size: 0.7rem;
-        padding: 6px 10px;
+        font-size: 0.75rem;
+        padding: 8px 12px;
+    }
+
+    .header-title {
+        font-size: 1.2rem;
+    }
+
+    .nav-tab {
+        padding: 12px 8px;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-top {
+        padding: 12px 16px;
+    }
+
+    .header-nav {
+        flex-direction: column;
+    }
+
+    .nav-tab {
+        padding: 10px;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .tab-indicator {
+        display: none;
     }
 }

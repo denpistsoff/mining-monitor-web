@@ -1,75 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import FarmSelection from './components/FarmSelection';
 import Dashboard from './components/Dashboard';
 import MinersView from './components/MinersView';
 import AlertsPanel from './components/AlertsPanel';
 import Login from './components/Login';
+import Header from './components/Header';
 import './styles/dark-theme.css';
 import './App.css';
 
-// Упрощенный хедер
-const SimpleHeader = ({ farmName, activeTab }) => {
-    const navigate = useNavigate();
-
-    const tabs = [
-        { id: 'dashboard', label: 'Дашборд' },
-        { id: 'miners', label: 'Асики' },
-        { id: 'alerts', label: 'Оповещения' }
-    ];
-
-    const handleTabChange = (tabId) => {
-        navigate(`/farm/${farmName}/${tabId}`);
-    };
-
-    const handleBack = () => {
-        navigate('/');
-    };
-
-    const handleLogout = () => {
-        localStorage.removeItem('miningAuth');
-        window.location.href = '/';
-    };
-
-    return (
-        <header className="header">
-            <div className="header-top">
-                <div className="header-left">
-                    <button className="back-button" onClick={handleBack}>
-                        НАЗАД
-                    </button>
-                    <h1 className="header-title">MINING MONITOR</h1>
-                </div>
-
-                <div className="header-controls">
-                    <div className="farm-name">{farmName}</div>
-                    <button className="logout-button" onClick={handleLogout}>
-                        ВЫХОД
-                    </button>
-                </div>
-            </div>
-
-            <nav className="header-nav">
-                {tabs.map(tab => (
-                    <button
-                        key={tab.id}
-                        className={`nav-tab ${activeTab === tab.id ? 'active' : ''}`}
-                        onClick={() => handleTabChange(tab.id)}
-                    >
-                        {tab.label}
-                    </button>
-                ))}
-            </nav>
-        </header>
-    );
-};
-
-// Простые компоненты страниц
+// Простые компоненты страниц с нормальным Header
 const DashboardPage = () => {
     const pathFarmName = window.location.pathname.split('/')[2];
     return (
         <div className="farm-layout">
-            <SimpleHeader farmName={pathFarmName} activeTab="dashboard" />
+            <Header farmName={pathFarmName} activeTab="dashboard" />
             <Dashboard farmNameProp={pathFarmName} />
         </div>
     );
@@ -79,7 +24,7 @@ const MinersPage = () => {
     const pathFarmName = window.location.pathname.split('/')[2];
     return (
         <div className="farm-layout">
-            <SimpleHeader farmName={pathFarmName} activeTab="miners" />
+            <Header farmName={pathFarmName} activeTab="miners" />
             <MinersView farmNameProp={pathFarmName} />
         </div>
     );
@@ -89,7 +34,7 @@ const AlertsPage = () => {
     const pathFarmName = window.location.pathname.split('/')[2];
     return (
         <div className="farm-layout">
-            <SimpleHeader farmName={pathFarmName} activeTab="alerts" />
+            <Header farmName={pathFarmName} activeTab="alerts" />
             <AlertsPanel farmNameProp={pathFarmName} />
         </div>
     );
