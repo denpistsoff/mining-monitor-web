@@ -28,14 +28,13 @@ function App() {
             setIsLoading(false);
         };
 
-        // Настройка Telegram Web App
         if (window.Telegram?.WebApp) {
             const tgApp = window.Telegram.WebApp;
             tgApp.ready();
             tgApp.expand();
         }
 
-        document.title = 'Mining Monitor 🏭';
+        document.title = 'Mining Monitor';
         checkAuth();
     }, []);
 

@@ -25,18 +25,6 @@ const MinerCard = ({ miner, showContainer = false }) => {
         }
     };
 
-    const handleRestart = () => {
-        alert(`Перезапуск ${ip}...`);
-    };
-
-    const handleDetails = () => {
-        setIsExpanded(!isExpanded);
-    };
-
-    const handleDiagnose = () => {
-        alert(`Диагностика ${ip}...`);
-    };
-
     const statusInfo = getStatusInfo();
 
     return (
@@ -76,7 +64,7 @@ const MinerCard = ({ miner, showContainer = false }) => {
                     <div className="stat-item">
                         <span className="stat-label">ТЕМПЕРАТУРА</span>
                         <span className="stat-value">
-                            {temperature && temperature !== 'N/A' ? `${temperature}°C` : 'N/A'}
+                            {temperature ? `${temperature}°C` : 'N/A'}
                         </span>
                     </div>
                 </div>
@@ -85,15 +73,13 @@ const MinerCard = ({ miner, showContainer = false }) => {
                     <div className="stat-item">
                         <span className="stat-label">ПИТАНИЕ</span>
                         <span className="stat-value">
-                            {power && power !== 'N/A' ? `${power} ВТ` : 'N/A'}
+                            {power ? `${power} ВТ` : 'N/A'}
                         </span>
                     </div>
                     <div className="stat-item">
                         <span className="stat-label">ПУЛ</span>
                         <span className="stat-value pool" title={pool}>
-                            {pool && pool !== 'нет данных' ?
-                                pool.length > 15 ? `${pool.substring(0, 15)}...` : pool
-                                : 'N/A'}
+                            {pool ? (pool.length > 20 ? `${pool.substring(0, 20)}...` : pool) : 'N/A'}
                         </span>
                     </div>
                 </div>
@@ -108,23 +94,15 @@ const MinerCard = ({ miner, showContainer = false }) => {
             )}
 
             <div className="miner-actions">
-                <button className="btn btn-sm btn-primary" onClick={handleRestart}>
-                    ПЕРЕЗАПУСТИТЬ
+                <button className="btn btn-sm btn-secondary" onClick={() => setIsExpanded(!isExpanded)}>
+                    {isExpanded ? 'СКРЫТЬ' : 'ПОДРОБНО'}
                 </button>
-                <button className="btn btn-sm btn-secondary" onClick={handleDetails}>
-                    {isExpanded ? 'СКРЫТЬ' : 'ДЕТАЛИ'}
-                </button>
-                {(status === 'problematic' || problem_reason) && (
-                    <button className="btn btn-sm btn-warning" onClick={handleDiagnose}>
-                        ДИАГНОСТИКА
-                    </button>
-                )}
             </div>
 
             {isExpanded && (
                 <div className="miner-details">
                     <div className="detail-section">
-                        <h4>ПОДРОБНАЯ ИНФОРМАЦИЯ</h4>
+                        <h4>ДЕТАЛЬНАЯ ИНФОРМАЦИЯ</h4>
                         <div className="detail-grid">
                             <div className="detail-item">
                                 <span>IP АДРЕС:</span>
@@ -135,13 +113,21 @@ const MinerCard = ({ miner, showContainer = false }) => {
                                 <strong>{type}</strong>
                             </div>
                             <div className="detail-item">
-                                <span>КОНТЕЙНЕР:</span>
-                                <strong>{containerId}</strong>
-                            </div>
-                            <div className="detail-item">
                                 <span>СТАТУС:</span>
                                 <strong>{status}</strong>
                             </div>
+                            {containerId && (
+                                <div className="detail-item">
+                                    <span>КОНТЕЙНЕР:</span>
+                                    <strong>{containerId}</strong>
+                                </div>
+                            )}
+                            {pool && (
+                                <div className="detail-item">
+                                    <span>ПУЛ:</span>
+                                    <strong>{pool}</strong>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

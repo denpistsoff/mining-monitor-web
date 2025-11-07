@@ -1,10 +1,12 @@
 import React from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { useFarmData } from '../hooks/useFarmData';
 import StatsGrid from './StatsGrid';
 import ContainerCard from './ContainerCard';
 import '../styles/components/Dashboard.css';
 
-const Dashboard = ({ farmName }) => {
+const Dashboard = () => {
+    const { farmName } = useOutletContext();
     const { farmData, loading, error } = useFarmData(farmName);
 
     if (loading) {
@@ -21,7 +23,9 @@ const Dashboard = ({ farmName }) => {
             <div className="dashboard-error">
                 <div className="error-title">ОШИБКА</div>
                 <div className="error-message">{error}</div>
-                <button className="retry-button">ПОВТОРИТЬ</button>
+                <button className="retry-button" onClick={() => window.location.reload()}>
+                    ПОВТОРИТЬ
+                </button>
             </div>
         );
     }
@@ -39,9 +43,9 @@ const Dashboard = ({ farmName }) => {
         <div className="dashboard">
             <div className="dashboard-header">
                 <div className="dashboard-title">
-                    <h2>ДАШБОРД ФЕРМЫ</h2>
+                    <h2>ДАШБОРД ФЕРМЫ {farmName}</h2>
                     <div className="last-update">
-                        Последнее обновление: {new Date(farmData.last_update).toLocaleString('ru-RU')}
+                        Последнее обновление: {farmData.last_update}
                     </div>
                 </div>
             </div>
@@ -51,7 +55,7 @@ const Dashboard = ({ farmName }) => {
             <div className="containers-section">
                 <h3 className="section-title">КОНТЕЙНЕРЫ</h3>
                 <div className="containers-grid">
-                    {Object.entries(farmData.containers).map(([containerId, container]) => (
+                    {Object.entries(farmData.containers || {}).map(([containerId, container]) => (
                         <ContainerCard
                             key={containerId}
                             containerId={containerId}

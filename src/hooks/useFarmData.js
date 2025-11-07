@@ -15,66 +15,82 @@ export const useFarmData = (farmName) => {
         try {
             setLoading(true);
 
-            // Абсолютные пути к GitHub
-            const pathsToTry = [
-                `https://raw.githubusercontent.com/denpistsoff/mining-monitor-web/main/data/farm_data_${farmName}.json?t=${Date.now()}`,
-                `/data/farm_data_${farmName}.json?t=${Date.now()}`,
-                `./data/farm_data_${farmName}.json?t=${Date.now()}`,
-                `data/farm_data_${farmName}.json?t=${Date.now()}`
-            ];
+            const url = `https://raw.githubusercontent.com/denpistsoff/mining-monitor-web/main/data/farm_data_${farmName}.json?t=${Date.now()}`;
 
-            let data = null;
-            let lastError = null;
+            console.log(`🔄 Загружаем данные для: ${farmName}`);
+            const response = await fetch(url);
 
-            for (const path of pathsToTry) {
-                try {
-                    console.log(`Пробуем загрузить: ${path}`);
-                    const response = await fetch(path);
-
-                    if (response.ok) {
-                        data = await response.json();
-                        console.log(`✅ Успешно загружено: ${farmName}`, data);
-
-                        // Проверяем, изменились ли данные
-                        const currentTimestamp = data.timestamp || data.last_update;
-                        if (force || !lastUpdateRef.current || lastUpdateRef.current !== currentTimestamp) {
-                            lastUpdateRef.current = currentTimestamp;
-                            setFarmData(data);
-                            setError(null);
-                        }
-                        break;
-                    } else {
-                        console.log(`❌ Ошибка ${path}: ${response.status}`);
-                    }
-                } catch (err) {
-                    lastError = err;
-                    console.log(`❌ Ошибка загрузки ${path}:`, err);
-                }
+            if (!response.ok) {
+                throw new Error(`Файл не найден: ${response.status}`);
             }
 
-            if (!data) {
-                throw new Error(lastError || `Ферма "${farmName}" не найдена`);
+            const data = await response.json();
+            console.log(`✅ Данные получены:`, data);
+
+            // Обрабатываем структуру данных
+            const processedData = processFarmData(data);
+
+            // Проверяем, изменились ли данные
+            const currentTimestamp = data.timestamp || data.last_update;
+            if (force || !lastUpdateRef.current || lastUpdateRef.current !== currentTimestamp) {
+                lastUpdateRef.current = currentTimestamp;
+                setFarmData(processedData);
+                setError(null);
             }
 
         } catch (err) {
             setError(err.message);
-            console.error('Ошибка загрузки данных фермы:', err);
+            console.error('❌ Ошибка загрузки данных:', err);
         } finally {
             setLoading(false);
         }
     };
 
+    // Функция для обработки структуры данных
+    const processFarmData = (data) => {
+        const containers = data.containers || {};
+        const containerEntries = Object.entries(containers);
+
+        // Рассчитываем общую статистику
+        const summary = {
+            total_containers: containerEntries.length,
+            total_miners: containerEntries.reduce((sum, [_, container]) =>
+                sum + (container.total_miners || 0), 0),
+            online_miners: containerEntries.reduce((sum, [_, container]) =>
+                sum + (container.online_miners || 0), 0),
+            total_hashrate: containerEntries.reduce((sum, [_, container]) =>
+                sum + (container.total_hashrate || 0), 0),
+            total_power: containerEntries.reduce((sum, [_, container]) =>
+                sum + (container.total_power || 0), 0)
+        };
+
+        // Обрабатываем контейнеры для единообразной структуры
+        const processedContainers = {};
+        containerEntries.forEach(([containerId, container]) => {
+            processedContainers[containerId] = {
+                stats: {
+                    total_hashrate: container.total_hashrate,
+                    total_power: container.total_power,
+                    total_miners: container.total_miners,
+                    online_miners: container.online_miners
+                },
+                miners: container.miners_data || [] // Используем miners_data из JSON
+            };
+        });
+
+        return {
+            ...data,
+            summary: summary,
+            containers: processedContainers
+        };
+    };
+
     useEffect(() => {
         if (!farmName) return;
 
-        // Первая загрузка
         loadData(true);
 
-        // Обновляем данные каждую минуту
-        const interval = setInterval(() => {
-            loadData();
-        }, 60000);
-
+        const interval = setInterval(loadData, 60000);
         return () => clearInterval(interval);
     }, [farmName]);
 
