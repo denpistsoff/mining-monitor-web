@@ -301,4 +301,85 @@
         margin-top: 3px;
         font-family: 'Courier New', monospace;
     }
+    /* Новые стили статусов */
+    .farm-not-found {
+        border-left: 4px solid #9ca3af;
+    }
+
+    .farm-error {
+        border-left: 4px solid #ef4444;
+    }
+
+    .farm-empty {
+        border-left: 4px solid #6b7280;
+    }
+
+    .farm-unknown {
+        border-left: 4px solid #8b5cf6;
+    }
+
+    .farm-status.not-found {
+        background: rgba(156, 163, 175, 0.2);
+        color: #6b7280;
+    }
+
+    .farm-status.error {
+        background: rgba(239, 68, 68, 0.2);
+        color: #dc2626;
+    }
+
+    .farm-status.empty {
+        background: rgba(107, 114, 128, 0.2);
+        color: #6b7280;
+    }
+
+    .farm-status.unknown {
+        background: rgba(139, 92, 246, 0.2);
+        color: #7c3aed;
+    }
+
+    .farm-help {
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        margin-top: 5px;
+        font-family: 'Courier New', monospace;
+    }
+
+    .farm-list-info {
+        background: var(--bg-secondary);
+        padding: 20px;
+        border-radius: var(--radius-lg);
+        margin-top: 30px;
+    }
+
+    .farm-names-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 10px 0;
+    }
+
+    .farm-name-tag {
+        background: var(--bg-card);
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-family: 'Courier New', monospace;
+        border: 1px solid var(--bg-tertiary);
+    }
+
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        z-index: 1000;
+    }
 }
