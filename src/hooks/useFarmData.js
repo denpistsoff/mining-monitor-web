@@ -15,8 +15,9 @@ export const useFarmData = (farmName) => {
         try {
             setLoading(true);
 
-            // Правильные пути для public/data/
+            // Абсолютные пути к GitHub
             const pathsToTry = [
+                `https://raw.githubusercontent.com/denpistsoff/mining-monitor-web/main/data/farm_data_${farmName}.json?t=${Date.now()}`,
                 `/data/farm_data_${farmName}.json?t=${Date.now()}`,
                 `./data/farm_data_${farmName}.json?t=${Date.now()}`,
                 `data/farm_data_${farmName}.json?t=${Date.now()}`
@@ -27,11 +28,12 @@ export const useFarmData = (farmName) => {
 
             for (const path of pathsToTry) {
                 try {
-                    console.log(`Загружаем ферму ${farmName} по пути: ${path}`);
+                    console.log(`Пробуем загрузить: ${path}`);
                     const response = await fetch(path);
 
                     if (response.ok) {
                         data = await response.json();
+                        console.log(`✅ Успешно загружено: ${farmName}`, data);
 
                         // Проверяем, изменились ли данные
                         const currentTimestamp = data.timestamp || data.last_update;
@@ -41,9 +43,12 @@ export const useFarmData = (farmName) => {
                             setError(null);
                         }
                         break;
+                    } else {
+                        console.log(`❌ Ошибка ${path}: ${response.status}`);
                     }
                 } catch (err) {
                     lastError = err;
+                    console.log(`❌ Ошибка загрузки ${path}:`, err);
                 }
             }
 
@@ -53,7 +58,7 @@ export const useFarmData = (farmName) => {
 
         } catch (err) {
             setError(err.message);
-            console.error('Error loading farm data:', err);
+            console.error('Ошибка загрузки данных фермы:', err);
         } finally {
             setLoading(false);
         }
