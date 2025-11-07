@@ -1,11 +1,10 @@
 import React from 'react';
 import '../styles/components/Header.css';
 
-const Header = ({ activeTab, onTabChange, farmName, onLogout }) => {
+const Header = ({ activeTab, onTabChange, farmName, onLogout, unreadAlertsCount = 0 }) => {
     const tabs = [
         { id: 'dashboard', label: 'ДАШБОРД' },
-        { id: 'miners', label: 'АСИКИ' },
-        { id: 'alerts', label: 'ОПОВЕЩЕНИЯ' }
+        { id: 'miners', label: 'АСИКИ' }
     ];
 
     const handleBack = () => {
@@ -14,6 +13,10 @@ const Header = ({ activeTab, onTabChange, farmName, onLogout }) => {
 
     const handleAction = (action) => {
         alert(`Функция "${action}" в разработке`);
+    };
+
+    const handleAlertsClick = () => {
+        onTabChange('alerts');
     };
 
     return (
@@ -32,23 +35,33 @@ const Header = ({ activeTab, onTabChange, farmName, onLogout }) => {
                 <div className="header-controls">
                     <div className="action-buttons">
                         <button
-                            className="action-btn"
-                            onClick={() => handleAction('Перезапуск')}
+                            className={`alerts-button ${unreadAlertsCount > 0 ? 'has-alerts' : ''}`}
+                            onClick={handleAlertsClick}
+                            title="Оповещения"
                         >
-                            ПЕРЕЗАПУСК
+                            🔔
+                            {unreadAlertsCount > 0 && (
+                                <span className="alerts-badge">{unreadAlertsCount}</span>
+                            )}
+                        </button>
+
+                        <button
+                            className="action-btn small"
+                            onClick={() => handleAction('Перезапуск')}
+                            title="Перезапуск"
+                        >
+                            🔄
                         </button>
                         <button
-                            className="action-btn"
+                            className="action-btn small"
                             onClick={() => handleAction('Диагностика')}
+                            title="Диагностика"
                         >
-                            ДИАГНОСТИКА
+                            ⚡
                         </button>
                     </div>
 
-                    <button
-                        className="logout-button"
-                        onClick={onLogout}
-                    >
+                    <button className="logout-button" onClick={onLogout}>
                         ВЫХОД
                     </button>
                 </div>

@@ -7,6 +7,66 @@ import '../styles/components/Dashboard.css';
 const Dashboard = ({ farmNameProp }) => {
     const { farmData, loading, error } = useFarmData(farmNameProp);
 
+    // Функция для подсчета ТОЛЬКО онлайн майнеров (status === 'online')
+    const countOnlineMiners = (containers) => {
+        if (!containers) return 0;
+
+        let onlineCount = 0;
+        Object.values(containers).forEach(container => {
+            Object.values(container.miners || {}).forEach(miner => {
+                if (miner.status === 'online') {
+                    onlineCount++;
+                }
+            });
+        });
+        return onlineCount;
+    };
+
+    // Функция для подсчета проблемных майнеров
+    const countProblematicMiners = (containers) => {
+        if (!containers) return 0;
+
+        let problematicCount = 0;
+        Object.values(containers).forEach(container => {
+            Object.values(container.miners || {}).forEach(miner => {
+                if (miner.status === 'problematic') {
+                    problematicCount++;
+                }
+            });
+        });
+        return problematicCount;
+    };
+
+    // Функция для подсчета оффлайн майнеров
+    const countOfflineMiners = (containers) => {
+        if (!containers) return 0;
+
+        let offlineCount = 0;
+        Object.values(containers).forEach(container => {
+            Object.values(container.miners || {}).forEach(miner => {
+                if (miner.status === 'offline') {
+                    offlineCount++;
+                }
+            });
+        });
+        return offlineCount;
+    };
+
+    // Функция для подсчета общего хешрейта только онлайн майнеров
+    const calculateTotalHashrate = (containers) => {
+        if (!containers) return 0;
+
+        let totalHashrate = 0;
+        Object.values(containers).forEach(container => {
+            Object.values(container.miners || {}).forEach(miner => {
+                if (miner.status === 'online' && miner.hashrate) {
+                    totalHashrate += miner.hashrate;
+                }
+            });
+        });
+        return totalHashrate;
+    };
+
     if (loading) {
         return (
             <div className="dashboard-loading">
@@ -37,6 +97,18 @@ const Dashboard = ({ farmNameProp }) => {
         );
     }
 
+    // Обновляем summary с правильными счетчиками
+    const updatedSummary = {
+        ...farmData.summary,
+        online_miners: countOnlineMiners(farmData.containers),
+        problematic_miners: countProblematicMiners(farmData.containers),
+        offline_miners: countOfflineMiners(farmData.containers),
+        total_hashrate: calculateTotalHashrate(farmData.containers),
+        total_miners: countOnlineMiners(farmData.containers) +
+            countProblematicMiners(farmData.containers) +
+            countOfflineMiners(farmData.containers)
+    };
+
     return (
         <div className="dashboard">
             <div className="dashboard-header">
@@ -48,7 +120,7 @@ const Dashboard = ({ farmNameProp }) => {
                 </div>
             </div>
 
-            <StatsGrid summary={farmData.summary} />
+            <StatsGrid summary={updatedSummary} />
 
             <div className="containers-section">
                 <h3 className="section-title">КОНТЕЙНЕРЫ</h3>

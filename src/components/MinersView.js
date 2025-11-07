@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useFarmData } from '../hooks/useFarmData';
 import MinerCard from './MinerCard';
 import '../styles/components/MinerView.css';
@@ -6,73 +6,96 @@ import '../styles/components/MinerView.css';
 const MinersView = ({ farmNameProp }) => {
     const { farmData, loading, error } = useFarmData(farmNameProp);
     const [selectedContainer, setSelectedContainer] = useState('all');
-    const [activeTab, setActiveTab] = useState('all');
+    const [selectedStatus, setSelectedStatus] = useState('all');
+    const [cardSize, setCardSize] = useState('medium'); // 'small', 'medium', 'large'
 
-    if (loading) return <div className="loading">ЗАГРУЗКА МАЙНЕРОВ</div>;
-    if (error) return <div className="error">ОШИБКА: {error}</div>;
-    if (!farmData) return <div className="no-data">НЕТ ДАННЫХ</div>;
+    // Сбор всех майнеров из всех контейнеров
+    const allMiners = useMemo(() => {
+        if (!farmData?.containers) return [];
 
-    const containers = farmData.containers || {};
-
-    // Собираем всех майнеров из всех контейнеров
-    const getAllMiners = () => {
-        let allMiners = [];
-        Object.entries(containers).forEach(([containerId, container]) => {
-            if (container.miners) {
-                container.miners.forEach(miner => {
-                    allMiners.push({
-                        ...miner,
-                        containerId: containerId
-                    });
+        const miners = [];
+        Object.entries(farmData.containers).forEach(([containerId, container]) => {
+            Object.entries(container.miners || {}).forEach(([minerIp, miner]) => {
+                miners.push({
+                    ...miner,
+                    containerId,
+                    ip: minerIp
                 });
-            }
+            });
         });
-        return allMiners;
-    };
+        return miners;
+    }, [farmData]);
 
-    const allMiners = getAllMiners();
+    // Фильтрация майнеров
+    const filteredMiners = useMemo(() => {
+        return allMiners.filter(miner => {
+            const containerMatch = selectedContainer === 'all' || miner.containerId === selectedContainer;
+            const statusMatch = selectedStatus === 'all' || miner.status === selectedStatus;
+            return containerMatch && statusMatch;
+        });
+    }, [allMiners, selectedContainer, selectedStatus]);
 
-    // Фильтруем майнеров по выбранным критериям
-    const filteredMiners = allMiners.filter(miner => {
-        // Фильтр по контейнеру
-        if (selectedContainer !== 'all' && miner.containerId !== selectedContainer) {
-            return false;
-        }
+    // Статистика для отображения
+    const stats = useMemo(() => {
+        const online = allMiners.filter(m => m.status === 'online').length;
+        const problematic = allMiners.filter(m => m.status === 'problematic').length;
+        const offline = allMiners.filter(m => m.status === 'offline').length;
+        const total = allMiners.length;
 
-        // Фильтр по статусу
-        switch (activeTab) {
-            case 'online':
-                return miner.status === 'online';
-            case 'problematic':
-                return miner.status === 'problematic' || miner.problem_reason;
-            case 'offline':
-                return miner.status === 'offline';
-            default:
-                return true; // 'all' - показываем всех
-        }
-    });
+        return { online, problematic, offline, total };
+    }, [allMiners]);
 
-    // Статистика
-    const stats = {
-        total: allMiners.length,
-        online: allMiners.filter(m => m.status === 'online').length,
-        problematic: allMiners.filter(m => m.status === 'problematic' || m.problem_reason).length,
-        offline: allMiners.filter(m => m.status === 'offline').length
-    };
+    // Уникальные контейнеры для фильтра
+    const containers = useMemo(() => {
+        const uniqueContainers = [...new Set(allMiners.map(m => m.containerId))];
+        return ['all', ...uniqueContainers];
+    }, [allMiners]);
+
+    if (loading) {
+        return (
+            <div className="miners-view">
+                <div className="dashboard-loading">
+                    <div className="loading-spinner large"></div>
+                    <p>ЗАГРУЗКА ДАННЫХ АСИКОВ</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="miners-view">
+                <div className="dashboard-error">
+                    <div className="error-title">ОШИБКА ЗАГРУЗКИ АСИКОВ</div>
+                    <div className="error-message">{error}</div>
+                    <button className="retry-button" onClick={() => window.location.reload()}>
+                        ПОВТОРИТЬ
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="miners-view">
             <div className="miners-header">
-                <h1>УПРАВЛЕНИЕ МАЙНЕРАМИ - {farmNameProp}</h1>
+                <h1>МОНИТОРИНГ АСИКОВ - {farmNameProp}</h1>
                 <div className="miners-stats">
-                    <div className="stat-item">ВСЕГО: <strong>{stats.total}</strong></div>
-                    <div className="stat-item online">ОНЛАЙН: <strong>{stats.online}</strong></div>
-                    <div className="stat-item problematic">ПРОБЛЕМЫ: <strong>{stats.problematic}</strong></div>
-                    <div className="stat-item offline">ОФФЛАЙН: <strong>{stats.offline}</strong></div>
+                    <div className="stat-item online">
+                        ОНЛАЙН: <strong>{stats.online}</strong>
+                    </div>
+                    <div className="stat-item problematic">
+                        ПРОБЛЕМЫ: <strong>{stats.problematic}</strong>
+                    </div>
+                    <div className="stat-item offline">
+                        ОФФЛАЙН: <strong>{stats.offline}</strong>
+                    </div>
+                    <div className="stat-item">
+                        ВСЕГО: <strong>{stats.total}</strong>
+                    </div>
                 </div>
             </div>
 
-            {/* Фильтры */}
             <div className="filters-panel">
                 <div className="container-filter">
                     <label>КОНТЕЙНЕР:</label>
@@ -80,10 +103,9 @@ const MinersView = ({ farmNameProp }) => {
                         value={selectedContainer}
                         onChange={(e) => setSelectedContainer(e.target.value)}
                     >
-                        <option value="all">ВСЕ КОНТЕЙНЕРЫ</option>
-                        {Object.keys(containers).map(containerId => (
-                            <option key={containerId} value={containerId}>
-                                КОНТЕЙНЕР {containerId}
+                        {containers.map(container => (
+                            <option key={container} value={container}>
+                                {container === 'all' ? 'ВСЕ КОНТЕЙНЕРЫ' : container}
                             </option>
                         ))}
                     </select>
@@ -91,47 +113,86 @@ const MinersView = ({ farmNameProp }) => {
 
                 <div className="tab-buttons">
                     <button
-                        className={`tab-btn ${activeTab === 'all' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('all')}
+                        className={`tab-btn ${selectedStatus === 'all' ? 'active' : ''}`}
+                        onClick={() => setSelectedStatus('all')}
                     >
-                        ВСЕ ({stats.total})
+                        ВСЕ АСИКИ ({stats.total})
                     </button>
                     <button
-                        className={`tab-btn ${activeTab === 'online' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('online')}
+                        className={`tab-btn ${selectedStatus === 'online' ? 'active' : ''}`}
+                        onClick={() => setSelectedStatus('online')}
                     >
                         ОНЛАЙН ({stats.online})
                     </button>
                     <button
-                        className={`tab-btn ${activeTab === 'problematic' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('problematic')}
+                        className={`tab-btn ${selectedStatus === 'problematic' ? 'active' : ''}`}
+                        onClick={() => setSelectedStatus('problematic')}
                     >
                         ПРОБЛЕМЫ ({stats.problematic})
                     </button>
                     <button
-                        className={`tab-btn ${activeTab === 'offline' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('offline')}
+                        className={`tab-btn ${selectedStatus === 'offline' ? 'active' : ''}`}
+                        onClick={() => setSelectedStatus('offline')}
                     >
                         ОФФЛАЙН ({stats.offline})
                     </button>
                 </div>
+
+                <div className="size-controls">
+                    <label>РАЗМЕР КАРТОЧЕК:</label>
+                    <div className="size-buttons">
+                        <button
+                            className={`size-btn ${cardSize === 'small' ? 'active' : ''}`}
+                            onClick={() => setCardSize('small')}
+                            title="Компактный вид"
+                        >
+                            🔘 Маленький
+                        </button>
+                        <button
+                            className={`size-btn ${cardSize === 'medium' ? 'active' : ''}`}
+                            onClick={() => setCardSize('medium')}
+                            title="Стандартный вид"
+                        >
+                            🔘🔘 Средний
+                        </button>
+                        <button
+                            className={`size-btn ${cardSize === 'large' ? 'active' : ''}`}
+                            onClick={() => setCardSize('large')}
+                            title="Подробный вид"
+                        >
+                            🔘🔘🔘 Большой
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            {/* Список майнеров */}
+            <div className="actions-panel">
+                <button className="action-btn primary">
+                    ОБНОВИТЬ ДАННЫЕ
+                </button>
+                <button className="action-btn secondary">
+                    ЭКСПОРТ ОТЧЕТА
+                </button>
+                <button className="action-btn warning">
+                    МАССОВЫЙ ПЕРЕЗАПУСК
+                </button>
+            </div>
+
             <div className="miners-grid">
-                {filteredMiners.length > 0 ? (
-                    filteredMiners.map((miner, index) => (
+                {filteredMiners.length === 0 ? (
+                    <div className="no-miners-message">
+                        <h3>АСИКИ НЕ НАЙДЕНЫ</h3>
+                        <p>Попробуйте изменить параметры фильтрации</p>
+                    </div>
+                ) : (
+                    filteredMiners.map(miner => (
                         <MinerCard
-                            key={`${miner.ip}-${index}-${miner.containerId}`}
+                            key={miner.ip}
                             miner={miner}
                             showContainer={selectedContainer === 'all'}
+                            size={cardSize}
                         />
                     ))
-                ) : (
-                    <div className="no-miners-message">
-                        <h3>МАЙНЕРЫ НЕ НАЙДЕНЫ</h3>
-                        <p>Измените фильтры для поиска</p>
-                    </div>
                 )}
             </div>
         </div>

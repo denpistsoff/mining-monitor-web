@@ -203,4 +203,72 @@
     .miners-grid {
         grid-template-columns: 1fr;
     }
+    /* Добавить в конец MinerView.css */
+
+    .size-controls {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #252525;
+    }
+
+    .size-controls label {
+        font-weight: 700;
+        color: var(--accent-primary);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+
+    .size-buttons {
+        display: flex;
+        gap: 8px;
+        flex: 1;
+    }
+
+    .size-btn {
+        flex: 1;
+        padding: 10px 16px;
+        background: var(--bg-secondary);
+        border: 1px solid #333;
+        border-radius: var(--radius-md);
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition-fast);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .size-btn:hover {
+        background: var(--bg-tertiary);
+        transform: translateY(-2px);
+    }
+
+    .size-btn.active {
+        background: var(--gradient-primary);
+        color: #000;
+        border-color: var(--accent-primary);
+    }
+
+    @media (max-width: 768px) {
+        .size-controls {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .size-buttons {
+            width: 100%;
+        }
+
+        .size-btn {
+            padding: 8px 12px;
+            font-size: 0.75rem;
+        }
+    }
 }
