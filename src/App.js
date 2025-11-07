@@ -9,34 +9,57 @@ import Header from './components/Header';
 import './styles/dark-theme.css';
 import './App.css';
 
-// Простые компоненты страниц с нормальным Header
+// Компонент-обертка для страниц с Header
+const FarmPageWrapper = ({ children, farmName, activeTab }) => {
+    const navigate = useNavigate();
+
+    const handleTabChange = (tabId) => {
+        navigate(`/farm/${farmName}/${tabId}`);
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('miningAuth');
+        window.location.href = '/';
+    };
+
+    return (
+        <div className="farm-layout">
+            <Header
+                farmName={farmName}
+                activeTab={activeTab}
+                onTabChange={handleTabChange}
+                onLogout={handleLogout}
+            />
+            {children}
+        </div>
+    );
+};
+
+// Простые компоненты страниц
 const DashboardPage = () => {
     const pathFarmName = window.location.pathname.split('/')[2];
     return (
-        <div className="farm-layout">
-            <Header farmName={pathFarmName} activeTab="dashboard" />
+        <FarmPageWrapper farmName={pathFarmName} activeTab="dashboard">
             <Dashboard farmNameProp={pathFarmName} />
-        </div>
+        </FarmPageWrapper>
     );
 };
 
 const MinersPage = () => {
     const pathFarmName = window.location.pathname.split('/')[2];
     return (
-        <div className="farm-layout">
-            <Header farmName={pathFarmName} activeTab="miners" />
+        <FarmPageWrapper farmName={pathFarmName} activeTab="miners">
             <MinersView farmNameProp={pathFarmName} />
-        </div>
+        </FarmPageWrapper>
     );
 };
 
 const AlertsPage = () => {
     const pathFarmName = window.location.pathname.split('/')[2];
     return (
-        <div className="farm-layout">
-            <Header farmName={pathFarmName} activeTab="alerts" />
+        <FarmPageWrapper farmName={pathFarmName} activeTab="alerts">
             <AlertsPanel farmNameProp={pathFarmName} />
-        </div>
+        </FarmPageWrapper>
     );
 };
 

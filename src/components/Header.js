@@ -1,27 +1,15 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import '../styles/components/Header.css';
 
-const Header = ({ activeTab, onTabChange, farmName }) => {
-    const navigate = useNavigate();
-
+const Header = ({ activeTab, onTabChange, farmName, onLogout }) => {
     const tabs = [
         { id: 'dashboard', label: 'ДАШБОРД' },
         { id: 'miners', label: 'АСИКИ' },
         { id: 'alerts', label: 'ОПОВЕЩЕНИЯ' }
     ];
 
-    const handleTabChange = (tabId) => {
-        navigate(`/farm/${farmName}/${tabId}`);
-    };
-
     const handleBack = () => {
-        navigate('/');
-    };
-
-    const handleLogout = () => {
-        localStorage.removeItem('miningAuth');
-        window.location.href = '/';
+        window.history.back();
     };
 
     const handleAction = (action) => {
@@ -59,7 +47,7 @@ const Header = ({ activeTab, onTabChange, farmName }) => {
 
                     <button
                         className="logout-button"
-                        onClick={handleLogout}
+                        onClick={onLogout}
                     >
                         ВЫХОД
                     </button>
@@ -71,7 +59,7 @@ const Header = ({ activeTab, onTabChange, farmName }) => {
                     <button
                         key={tab.id}
                         className={`nav-tab ${activeTab === tab.id ? 'active' : ''}`}
-                        onClick={() => handleTabChange(tab.id)}
+                        onClick={() => onTabChange(tab.id)}
                     >
                         <span className="tab-text">{tab.label}</span>
                         <div className="tab-indicator"></div>
