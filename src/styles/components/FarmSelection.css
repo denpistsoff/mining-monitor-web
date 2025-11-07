@@ -184,6 +184,12 @@
     opacity: 0.5;
 }
 
+.help-text {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin: 15px 0;
+}
+
 .auto-update-notice {
     text-align: center;
     margin-top: 40px;

@@ -8,10 +8,88 @@ const FarmSelection = () => {
     const [lastUpdate, setLastUpdate] = useState(null);
     const navigate = useNavigate();
 
-    // Список ферм для проверки
-    const FARM_NAMES = ['DESKTOP-TO75OLC', 'FARM-1', 'FARM-2', 'MAIN-FARM'];
+    // Функция для поиска ВСЕХ farm_data_*.json файлов
+    const scanForFarmFiles = async () => {
+        console.log('🔍 Сканируем все farm_data_*.json файлы...');
+        const foundFarms = [];
 
-    // Загружаем данные фермы
+        // Пробуем разные методы поиска файлов
+        const scanMethods = [
+            // Метод 1: Пробуем загрузить индекс
+            async () => {
+                try {
+                    const response = await fetch('../data/farms_index.json?t=' + Date.now());
+                    if (response.ok) {
+                        const data = await response.json();
+                        return data.farms.map(farm => farm.name);
+                    }
+                } catch (e) {
+                    console.log('❌ Индекс не найден');
+                }
+                return [];
+            },
+
+            // Метод 2: Пробуем получить список файлов из папки data/
+            async () => {
+                const farmsFromDir = [];
+                try {
+                    const response = await fetch('../data/');
+                    if (response.ok) {
+                        const text = await response.text();
+                        const parser = new DOMParser();
+                        const html = parser.parseFromString(text, 'text/html');
+                        const links = html.querySelectorAll('a[href]');
+
+                        links.forEach(link => {
+                            const fileName = link.getAttribute('href');
+                            if (fileName && fileName.startsWith('farm_data_') && fileName.endsWith('.json')) {
+                                const farmName = fileName.replace('farm_data_', '').replace('.json', '');
+                                farmsFromDir.push(farmName);
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.log('❌ Не удалось прочитать папку data/');
+                }
+                return farmsFromDir;
+            },
+
+            // Метод 3: Пробуем известные имена ферм
+            async () => {
+                const knownFarms = [];
+                const testNames = ['VISOKOVKA', 'DESKTOP-TO75OLC', 'FARM1', 'FARM2', 'MAIN'];
+
+                for (const name of testNames) {
+                    try {
+                        const response = await fetch(`../data/farm_data_${name}.json?t=${Date.now()}`);
+                        if (response.ok) {
+                            knownFarms.push(name);
+                        }
+                    } catch (e) {
+                        // Файл не существует - это нормально
+                    }
+                }
+                return knownFarms;
+            }
+        ];
+
+        // Запускаем все методы поиска
+        for (const method of scanMethods) {
+            const found = await method();
+            found.forEach(farmName => {
+                if (!foundFarms.includes(farmName)) {
+                    foundFarms.push(farmName);
+                }
+            });
+
+            if (foundFarms.length > 0) break; // Если нашли фермы, останавливаемся
+        }
+
+        console.log(`🎯 Найдено ферм: ${foundFarms.length}`, foundFarms);
+        return foundFarms;
+    };
+
+    // Загружаем данные конкретной фермы
     const loadFarmData = async (farmName) => {
         const paths = [
             `../data/farm_data_${farmName}.json?t=${Date.now()}`,
@@ -22,15 +100,13 @@ const FarmSelection = () => {
 
         for (const path of paths) {
             try {
-                console.log(`Пробуем путь: ${path}`);
                 const response = await fetch(path);
                 if (response.ok) {
                     const data = await response.json();
-                    console.log(`✅ Найдена ферма: ${farmName}`);
                     return data;
                 }
             } catch (error) {
-                console.log(`❌ Ошибка загрузки ${path}:`, error);
+                // Пробуем следующий путь
             }
         }
         return null;
@@ -69,39 +145,45 @@ const FarmSelection = () => {
         };
     };
 
-    // Загружаем все фермы
+    // Основная функция загрузки всех ферм
     const loadAllFarms = async () => {
         setLoading(true);
-        console.log('🔄 Начинаем загрузку ферм...');
+        console.log('🔄 Загружаем данные всех ферм...');
 
-        const farmsData = [];
+        try {
+            // 1. Находим все файлы ферм
+            const farmNames = await scanForFarmFiles();
 
-        // Проверяем каждую ферму
-        for (const farmName of FARM_NAMES) {
-            const farmData = await loadFarmData(farmName);
-            if (farmData) {
-                const stats = calculateFarmStats(farmData);
-                farmsData.push({
-                    name: farmName,
-                    ...stats
-                });
+            // 2. Загружаем данные для каждой найденной фермы
+            const farmsData = [];
+
+            for (const farmName of farmNames) {
+                const farmData = await loadFarmData(farmName);
+                if (farmData) {
+                    const stats = calculateFarmStats(farmData);
+                    farmsData.push({
+                        name: farmName,
+                        ...stats
+                    });
+                }
             }
-        }
 
-        setFarms(farmsData);
-        setLastUpdate(new Date().toLocaleTimeString('ru-RU'));
-        setLoading(false);
+            // 3. Сортируем фермы по имени
+            farmsData.sort((a, b) => a.name.localeCompare(b.name));
 
-        console.log(`✅ Загружено ферм: ${farmsData.length}`);
-        if (farmsData.length === 0) {
-            console.log('❌ Не найдено ни одной фермы. Проверьте:');
-            console.log('1. Файлы в папке data/');
-            console.log('2. Формат имен: farm_data_НАЗВАНИЕ.json');
-            console.log('3. Доступность файлов по сети');
+            setFarms(farmsData);
+            setLastUpdate(new Date().toLocaleTimeString('ru-RU'));
+
+            console.log(`✅ Успешно загружено ${farmsData.length} ферм`);
+
+        } catch (error) {
+            console.error('❌ Ошибка загрузки ферм:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
-    // Первая загрузка
+    // Первая загрузка при монтировании компонента
     useEffect(() => {
         loadAllFarms();
 
@@ -110,17 +192,16 @@ const FarmSelection = () => {
         return () => clearInterval(interval);
     }, []);
 
-    // Обработчик выбора фермы
+    // Обработчики событий
     const handleFarmSelect = (farmName) => {
         navigate(`/farm/${farmName}/dashboard`);
     };
 
-    // Обработчик обновления
     const handleRefresh = () => {
         loadAllFarms();
     };
 
-    // Иконки статусов
+    // Вспомогательные функции для отображения
     const getStatusIcon = (status) => {
         switch (status) {
             case 'online': return '🟢';
@@ -130,7 +211,6 @@ const FarmSelection = () => {
         }
     };
 
-    // Текст статусов
     const getStatusText = (status) => {
         switch (status) {
             case 'online': return 'Онлайн';
@@ -147,7 +227,7 @@ const FarmSelection = () => {
                 <div className="header-top">
                     <div>
                         <h1>🏭 Выбор площадки</h1>
-                        <p>Фермы загружаются из папки data/</p>
+                        <p>Автоматически находит все farm_data_*.json файлы</p>
                     </div>
                     <button
                         className="btn btn-primary refresh-btn"
@@ -161,7 +241,7 @@ const FarmSelection = () => {
                 <div className="header-stats">
                     <span>Найдено ферм: <strong>{farms.length}</strong></span>
                     {lastUpdate && <span>Обновлено: <strong>{lastUpdate}</strong></span>}
-                    <span>Следующее обновление: <strong>через 1 минуту</strong></span>
+                    <span>Автообновление: <strong>каждую минуту</strong></span>
                 </div>
             </div>
 
@@ -210,20 +290,17 @@ const FarmSelection = () => {
                 ))}
             </div>
 
-            {/* Сообщение если нет ферм */}
+            {/* Сообщения */}
             {!loading && farms.length === 0 && (
                 <div className="no-farms">
                     <div className="no-farms-icon">🏭</div>
                     <h3>Фермы не найдены</h3>
-                    <p>Добавьте JSON файлы в папку <code>data/</code></p>
+                    <p>Добавьте файлы в формате <code>farm_data_НАЗВАНИЕ.json</code> в папку <code>data/</code></p>
                     <div className="help-text">
-                        <p>Формат имен: <code>farm_data_НАЗВАНИЕ.json</code></p>
-                        <p>Пример: <code>farm_data_DESKTOP-TO75OLC.json</code></p>
+                        <p>Пример: <code>farm_data_VISOKOVKA.json</code></p>
+                        <p>Система автоматически найдет новые файлы</p>
                     </div>
-                    <button
-                        className="btn btn-primary"
-                        onClick={handleRefresh}
-                    >
+                    <button className="btn btn-primary" onClick={handleRefresh}>
                         🔄 Проверить снова
                     </button>
                 </div>
@@ -232,22 +309,10 @@ const FarmSelection = () => {
             {/* Уведомление об автообновлении */}
             {farms.length > 0 && (
                 <div className="auto-update-notice">
-                    <p>🔄 Данные обновляются автоматически каждую минуту</p>
-                    <p>Последнее обновление: {lastUpdate}</p>
+                    <p>🔄 Система автоматически сканирует папку data/ каждую минуту</p>
+                    <p>Последнее сканирование: {lastUpdate}</p>
                 </div>
             )}
-
-            {/* Отладочная информация */}
-            <div className="debug-info">
-                <details>
-                    <summary>Отладочная информация</summary>
-                    <div>
-                        <p>Проверяемые фермы: {FARM_NAMES.join(', ')}</p>
-                        <p>Текущий URL: {window.location.href}</p>
-                        <p>Проверьте консоль браузера для подробной отладки</p>
-                    </div>
-                </details>
-            </div>
         </div>
     );
 };
