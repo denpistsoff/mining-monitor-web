@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useOutletContext } from 'react-router-dom';
 import '../styles/components/AlertsPanel.css';
 
-const AlertsPanel = ({ farmName }) => {
-    // остальной код без изменений
-    const { farmName } = useOutletContext();
+const AlertsPanel = ({ farmNameProp }) => {
     const [alerts, setAlerts] = useState([]);
     const [isExpanded, setIsExpanded] = useState(true);
 
@@ -26,7 +23,7 @@ const AlertsPanel = ({ farmName }) => {
             }
         ];
         setAlerts(mockAlerts);
-    }, [farmName]);
+    }, [farmNameProp]);
 
     const getAlertIcon = (severity) => {
         switch (severity) {
@@ -45,7 +42,7 @@ const AlertsPanel = ({ farmName }) => {
         <div className={`alerts-panel ${isExpanded ? 'expanded' : ''}`}>
             <div className="alerts-header" onClick={() => setIsExpanded(!isExpanded)}>
                 <div className="alerts-title">
-                    <span>ОПОВЕЩЕНИЯ</span>
+                    <span>ОПОВЕЩЕНИЯ - {farmNameProp}</span>
                     {alerts.length > 0 && (
                         <span className="alerts-count">{alerts.length}</span>
                     )}

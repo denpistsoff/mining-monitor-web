@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
-import { useOutletContext } from 'react-router-dom';
 import { useFarmData } from '../hooks/useFarmData';
 import MinerCard from './MinerCard';
 import '../styles/components/MinerView.css';
 
-const MinersView = ({ farmName }) => {
-    // остальной код без изменений
-    const { farmName } = useOutletContext();
-    const { farmData, loading, error } = useFarmData(farmName);
+const MinersView = ({ farmNameProp }) => {
+    const { farmData, loading, error } = useFarmData(farmNameProp);
     const [selectedContainer, setSelectedContainer] = useState('all');
     const [activeTab, setActiveTab] = useState('all');
 
@@ -21,8 +18,8 @@ const MinersView = ({ farmName }) => {
     const getAllMiners = () => {
         let allMiners = [];
         Object.entries(containers).forEach(([containerId, container]) => {
-            if (container.miners_data) {
-                container.miners_data.forEach(miner => {
+            if (container.miners) {
+                container.miners.forEach(miner => {
                     allMiners.push({
                         ...miner,
                         containerId: containerId
@@ -66,7 +63,7 @@ const MinersView = ({ farmName }) => {
     return (
         <div className="miners-view">
             <div className="miners-header">
-                <h1>УПРАВЛЕНИЕ МАЙНЕРАМИ - {farmName}</h1>
+                <h1>УПРАВЛЕНИЕ МАЙНЕРАМИ - {farmNameProp}</h1>
                 <div className="miners-stats">
                     <div className="stat-item">ВСЕГО: <strong>{stats.total}</strong></div>
                     <div className="stat-item online">ОНЛАЙН: <strong>{stats.online}</strong></div>

@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 
-export const useFarmData = (farmName) => {
+export const useFarmData = (farmNameProp) => {
     const [farmData, setFarmData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const lastUpdateRef = useRef(null);
 
     const loadData = async (force = false) => {
-        if (!farmName) {
+        if (!farmNameProp) {
             setLoading(false);
             return;
         }
@@ -15,9 +15,9 @@ export const useFarmData = (farmName) => {
         try {
             setLoading(true);
 
-            const url = `https://raw.githubusercontent.com/denpistsoff/mining-monitor-web/main/data/farm_data_${farmName}.json?t=${Date.now()}`;
+            const url = `https://raw.githubusercontent.com/denpistsoff/mining-monitor-web/main/data/farm_data_${farmNameProp}.json?t=${Date.now()}`;
 
-            console.log(`🔄 Загружаем данные для: ${farmName}`);
+            console.log(`🔄 Загружаем данные для: ${farmNameProp}`);
             const response = await fetch(url);
 
             if (!response.ok) {
@@ -86,13 +86,13 @@ export const useFarmData = (farmName) => {
     };
 
     useEffect(() => {
-        if (!farmName) return;
+        if (!farmNameProp) return;
 
         loadData(true);
 
         const interval = setInterval(loadData, 60000);
         return () => clearInterval(interval);
-    }, [farmName]);
+    }, [farmNameProp]);
 
     const refresh = () => {
         loadData(true);

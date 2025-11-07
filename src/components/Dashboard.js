@@ -1,14 +1,11 @@
 import React from 'react';
-import { useOutletContext } from 'react-router-dom';
 import { useFarmData } from '../hooks/useFarmData';
 import StatsGrid from './StatsGrid';
 import ContainerCard from './ContainerCard';
 import '../styles/components/Dashboard.css';
 
-const Dashboard = ({ farmName }) => {
-    // остальной код без изменений
-    const { farmName } = useOutletContext();
-    const { farmData, loading, error } = useFarmData(farmName);
+const Dashboard = ({ farmNameProp }) => {
+    const { farmData, loading, error } = useFarmData(farmNameProp);
 
     if (loading) {
         return (
@@ -44,7 +41,7 @@ const Dashboard = ({ farmName }) => {
         <div className="dashboard">
             <div className="dashboard-header">
                 <div className="dashboard-title">
-                    <h2>ДАШБОРД ФЕРМЫ {farmName}</h2>
+                    <h2>ДАШБОРД ФЕРМЫ {farmNameProp}</h2>
                     <div className="last-update">
                         Последнее обновление: {farmData.last_update}
                     </div>
