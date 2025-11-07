@@ -1,26 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import Header from './components/Header';
-import Dashboard from './components/Dashboard';
-import MinersView from './components/MinersView';
-import AlertsPanel from './components/AlertsPanel';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import FarmSelection from './components/FarmSelection';
+import FarmLayout from './components/FarmLayout';
 import Login from './components/Login';
 import './styles/dark-theme.css';
 import './App.css';
 
 function App() {
-    const [farmName, setFarmName] = useState('main-farm');
-    const [activeTab, setActiveTab] = useState('dashboard');
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // Проверяем авторизацию при загрузке
         const checkAuth = () => {
             const savedAuth = localStorage.getItem('miningAuth');
             if (savedAuth) {
                 try {
                     const authData = JSON.parse(savedAuth);
-                    // Если прошло меньше 30 дней, автоматически авторизуем
                     if (Date.now() - authData.timestamp < 30 * 24 * 60 * 60 * 1000) {
                         setIsAuthenticated(true);
                     } else {
@@ -36,10 +31,6 @@ function App() {
         // Настройка Telegram Web App
         if (window.Telegram?.WebApp) {
             const tgApp = window.Telegram.WebApp;
-            if (tgApp.initDataUnsafe?.user?.username) {
-                setFarmName(tgApp.initDataUnsafe.user.username);
-            }
-
             tgApp.ready();
             tgApp.expand();
         }
@@ -50,19 +41,6 @@ function App() {
 
     const handleLogin = (success) => {
         setIsAuthenticated(success);
-    };
-
-    const renderContent = () => {
-        switch (activeTab) {
-            case 'dashboard':
-                return <Dashboard farmName={farmName} />;
-            case 'miners':
-                return <MinersView farmName={farmName} />;
-            case 'alerts':
-                return <AlertsPanel farmName={farmName} />;
-            default:
-                return <Dashboard farmName={farmName} />;
-        }
     };
 
     if (isLoading) {
@@ -81,21 +59,20 @@ function App() {
     }
 
     return (
-        <div className="app">
-            <Header
-                activeTab={activeTab}
-                onTabChange={setActiveTab}
-                farmName={farmName}
-                onLogout={() => {
-                    localStorage.removeItem('miningAuth');
-                    setIsAuthenticated(false);
-                }}
-            />
-
-            <main className="main-content">
-                {renderContent()}
-            </main>
-        </div>
+        <Router>
+            <div className="app">
+                <Routes>
+                    <Route path="/" element={<FarmSelection />} />
+                    <Route path="/farm/:farmName" element={<FarmLayout />}>
+                        <Route index element={<Navigate to="dashboard" replace />} />
+                        <Route path="dashboard" element={<FarmLayout tab="dashboard" />} />
+                        <Route path="miners" element={<FarmLayout tab="miners" />} />
+                        <Route path="alerts" element={<FarmLayout tab="alerts" />} />
+                    </Route>
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+            </div>
+        </Router>
     );
 }
 

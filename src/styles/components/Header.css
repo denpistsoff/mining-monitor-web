@@ -11,6 +11,28 @@
     padding: 15px 20px;
 }
 
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.back-button {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    color: var(--accent-blue);
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: var(--transition-fast);
+}
+
+.back-button:hover {
+    background: rgba(59, 130, 246, 0.2);
+    transform: translateY(-1px);
+}
+
 .header-title {
     color: #00ffea;
     font-size: 1.5rem;
@@ -33,6 +55,33 @@
     border: 1px solid rgba(0, 255, 234, 0.3);
 }
 
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-primary);
+    padding: 8px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+}
+
+.action-btn:hover {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.5);
+    transform: translateY(-1px);
+}
+
 .logout-button {
     background: rgba(255, 82, 82, 0.1);
     border: 1px solid rgba(255, 82, 82, 0.3);
@@ -41,7 +90,7 @@
     border-radius: 20px;
     cursor: pointer;
     font-size: 16px;
-    transition: all 0.3s ease;
+    transition: var(--transition-fast);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -51,14 +100,7 @@
 
 .logout-button:hover {
     background: rgba(255, 82, 82, 0.2);
-    color: #ff6b6b;
-    border-color: rgba(255, 82, 82, 0.5);
-    text-shadow: 0 0 10px rgba(255, 82, 82, 0.5);
     transform: translateY(-1px);
-}
-
-.logout-button:active {
-    transform: translateY(0);
 }
 
 .header-nav {
@@ -95,42 +137,26 @@
     font-weight: bold;
 }
 
-.tab-icon {
-    font-size: 1.1rem;
-}
-
-/* Адаптивность для мобильных */
+/* Адаптивность */
 @media (max-width: 768px) {
-    .header-controls {
-        gap: 10px;
-    }
-
-    .logout-button {
-        padding: 6px 10px;
-        min-width: 36px;
-        height: 36px;
-        font-size: 14px;
-    }
-
-    .farm-name {
-        font-size: 0.9rem;
-        padding: 6px 12px;
-    }
-
-    .header-title {
-        font-size: 1.3rem;
-    }
-}
-
-@media (max-width: 480px) {
     .header-top {
         flex-direction: column;
-        gap: 10px;
+        gap: 15px;
         align-items: flex-start;
     }
 
     .header-controls {
         width: 100%;
         justify-content: space-between;
+    }
+
+    .action-buttons {
+        gap: 5px;
+    }
+
+    .action-btn, .logout-button {
+        min-width: 36px;
+        height: 36px;
+        font-size: 14px;
     }
 }

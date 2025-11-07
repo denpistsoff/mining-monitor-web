@@ -1,12 +1,13 @@
 {
   "name": "mining-monitor-web",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Веб-интерфейс для мониторинга майнинг ферм",
   "homepage": "https://denpistsoff.github.io/mining-monitor-web",
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
+    "react-router-dom": "^6.8.0",
     "firebase": "^10.5.0"
   },
   "scripts": {
