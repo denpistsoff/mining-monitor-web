@@ -13,8 +13,8 @@ const FarmSelection = () => {
             url: 'https://raw.githubusercontent.com/denpistsoff/mining-monitor-web/main/data/farm_data_VISOKOVKA.json'
         },
         {
-            name: 'DESKTOP-TO75OLC',
-            url: 'https://raw.githubusercontent.com/denpistsoff/mining-monitor-web/main/data/farm_data_DESKTOP-TO75OLC.json'
+            name: 'SARATOV',
+            url: 'https://raw.githubusercontent.com/denpistsoff/mining-monitor-web/main/data/farm_data_SARATOV.json'
         }
     ];
 

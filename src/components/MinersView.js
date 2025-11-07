@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useFarmData } from '../hooks/useFarmData';
 import MinerCard from './MinerCard';
-import '../styles/components/MinersView.css';
+import '../styles/components/MinerView.css';
 
 const MinersView = ({ farmName }) => {
     const { farmData, loading, error } = useFarmData(farmName);
