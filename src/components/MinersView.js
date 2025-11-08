@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useFarmData } from './useFarmData';
+import { useFarmData } from '../hooks/useFarmData';
 import '../styles/MinerView.css';
 
 const MinersView = ({ farmName }) => {
