@@ -130,4 +130,35 @@
     .containers-grid {
         grid-template-columns: 1fr;
     }
+    /* Добавь в существующий Dashboard.css */
+    .dashboard {
+        padding: 20px;
+    }
+
+    .dashboard-header {
+        margin-bottom: 24px;
+    }
+
+    .dashboard-title h2 {
+        color: #ff8c00;
+        margin-bottom: 8px;
+        font-size: 24px;
+    }
+
+    .last-update {
+        color: #a0a0a0;
+        font-size: 14px;
+    }
+
+    .containers-section {
+        margin-top: 24px;
+    }
+
+    .section-title {
+        color: #ff8c00;
+        margin-bottom: 16px;
+        font-size: 18px;
+        border-bottom: 2px solid rgba(255, 140, 0, 0.3);
+        padding-bottom: 8px;
+    }
 }
