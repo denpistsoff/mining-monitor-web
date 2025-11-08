@@ -1,15 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { useFarmData } from '../hooks/useFarmData';
-import { useOutletContext } from 'react-router-dom';
 import MinerCard from './MinerCard';
 import '../styles/components/MinerView.css';
 
-const MinersView = () => {
-    const { farmNameProp } = useOutletContext();
+const MinersView = ({ farmNameProp }) => {
     const { farmData, loading, error } = useFarmData(farmNameProp);
     const [selectedContainer, setSelectedContainer] = useState('all');
     const [selectedStatus, setSelectedStatus] = useState('all');
-    const [cardSize, setCardSize] = useState('medium');
+    const [cardSize, setCardSize] = useState('medium'); // 'small', 'medium', 'large'
 
     // Сбор всех майнеров из всех контейнеров
     const allMiners = useMemo(() => {
@@ -37,19 +35,15 @@ const MinersView = () => {
         });
     }, [allMiners, selectedContainer, selectedStatus]);
 
-    // Статистика из summary
+    // Статистика для отображения
     const stats = useMemo(() => {
-        if (!farmData?.summary) {
-            return { online: 0, problematic: 0, offline: 0, total: 0 };
-        }
+        const online = allMiners.filter(m => m.status === 'online').length;
+        const problematic = allMiners.filter(m => m.status === 'problematic').length;
+        const offline = allMiners.filter(m => m.status === 'offline').length;
+        const total = allMiners.length;
 
-        return {
-            online: farmData.summary.online_miners || 0,
-            problematic: farmData.summary.problematic_miners || 0,
-            offline: farmData.summary.offline_miners || 0,
-            total: farmData.summary.total_miners || 0
-        };
-    }, [farmData?.summary]);
+        return { online, problematic, offline, total };
+    }, [allMiners]);
 
     // Уникальные контейнеры для фильтра
     const containers = useMemo(() => {
@@ -110,7 +104,6 @@ const MinersView = () => {
                 </div>
             </div>
 
-            {/* Остальной код MinerView без изменений */}
             <div className="filters-panel">
                 <div className="container-filter">
                     <label>КОНТЕЙНЕР:</label>
