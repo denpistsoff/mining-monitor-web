@@ -32,6 +32,7 @@ jobs:
           AUTH_JSON='${{ secrets.AUTH_CREDENTIALS }}'
           echo "$AUTH_JSON" > public/data/auth/credentials.json
           echo "✅ Auth credentials created successfully"
+          cat public/data/auth/credentials.json
 
       - name: Build React app
         run: npm run build
@@ -39,10 +40,10 @@ jobs:
           CI: false
 
       - name: Setup Pages
-        uses: actions/configure-pages@4
+        uses: actions/configure-pages@v3
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@3
+        uses: actions/upload-pages-artifact@v2
         with:
           path: ./build
 
@@ -55,4 +56,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@4
+        uses: actions/deploy-pages@v2
