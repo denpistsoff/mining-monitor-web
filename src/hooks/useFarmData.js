@@ -14,7 +14,6 @@ export const useFarmData = (farmNameProp) => {
 
         try {
             setLoading(true);
-            setError(null);
 
             const url = `https://raw.githubusercontent.com/denpistsoff/mining-monitor-web/main/data/farm_data_${farmNameProp}.json?t=${Date.now()}`;
 
@@ -36,14 +35,75 @@ export const useFarmData = (farmNameProp) => {
             if (force || !lastUpdateRef.current || lastUpdateRef.current !== currentTimestamp) {
                 lastUpdateRef.current = currentTimestamp;
                 setFarmData(processedData);
+                setError(null);
             }
 
         } catch (err) {
+            setError(err.message);
             console.error('❌ Ошибка загрузки данных:', err);
-            setError(`Ошибка загрузки данных: ${err.message}`);
         } finally {
             setLoading(false);
         }
+    };
+
+    // Функция для ПРАВИЛЬНОГО подсчета онлайн майнеров
+    const countOnlineMiners = (containers) => {
+        if (!containers) return 0;
+
+        let onlineCount = 0;
+        Object.values(containers).forEach(container => {
+            Object.values(container.miners || {}).forEach(miner => {
+                if (miner.status === 'online') {
+                    onlineCount++;
+                }
+            });
+        });
+        return onlineCount;
+    };
+
+    // Функция для подсчета проблемных майнеров
+    const countProblematicMiners = (containers) => {
+        if (!containers) return 0;
+
+        let problematicCount = 0;
+        Object.values(containers).forEach(container => {
+            Object.values(container.miners || {}).forEach(miner => {
+                if (miner.status === 'problematic') {
+                    problematicCount++;
+                }
+            });
+        });
+        return problematicCount;
+    };
+
+    // Функция для подсчета оффлайн майнеров
+    const countOfflineMiners = (containers) => {
+        if (!containers) return 0;
+
+        let offlineCount = 0;
+        Object.values(containers).forEach(container => {
+            Object.values(container.miners || {}).forEach(miner => {
+                if (miner.status === 'offline') {
+                    offlineCount++;
+                }
+            });
+        });
+        return offlineCount;
+    };
+
+    // Функция для подсчета общего хешрейта только онлайн майнеров
+    const calculateTotalHashrate = (containers) => {
+        if (!containers) return 0;
+
+        let totalHashrate = 0;
+        Object.values(containers).forEach(container => {
+            Object.values(container.miners || {}).forEach(miner => {
+                if (miner.status === 'online' && miner.hashrate) {
+                    totalHashrate += miner.hashrate;
+                }
+            });
+        });
+        return totalHashrate;
     };
 
     // Функция для обработки структуры данных
@@ -51,19 +111,22 @@ export const useFarmData = (farmNameProp) => {
         const containers = data.containers || {};
         const containerEntries = Object.entries(containers);
 
-        // Создаем summary на основе данных контейнеров
+        // ПРАВИЛЬНО рассчитываем общую статистику
+        const totalMiners = containerEntries.reduce((sum, [_, container]) =>
+            sum + Object.keys(container.miners || {}).length, 0);
+
+        const onlineMiners = countOnlineMiners(containers);
+        const problematicMiners = countProblematicMiners(containers);
+        const offlineMiners = countOfflineMiners(containers);
+        const totalHashrate = calculateTotalHashrate(containers);
+
         const summary = {
             total_containers: containerEntries.length,
-            total_miners: containerEntries.reduce((sum, [_, container]) =>
-                sum + (container.total_miners || 0), 0),
-            online_miners: containerEntries.reduce((sum, [_, container]) =>
-                sum + (container.online_miners || 0), 0),
-            problematic_miners: containerEntries.reduce((sum, [_, container]) =>
-                sum + (container.problematic_count || 0), 0),
-            offline_miners: containerEntries.reduce((sum, [_, container]) =>
-                sum + ((container.total_miners || 0) - (container.online_miners || 0)), 0),
-            total_hashrate: containerEntries.reduce((sum, [_, container]) =>
-                sum + (container.total_hashrate || 0), 0),
+            total_miners: totalMiners,
+            online_miners: onlineMiners, // ТОЛЬКО онлайн (status === 'online')
+            problematic_miners: problematicMiners, // отдельно проблемные
+            offline_miners: offlineMiners, // отдельно оффлайн
+            total_hashrate: totalHashrate,
             total_power: containerEntries.reduce((sum, [_, container]) =>
                 sum + (container.total_power || 0), 0)
         };
@@ -71,20 +134,24 @@ export const useFarmData = (farmNameProp) => {
         // Обрабатываем контейнеры для единообразной структуры
         const processedContainers = {};
         containerEntries.forEach(([containerId, container]) => {
-            const minersData = container.miners_data || [];
+            const containerMiners = container.miners || {};
+            const containerOnline = Object.values(containerMiners).filter(m => m.status === 'online').length;
+            const containerProblematic = Object.values(containerMiners).filter(m => m.status === 'problematic').length;
+            const containerOffline = Object.values(containerMiners).filter(m => m.status === 'offline').length;
+            const containerHashrate = Object.values(containerMiners)
+                .filter(m => m.status === 'online' && m.hashrate)
+                .reduce((sum, miner) => sum + (miner.hashrate || 0), 0);
+
             processedContainers[containerId] = {
                 stats: {
-                    total_hashrate: container.total_hashrate,
-                    total_power: container.total_power,
-                    total_miners: container.total_miners,
-                    online_miners: container.online_miners,
-                    problematic_miners: container.problematic_count,
-                    offline_miners: (container.total_miners || 0) - (container.online_miners || 0)
+                    total_hashrate: containerHashrate,
+                    total_power: container.total_power || 0,
+                    total_miners: Object.keys(containerMiners).length,
+                    online_miners: containerOnline,
+                    problematic_miners: containerProblematic,
+                    offline_miners: containerOffline
                 },
-                miners: minersData.map(miner => ({
-                    ...miner,
-                    containerId: containerId
-                }))
+                miners: containerMiners
             };
         });
 
