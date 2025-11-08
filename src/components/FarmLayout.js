@@ -22,7 +22,7 @@ const FarmLayout = () => {
 
     const handleLogout = () => {
         localStorage.removeItem('miningAuth');
-        window.location.href = '/';
+        window.location.href = 'https://denpistsoff.github.io/mining-monitor-web/';
     };
 
     const renderContent = () => {
