@@ -7,9 +7,12 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -27,13 +30,13 @@ jobs:
           echo "✅ Auth credentials file created"
 
       - name: Build
-        run: |
-          npm run build
-          ls -la public/data/auth/
+        run: npm run build
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build
+          publish_branch: gh-pages
           force_orphan: true
+          cname: denpistsoff.github.io
