@@ -1,37 +1,23 @@
 import React, { useState } from 'react';
-import { useParams, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import Header from './Header';
+import Dashboard from './Dashboard';
+import MinersView from './MinersView';
 import AlertsPanel from './AlertsPanel';
 import '../styles/components/FarmLayout.css';
 
 const FarmLayout = () => {
     const { farmName } = useParams();
-    const location = useLocation();
-    const navigate = useNavigate();
+    const [activeTab, setActiveTab] = useState('dashboard');
     const [alertsOpen, setAlertsOpen] = useState(false);
     const [unreadAlertsCount, setUnreadAlertsCount] = useState(3);
-
-    // Определяем активную вкладку на основе текущего пути
-    const getActiveTab = () => {
-        const path = location.pathname;
-        if (path.includes('/miners')) return 'miners';
-        return 'dashboard';
-    };
-
-    const activeTab = getActiveTab();
 
     const handleTabChange = (tab) => {
         if (tab === 'alerts') {
             setAlertsOpen(true);
             return;
         }
-
-        // Навигация по вкладкам
-        if (tab === 'dashboard') {
-            navigate(`/farm/${farmName}`);
-        } else if (tab === 'miners') {
-            navigate(`/farm/${farmName}/miners`);
-        }
+        setActiveTab(tab);
     };
 
     const handleLogout = () => {
@@ -39,9 +25,15 @@ const FarmLayout = () => {
         window.location.href = '/';
     };
 
-    if (!farmName) {
-        return <div>Ошибка: farmName не определен</div>;
-    }
+    const renderContent = () => {
+        switch (activeTab) {
+            case 'miners':
+                return <MinerView farmNameProp={farmName} />;
+            case 'dashboard':
+            default:
+                return <Dashboard farmNameProp={farmName} />;
+        }
+    };
 
     return (
         <div className="farm-layout">
@@ -54,7 +46,7 @@ const FarmLayout = () => {
             />
 
             <main className="farm-content">
-                <Outlet context={{ farmNameProp: farmName }} />
+                {renderContent()}
             </main>
 
             <AlertsPanel

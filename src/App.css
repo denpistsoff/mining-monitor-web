@@ -1,11 +1,11 @@
-/* App.css */
+/* App.css - Оранжево-черная тема */
 .app {
     min-height: 100vh;
     background: linear-gradient(135deg, #0a0a0a 0%, #1a0f0a 50%, #0a0a0a 100%);
     color: #ffffff;
 }
 
-.app-loading {
+.loading {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -23,12 +23,6 @@
     height: 40px;
     animation: spin 1s linear infinite;
     margin-bottom: 16px;
-}
-
-.loading-spinner.large {
-    width: 60px;
-    height: 60px;
-    border-width: 4px;
 }
 
 @keyframes spin {
