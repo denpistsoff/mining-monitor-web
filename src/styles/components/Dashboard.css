@@ -671,3 +671,101 @@
 .chart-wrapper canvas {
     border-radius: var(--radius-md);
 }
+/* Новые стили для управления историей */
+.history-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    background: rgba(255, 140, 0, 0.1);
+    border: 1px solid rgba(255, 140, 0, 0.3);
+    color: #ff8c00;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.action-btn:hover {
+    background: rgba(255, 140, 0, 0.2);
+    transform: translateY(-1px);
+}
+
+.export-btn:hover {
+    background: rgba(0, 170, 255, 0.2);
+    border-color: rgba(0, 170, 255, 0.5);
+}
+
+.test-btn:hover {
+    background: rgba(0, 255, 136, 0.2);
+    border-color: rgba(0, 255, 136, 0.5);
+}
+
+.clear-btn:hover {
+    background: rgba(255, 68, 68, 0.2);
+    border-color: rgba(255, 68, 68, 0.5);
+}
+
+/* Бейджи для статистики */
+.test-badge {
+    background: rgba(0, 255, 136, 0.2);
+    color: #00ff88;
+    border-color: rgba(0, 255, 136, 0.3);
+}
+
+.test-count {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+    border-color: rgba(255, 193, 7, 0.3);
+}
+
+/* Информационные сообщения */
+.data-info {
+    margin-top: 16px;
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+}
+
+.info-message {
+    text-align: center;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+}
+
+.test-message {
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    color: #00ff88;
+}
+
+.waiting-message {
+    background: rgba(255, 193, 7, 0.1);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    color: #ffc107;
+}
+
+.real-message {
+    background: rgba(255, 140, 0, 0.1);
+    border: 1px solid rgba(255, 140, 0, 0.3);
+    color: #ff8c00;
+}
+
+/* Адаптивность для кнопок */
+@media (max-width: 768px) {
+    .history-actions {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .action-btn {
+        flex: 1;
+        text-align: center;
+        padding: 10px 8px;
+        font-size: 11px;
+    }
+}

@@ -1,38 +1,62 @@
 // utils/historyManager.js
 class HistoryManager {
     constructor() {
-        this.historyFile = '../../data/farm_history.json';
+        this.historyKey = 'farm_history_data';
         this.maxEntries = 168; // 7 дней * 24 часа
         this.lastSaveTime = null;
         this.saveInterval = 60 * 60 * 1000; // 1 час
     }
 
-    // Инициализация истории
-    async initHistory() {
-        try {
-            const response = await fetch(this.historyFile);
-            if (response.ok) {
-                return await response.json();
-            }
-        } catch (error) {
-            console.log('📁 History file not found, creating new...');
+    // Инициализация истории с тестовыми данными
+    initHistory() {
+        let history = this.loadHistory();
+
+        // Если история пустая, создаем тестовые данные за 2 часа
+        if (history.farm_history.length === 0) {
+            console.log('🧪 Creating test data for 2 hours...');
+            history = this.createTestData();
+            this.saveToStorage(history);
         }
-        return this.createNewHistory();
+
+        return history;
     }
 
-    // Создать новую историю
-    createNewHistory() {
-        const newHistory = {
+    // Создать тестовые данные за 2 часа
+    createTestData() {
+        const testData = {
             farm_history: [],
             last_update: new Date().toISOString(),
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
+            is_test_data: true
         };
-        this.saveToFile(newHistory);
-        return newHistory;
+
+        const now = new Date();
+
+        // Создаем данные за последние 2 часа
+        for (let i = 2; i >= 0; i--) {
+            const timestamp = new Date(now.getTime() - i * 60 * 60 * 1000);
+            const hashrate = 21700 + Math.random() * 200 - 100; // 21700 ± 100
+            const power = 708000 + Math.random() * 2000 - 1000; // 708000 ± 1000
+
+            testData.farm_history.push({
+                timestamp: timestamp.toISOString(),
+                date: timestamp.toLocaleDateString('ru-RU'),
+                hour: timestamp.getHours(),
+                total_hashrate: parseFloat(hashrate.toFixed(2)),
+                total_power: parseFloat(power.toFixed(0)),
+                online_miners: 194,
+                problematic_count: 5,
+                efficiency: parseFloat((hashrate / (power / 1000)).toFixed(3)),
+                is_test_entry: true
+            });
+        }
+
+        console.log('✅ Test data created for 2 hours:', testData.farm_history.length, 'entries');
+        return testData;
     }
 
     // Сохранить текущие данные (если прошел час)
-    async saveCurrentData(farmData) {
+    saveCurrentData(farmData) {
         const now = Date.now();
 
         // Проверяем, прошел ли час с последнего сохранения
@@ -41,7 +65,15 @@ class HistoryManager {
         }
 
         try {
-            const history = await this.loadHistory();
+            const history = this.loadHistory();
+
+            // Удаляем тестовые данные при первом реальном сохранении
+            if (history.is_test_data) {
+                console.log('🔄 Replacing test data with real data...');
+                history.farm_history = [];
+                history.is_test_data = false;
+            }
+
             const newEntry = {
                 timestamp: new Date().toISOString(),
                 date: new Date().toLocaleDateString('ru-RU'),
@@ -69,109 +101,126 @@ class HistoryManager {
             }
 
             history.last_update = new Date().toISOString();
-            await this.saveToFile(history);
+            this.saveToStorage(history);
             this.lastSaveTime = now;
 
             return history;
         } catch (error) {
             console.error('❌ Error saving history:', error);
-            return await this.loadHistory();
+            return this.loadHistory();
         }
     }
 
-    // Загрузить историю
-    async loadHistory() {
+    // Загрузить историю из localStorage
+    loadHistory() {
         try {
-            const response = await fetch(`${this.historyFile}?t=${Date.now()}`);
-            if (response.ok) {
-                return await response.json();
+            const stored = localStorage.getItem(this.historyKey);
+            if (stored) {
+                return JSON.parse(stored);
             }
         } catch (error) {
-            console.warn('Could not load history file:', error);
+            console.error('Error loading history from storage:', error);
         }
-        return this.createNewHistory();
+
+        // Возвращаем пустую историю если нет данных
+        return {
+            farm_history: [],
+            last_update: new Date().toISOString(),
+            created_at: new Date().toISOString()
+        };
     }
 
-    // Сохранить в файл
-    async saveToFile(historyData) {
+    // Сохранить в localStorage
+    saveToStorage(historyData) {
         try {
-            await fetch('/api/save-farm-history', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(historyData)
-            });
+            localStorage.setItem(this.historyKey, JSON.stringify(historyData));
         } catch (error) {
-            console.warn('Could not save to file, using localStorage as backup');
-            // Резервное сохранение в localStorage
-            localStorage.setItem('farm_history_backup', JSON.stringify(historyData));
+            console.error('Error saving to storage:', error);
         }
     }
 
-    // Получить почасовые данные
-    getHourlyData(hours = 24) {
-        return this.loadHistory().then(history => {
-            const cutoffTime = new Date(Date.now() - hours * 60 * 60 * 1000);
+    // Очистить всю историю
+    clearHistory() {
+        console.log('🗑️ Clearing all history data...');
+        const emptyHistory = {
+            farm_history: [],
+            last_update: new Date().toISOString(),
+            created_at: new Date().toISOString(),
+            cleared_at: new Date().toISOString()
+        };
+        this.saveToStorage(emptyHistory);
+        this.lastSaveTime = null;
+        return emptyHistory;
+    }
 
-            if (!history.farm_history || history.farm_history.length === 0) {
-                return [];
+    // Получить данные за последние N часов
+    getLastNHours(hours = 24) {
+        const history = this.loadHistory();
+        const cutoffTime = new Date(Date.now() - hours * 60 * 60 * 1000);
+
+        if (!history.farm_history || history.farm_history.length === 0) {
+            return [];
+        }
+
+        return history.farm_history.filter(entry => {
+            try {
+                return new Date(entry.timestamp) >= cutoffTime;
+            } catch {
+                return false;
             }
-
-            const filtered = history.farm_history.filter(entry =>
-                new Date(entry.timestamp) >= cutoffTime
-            );
-
-            // Группируем по часам для красивого графика
-            const hourlyData = {};
-            filtered.forEach(entry => {
-                const hourKey = `${entry.date} ${entry.hour}:00`;
-                if (!hourlyData[hourKey]) {
-                    hourlyData[hourKey] = {
-                        timestamp: entry.timestamp,
-                        label: `${entry.hour}:00`,
-                        hashrate: entry.total_hashrate,
-                        power: entry.total_power,
-                        efficiency: entry.efficiency,
-                        count: 1
-                    };
-                } else {
-                    // Усредняем если несколько записей в час
-                    hourlyData[hourKey].hashrate =
-                        (hourlyData[hourKey].hashrate * hourlyData[hourKey].count + entry.total_hashrate) /
-                        (hourlyData[hourKey].count + 1);
-                    hourlyData[hourKey].power =
-                        (hourlyData[hourKey].power * hourlyData[hourKey].count + entry.total_power) /
-                        (hourlyData[hourKey].count + 1);
-                    hourlyData[hourKey].count++;
-                }
-            });
-
-            return Object.values(hourlyData).sort((a, b) =>
-                new Date(a.timestamp) - new Date(b.timestamp)
-            );
         });
     }
 
-    // Для тестирования
-    async addTestData(currentData) {
-        const history = await this.loadHistory();
-        const testEntry = {
-            timestamp: new Date().toISOString(),
-            date: new Date().toLocaleDateString('ru-RU'),
-            hour: new Date().getHours(),
-            total_hashrate: currentData?.total_hashrate || 21704.47,
-            total_power: currentData?.total_power || 708438,
-            online_miners: currentData?.online_miners || 194,
-            problematic_count: currentData?.problematic_count || 5,
-            efficiency: 30.63
-        };
+    // Получить статистику истории
+    getHistoryStats() {
+        const history = this.loadHistory();
+        const totalEntries = history.farm_history?.length || 0;
+        const testEntries = history.farm_history?.filter(entry => entry.is_test_entry).length || 0;
+        const realEntries = totalEntries - testEntries;
 
-        history.farm_history.unshift(testEntry);
-        await this.saveToFile(history);
+        return {
+            total_entries: totalEntries,
+            test_entries: testEntries,
+            real_entries: realEntries,
+            is_test_data: history.is_test_data || false,
+            last_update: history.last_update,
+            date_range: history.farm_history?.length > 0 ? {
+                start: history.farm_history[history.farm_history.length - 1]?.timestamp,
+                end: history.farm_history[0]?.timestamp
+            } : null
+        };
+    }
+
+    // Добавить тестовые данные (для ручного тестирования)
+    addTestData() {
+        console.log('🧪 Adding manual test data...');
+        const history = this.loadHistory();
+        const testHistory = this.createTestData();
+
+        // Объединяем существующие данные с тестовыми
+        history.farm_history = [...testHistory.farm_history, ...history.farm_history];
+        history.last_update = new Date().toISOString();
+
+        this.saveToStorage(history);
         return history;
+    }
+
+    // Экспорт истории в файл
+    exportHistory() {
+        const history = this.loadHistory();
+        const dataStr = JSON.stringify(history, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(dataBlob);
+        link.download = `farm_history_${new Date().toISOString().split('T')[0]}.json`;
+        link.click();
+
+        console.log('📥 History exported');
     }
 }
 
+// Создаем глобальный экземпляр
 const historyManager = new HistoryManager();
+
 export default historyManager;
