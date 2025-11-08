@@ -35,15 +35,19 @@ const MinersView = ({ farmNameProp }) => {
         });
     }, [allMiners, selectedContainer, selectedStatus]);
 
-    // Статистика для отображения
+    // ПРАВИЛЬНАЯ статистика - берем из summary, а не пересчитываем
     const stats = useMemo(() => {
-        const online = allMiners.filter(m => m.status === 'online').length;
-        const problematic = allMiners.filter(m => m.status === 'problematic').length;
-        const offline = allMiners.filter(m => m.status === 'offline').length;
-        const total = allMiners.length;
+        if (!farmData?.summary) {
+            return { online: 0, problematic: 0, offline: 0, total: 0 };
+        }
 
-        return { online, problematic, offline, total };
-    }, [allMiners]);
+        return {
+            online: farmData.summary.online_miners || 0,
+            problematic: farmData.summary.problematic_miners || 0,
+            offline: farmData.summary.offline_miners || 0,
+            total: farmData.summary.total_miners || 0
+        };
+    }, [farmData?.summary]);
 
     // Уникальные контейнеры для фильтра
     const containers = useMemo(() => {

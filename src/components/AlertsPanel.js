@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/components/AlertsPanel.css';
 
-const AlertsPanel = ({ farmNameProp }) => {
+const AlertsPanel = ({ farmNameProp, isOpen, onClose }) => {
     const [alerts, setAlerts] = useState([]);
-    const [isExpanded, setIsExpanded] = useState(true);
 
     // Заглушка для оповещений
     useEffect(() => {
@@ -20,6 +19,12 @@ const AlertsPanel = ({ farmNameProp }) => {
                 message: 'Майнер 192.168.80.60 отключен',
                 severity: 'critical',
                 timestamp: Date.now() - 7200000
+            },
+            {
+                id: 3,
+                message: 'Низкий хешрейт на майнере 192.168.80.61',
+                severity: 'warning',
+                timestamp: Date.now() - 1800000
             }
         ];
         setAlerts(mockAlerts);
@@ -27,36 +32,45 @@ const AlertsPanel = ({ farmNameProp }) => {
 
     const getAlertIcon = (severity) => {
         switch (severity) {
-            case 'critical': return '●';
-            case 'warning': return '●';
-            case 'info': return '●';
-            default: return '●';
+            case 'critical': return '🔴';
+            case 'warning': return '🟡';
+            case 'info': return '🔵';
+            default: return '⚪';
         }
     };
 
-    if (alerts.length === 0 && !isExpanded) {
-        return null;
-    }
+    const getSeverityText = (severity) => {
+        switch (severity) {
+            case 'critical': return 'КРИТИЧЕСКИЙ';
+            case 'warning': return 'ПРЕДУПРЕЖДЕНИЕ';
+            case 'info': return 'ИНФОРМАЦИЯ';
+            default: return 'УВЕДОМЛЕНИЕ';
+        }
+    };
+
+    if (!isOpen) return null;
 
     return (
-        <div className={`alerts-panel ${isExpanded ? 'expanded' : ''}`}>
-            <div className="alerts-header" onClick={() => setIsExpanded(!isExpanded)}>
-                <div className="alerts-title">
-                    <span>ОПОВЕЩЕНИЯ - {farmNameProp}</span>
-                    {alerts.length > 0 && (
-                        <span className="alerts-count">{alerts.length}</span>
-                    )}
+        <div className="alerts-overlay">
+            <div className="alerts-panel">
+                <div className="alerts-header">
+                    <div className="alerts-title">
+                        <span>ОПОВЕЩЕНИЯ - {farmNameProp}</span>
+                        {alerts.length > 0 && (
+                            <span className="alerts-count">{alerts.length}</span>
+                        )}
+                    </div>
+                    <button className="alerts-close" onClick={onClose}>
+                        ×
+                    </button>
                 </div>
-                <button className="alerts-toggle">
-                    {isExpanded ? '▲' : '▼'}
-                </button>
-            </div>
 
-            {isExpanded && (
                 <div className="alerts-content">
                     {alerts.length === 0 ? (
                         <div className="no-alerts">
+                            <div className="no-alerts-icon">✅</div>
                             <span>НЕТ АКТИВНЫХ ОПОВЕЩЕНИЙ</span>
+                            <p>Все системы работают в штатном режиме</p>
                         </div>
                     ) : (
                         <div className="alerts-list">
@@ -66,6 +80,9 @@ const AlertsPanel = ({ farmNameProp }) => {
                                         {getAlertIcon(alert.severity)}
                                     </div>
                                     <div className="alert-content">
+                                        <div className="alert-severity">
+                                            {getSeverityText(alert.severity)}
+                                        </div>
                                         <div className="alert-message">{alert.message}</div>
                                         <div className="alert-time">
                                             {new Date(alert.timestamp).toLocaleString('ru-RU')}
@@ -82,17 +99,24 @@ const AlertsPanel = ({ farmNameProp }) => {
                             ))}
                         </div>
                     )}
-
-                    <div className="alerts-actions">
-                        <button
-                            className="btn btn-sm btn-secondary"
-                            onClick={() => setIsExpanded(false)}
-                        >
-                            СКРЫТЬ
-                        </button>
-                    </div>
                 </div>
-            )}
+
+                <div className="alerts-actions">
+                    <button
+                        className="btn btn-primary"
+                        onClick={() => setAlerts([])}
+                        disabled={alerts.length === 0}
+                    >
+                        ОЧИСТИТЬ ВСЕ
+                    </button>
+                    <button
+                        className="btn btn-secondary"
+                        onClick={onClose}
+                    >
+                        ЗАКРЫТЬ
+                    </button>
+                </div>
+            </div>
         </div>
     );
 };
