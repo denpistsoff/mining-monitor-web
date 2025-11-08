@@ -1,4 +1,4 @@
-// Login.js - Улучшенная версия
+// Login.js - Аутентификация через GitHub Repository Secret
 import React, { useState, useEffect } from 'react';
 import '../styles/components/Login.css';
 
@@ -10,12 +10,10 @@ const Login = ({ onLogin }) => {
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-        // Проверяем сохраненные данные при загрузке
         const savedAuth = localStorage.getItem('miningAuth');
         if (savedAuth) {
             try {
                 const authData = JSON.parse(savedAuth);
-                // Автоматический вход если не прошло 7 дней
                 if (Date.now() - authData.timestamp < 7 * 24 * 60 * 60 * 1000) {
                     handleAutoLogin(authData.username, authData.password);
                 } else {
@@ -30,38 +28,63 @@ const Login = ({ onLogin }) => {
     const handleAutoLogin = async (savedUser, savedPass) => {
         setIsLoading(true);
         try {
-            // Демо-авторизация - в реальном приложении здесь будет запрос к API
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            if (savedUser === 'demo' && savedPass === 'demo') {
+            const isValid = await validateCredentials(savedUser, savedPass);
+            if (isValid) {
                 onLogin(true);
             } else {
                 localStorage.removeItem('miningAuth');
                 setError('Сохраненные данные устарели');
             }
         } catch (error) {
-            console.error('Auto-login failed:', error);
             localStorage.removeItem('miningAuth');
             setError('Ошибка автоматического входа');
         }
         setIsLoading(false);
     };
 
+    const validateCredentials = async (user, pass) => {
+        try {
+            // Получаем секретные учетные данные из переменной окружения
+            const secretCredentials = process.env.REACT_APP_AUTH_CREDENTIALS;
+
+            if (!secretCredentials) {
+                console.error('AUTH_CREDENTIALS not found in environment');
+                return false;
+            }
+
+            // Парсим JSON из секрета
+            const validUsers = JSON.parse(secretCredentials);
+
+            // Проверяем учетные данные
+            return validUsers.some(cred =>
+                cred.username === user && cred.password === pass
+            );
+
+        } catch (error) {
+            console.error('Credential validation error:', error);
+            return false;
+        }
+    };
+
     const handleLogin = async (e) => {
         e.preventDefault();
         setError('');
+
+        if (!username.trim() || !password.trim()) {
+            setError('Введите логин и пароль');
+            return;
+        }
+
         setIsLoading(true);
 
         try {
-            // Имитация запроса к серверу
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            const isValid = await validateCredentials(username, password);
 
-            // Демо-авторизация
-            if (username === 'demo' && password === 'demo') {
+            if (isValid) {
                 if (rememberMe) {
+                    // Сохраняем в localStorage (в реальном приложении лучше хранить токен)
                     localStorage.setItem('miningAuth', JSON.stringify({
                         username: username,
-                        password: password,
                         timestamp: Date.now()
                     }));
                 }
@@ -71,13 +94,9 @@ const Login = ({ onLogin }) => {
             }
         } catch (error) {
             setError('Ошибка авторизации. Проверьте подключение.');
+            console.error('Login error:', error);
         }
         setIsLoading(false);
-    };
-
-    const handleDemoLogin = () => {
-        setUsername('demo');
-        setPassword('demo');
     };
 
     if (isLoading) {
@@ -98,7 +117,7 @@ const Login = ({ onLogin }) => {
             <div className="login-form">
                 <div className="login-header">
                     <h1 className="login-title">MINING MONITOR</h1>
-                    <p className="login-subtitle">Система мониторинга майнинг ферм</p>
+                    <p className="login-subtitle">Защищенный доступ к системе мониторинга</p>
                 </div>
 
                 <form onSubmit={handleLogin}>
@@ -110,6 +129,7 @@ const Login = ({ onLogin }) => {
                             onChange={(e) => setUsername(e.target.value)}
                             required
                             disabled={isLoading}
+                            autoComplete="username"
                         />
                     </div>
 
@@ -121,6 +141,7 @@ const Login = ({ onLogin }) => {
                             onChange={(e) => setPassword(e.target.value)}
                             required
                             disabled={isLoading}
+                            autoComplete="current-password"
                         />
                     </div>
 
@@ -147,9 +168,11 @@ const Login = ({ onLogin }) => {
                     </button>
                 </form>
 
-                <div className="demo-credentials">
-                    <div className="demo-title">Демо доступ:</div>
-                    <div className="demo-info">Логин: demo | Пароль: demo</div>
+                <div className="security-notice">
+                    <div className="security-icon">🔒</div>
+                    <div className="security-text">
+                        Доступ ограничен. Используйте выданные учетные данные.
+                    </div>
                 </div>
             </div>
         </div>

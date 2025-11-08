@@ -315,4 +315,27 @@
     .login-title {
         font-size: 1.75rem;
     }
+    /* Добавь это в Login.css */
+    .security-notice {
+        margin-top: 25px;
+        padding: 15px;
+        background: rgba(255, 107, 0, 0.05);
+        border: 1px solid rgba(255, 107, 0, 0.2);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-align: left;
+    }
+
+    .security-icon {
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .security-text {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        line-height: 1.4;
+    }
 }
