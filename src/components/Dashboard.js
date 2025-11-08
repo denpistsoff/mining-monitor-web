@@ -8,31 +8,19 @@ import '../styles/components/Dashboard.css';
 const Dashboard = ({ farmNameProp }) => {
     const { farmData, loading, error } = useFarmData(farmNameProp);
     const [historyData, setHistoryData] = useState(null);
+    const [activeTab, setActiveTab] = useState('hashrate'); // 'hashrate' или 'power'
     const [chartTimeRange, setChartTimeRange] = useState('24h');
 
     useEffect(() => {
-        // Инициализируем историю при первой загрузке
-        const initialHistory = historyManager.initHistory();
-        setHistoryData(initialHistory);
-        console.log('📊 History initialized:', initialHistory);
+        // Инициализируем историю
+        historyManager.initHistory().then(setHistoryData);
     }, []);
 
     useEffect(() => {
         if (farmData && !loading) {
-            console.log('💾 Saving farm data to history...');
-            // Сохраняем данные в историю (если прошел час)
-            const updatedHistory = historyManager.saveCurrentData(farmData);
-            setHistoryData(updatedHistory);
+            historyManager.saveCurrentData(farmData).then(setHistoryData);
         }
     }, [farmData, loading]);
-
-    // Для отладки - выводим в консоль
-    useEffect(() => {
-        if (historyData) {
-            console.log('📈 Current history stats:', historyManager.getHistoryStats());
-            console.log('📊 History data for chart:', historyManager.getLastNHours(24));
-        }
-    }, [historyData]);
 
     if (loading) {
         return (
@@ -77,9 +65,11 @@ const Dashboard = ({ farmNameProp }) => {
 
             <StatsGrid summary={farmData.summary} />
 
-            {/* График истории */}
-            <HistoryChartSection
+            {/* График с табами */}
+            <ChartTabsSection
                 historyData={historyData}
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
                 timeRange={chartTimeRange}
                 onTimeRangeChange={setChartTimeRange}
                 currentData={farmData.summary}
@@ -101,260 +91,43 @@ const Dashboard = ({ farmNameProp }) => {
     );
 };
 
-// Компонент секции графика
-const HistoryChartSection = ({ historyData, timeRange, onTimeRangeChange, currentData }) => {
-    const chartRef = useRef(null);
-    const chartInstance = useRef(null);
+// Компонент с табами для графиков
+const ChartTabsSection = ({ historyData, activeTab, onTabChange, timeRange, onTimeRangeChange, currentData }) => {
+    const [hourlyData, setHourlyData] = useState([]);
 
     useEffect(() => {
-        // Загружаем Chart.js динамически
-        if (!window.Chart) {
-            const script = document.createElement('script');
-            script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
-            script.onload = renderChart;
-            document.head.appendChild(script);
-        } else {
-            renderChart();
-        }
-
-        function renderChart() {
-            if (chartInstance.current) {
-                chartInstance.current.destroy();
-            }
-
-            if (!historyData || !historyData.farm_history || historyData.farm_history.length === 0) {
-                console.log('📊 No history data available for chart');
-                return;
-            }
-
+        if (historyData) {
             const hours = timeRange === '24h' ? 24 : timeRange === '48h' ? 48 : 168;
-            const filteredData = historyManager.getLastNHours(hours);
-
-            if (filteredData.length === 0 || !chartRef.current) {
-                console.log('📊 No filtered data for chart');
-                return;
-            }
-
-            console.log('📈 Rendering chart with data:', filteredData);
-
-            const ctx = chartRef.current.getContext('2d');
-
-            // Создаем градиенты
-            const gradientHashrate = ctx.createLinearGradient(0, 0, 0, 300);
-            gradientHashrate.addColorStop(0, 'rgba(255, 140, 0, 0.4)');
-            gradientHashrate.addColorStop(1, 'rgba(255, 140, 0, 0.05)');
-
-            const gradientPower = ctx.createLinearGradient(0, 0, 0, 300);
-            gradientPower.addColorStop(0, 'rgba(0, 170, 255, 0.4)');
-            gradientPower.addColorStop(1, 'rgba(0, 170, 255, 0.05)');
-
-            chartInstance.current = new window.Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: filteredData.map(entry =>
-                        new Date(entry.timestamp).toLocaleTimeString('ru-RU', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        })
-                    ).reverse(),
-                    datasets: [
-                        {
-                            label: 'Хешрейт (TH/s)',
-                            data: filteredData.map(entry => entry.total_hashrate).reverse(),
-                            borderColor: '#ff8c00',
-                            backgroundColor: gradientHashrate,
-                            borderWidth: 3,
-                            fill: true,
-                            tension: 0.4,
-                            yAxisID: 'y',
-                            pointBackgroundColor: '#ff8c00',
-                            pointBorderColor: '#000',
-                            pointBorderWidth: 2,
-                            pointRadius: 3,
-                            pointHoverRadius: 6,
-                        },
-                        {
-                            label: 'Потребление (кВт)',
-                            data: filteredData.map(entry => (entry.total_power / 1000)).reverse(),
-                            borderColor: '#00aaff',
-                            backgroundColor: gradientPower,
-                            borderWidth: 2,
-                            fill: true,
-                            tension: 0.4,
-                            yAxisID: 'y1',
-                            pointBackgroundColor: '#00aaff',
-                            pointBorderColor: '#000',
-                            pointBorderWidth: 2,
-                            pointRadius: 2,
-                            pointHoverRadius: 5,
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false,
-                    },
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                color: '#ffffff',
-                                font: {
-                                    size: 12,
-                                    family: "'Arial', sans-serif",
-                                    weight: 'bold'
-                                },
-                                usePointStyle: true,
-                                padding: 15,
-                            }
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(26, 15, 10, 0.95)',
-                            titleColor: '#ff8c00',
-                            bodyColor: '#ffffff',
-                            borderColor: '#ff8c00',
-                            borderWidth: 1,
-                            cornerRadius: 8,
-                            padding: 12,
-                            usePointStyle: true,
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed.y !== null) {
-                                        if (context.dataset.label.includes('Хешрейт')) {
-                                            label += context.parsed.y.toFixed(2) + ' TH/s';
-                                        } else {
-                                            label += context.parsed.y.toFixed(1) + ' кВт';
-                                        }
-                                    }
-                                    return label;
-                                },
-                                title: function(tooltipItems) {
-                                    const dataIndex = tooltipItems[0].dataIndex;
-                                    const originalIndex = filteredData.length - 1 - dataIndex;
-                                    const entry = filteredData[originalIndex];
-                                    return new Date(entry.timestamp).toLocaleString('ru-RU', {
-                                        day: '2-digit',
-                                        month: '2-digit',
-                                        year: 'numeric',
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                    });
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: {
-                                color: 'rgba(255, 140, 0, 0.1)',
-                                drawBorder: false,
-                            },
-                            ticks: {
-                                color: '#a0a0a0',
-                                maxTicksLimit: 8,
-                                font: {
-                                    size: 10
-                                }
-                            }
-                        },
-                        y: {
-                            type: 'linear',
-                            display: true,
-                            position: 'left',
-                            grid: {
-                                color: 'rgba(255, 140, 0, 0.1)',
-                                drawBorder: false,
-                            },
-                            ticks: {
-                                color: '#ff8c00',
-                                callback: function(value) {
-                                    return value.toFixed(0) + ' TH/s';
-                                },
-                                font: {
-                                    size: 10,
-                                    weight: 'bold'
-                                }
-                            },
-                            title: {
-                                display: true,
-                                text: 'Хешрейт (TH/s)',
-                                color: '#ff8c00',
-                                font: {
-                                    size: 11,
-                                    weight: 'bold'
-                                }
-                            }
-                        },
-                        y1: {
-                            type: 'linear',
-                            display: true,
-                            position: 'right',
-                            grid: {
-                                drawOnChartArea: false,
-                            },
-                            ticks: {
-                                color: '#00aaff',
-                                callback: function(value) {
-                                    return value.toFixed(0) + ' кВт';
-                                },
-                                font: {
-                                    size: 10,
-                                    weight: 'bold'
-                                }
-                            },
-                            title: {
-                                display: true,
-                                text: 'Потребление (кВт)',
-                                color: '#00aaff',
-                                font: {
-                                    size: 11,
-                                    weight: 'bold'
-                                }
-                            }
-                        },
-                    }
-                }
-            });
-
-            console.log('✅ Chart rendered successfully!');
+            historyManager.getHourlyData(hours).then(setHourlyData);
         }
-
-        return () => {
-            if (chartInstance.current) {
-                chartInstance.current.destroy();
-            }
-        };
     }, [historyData, timeRange]);
 
-    const handleTestData = () => {
-        console.log('🧪 Adding test data...');
-        const updatedHistory = historyManager.forceAddTestData(currentData);
-        // Обновляем состояние чтобы перерисовать график
-        setTimeout(() => {
-            window.location.reload();
-        }, 1000);
-    };
-
-    const stats = historyManager.getHistoryStats();
-
     return (
-        <div className="history-section">
+        <div className="chart-tabs-section">
             <div className="section-header">
                 <div className="section-title-wrapper">
-                    <h3 className="section-title">📊 ИСТОРИЯ РАБОТЫ</h3>
+                    <h3 className="section-title">📈 ИСТОРИЯ РАБОТЫ</h3>
                     <div className="history-stats">
-                        <span className="stat-badge">Записей: {stats.total_entries}</span>
+                        <span className="stat-badge">Часов: {hourlyData.length}</span>
                     </div>
                 </div>
 
                 <div className="chart-controls">
+                    <div className="tabs-container">
+                        <button
+                            className={`tab-btn ${activeTab === 'hashrate' ? 'active' : ''}`}
+                            onClick={() => onTabChange('hashrate')}
+                        >
+                            🚀 ХЕШРЕЙТ
+                        </button>
+                        <button
+                            className={`tab-btn ${activeTab === 'power' ? 'active' : ''}`}
+                            onClick={() => onTabChange('power')}
+                        >
+                            ⚡ ПОТРЕБЛЕНИЕ
+                        </button>
+                    </div>
+
                     <div className="time-range-selector">
                         <button
                             className={`time-range-btn ${timeRange === '24h' ? 'active' : ''}`}
@@ -378,53 +151,282 @@ const HistoryChartSection = ({ historyData, timeRange, onTimeRangeChange, curren
                 </div>
             </div>
 
-            <div className="history-chart-container">
-                <div className="chart-wrapper">
-                    <canvas ref={chartRef} />
-                </div>
+            <div className="chart-container">
+                {activeTab === 'hashrate' && (
+                    <HashrateChart
+                        data={hourlyData}
+                        currentData={currentData}
+                    />
+                )}
+                {activeTab === 'power' && (
+                    <PowerChart
+                        data={hourlyData}
+                        currentData={currentData}
+                    />
+                )}
+            </div>
+        </div>
+    );
+};
 
-                {(!historyData || !historyData.farm_history || historyData.farm_history.length === 0) ? (
-                    <div className="history-chart-empty">
-                        <div className="empty-chart-message">
-                            <p>📊 Собираем исторические данные...</p>
-                            <span>Первые данные появятся через час после начала работы</span>
-                            <div className="debug-info">
-                                <button onClick={handleTestData} className="test-btn">
-                                    🧪 Тест: добавить текущие данные
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                ) : historyManager.getLastNHours(timeRange === '24h' ? 24 : timeRange === '48h' ? 48 : 168).length === 0 ? (
-                    <div className="history-chart-empty">
-                        <div className="empty-chart-message">
-                            <p>⏰ Нет данных за выбранный период</p>
-                            <span>Попробуйте выбрать другой временной диапазон</span>
-                        </div>
-                    </div>
-                ) : null}
+// График хешрейта
+const HashrateChart = ({ data, currentData }) => {
+    const chartRef = useRef(null);
+    const chartInstance = useRef(null);
 
-                <div className="current-stats-mini">
-                    <div className="mini-stat">
-                        <span className="mini-label">Текущий хешрейт:</span>
-                        <span className="mini-value hashrate">
-                            {currentData?.total_hashrate?.toFixed(2)} TH/s
-                        </span>
-                    </div>
-                    <div className="mini-stat">
-                        <span className="mini-label">Потребление:</span>
-                        <span className="mini-value power">
-                            {(currentData?.total_power / 1000)?.toFixed(1)} кВт
-                        </span>
-                    </div>
-                    <div className="mini-stat">
-                        <span className="mini-label">Эффективность:</span>
-                        <span className="mini-value efficiency">
-                            {((currentData?.total_hashrate / (currentData?.total_power / 1000)) || 0).toFixed(2)} TH/кВт
-                        </span>
-                    </div>
+    useEffect(() => {
+        if (!window.Chart) {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+            script.onload = renderChart;
+            document.head.appendChild(script);
+        } else {
+            renderChart();
+        }
+
+        function renderChart() {
+            if (chartInstance.current) {
+                chartInstance.current.destroy();
+            }
+
+            if (!data || data.length === 0 || !chartRef.current) {
+                return;
+            }
+
+            const ctx = chartRef.current.getContext('2d');
+
+            // Градиент для хешрейта
+            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(255, 140, 0, 0.6)');
+            gradient.addColorStop(1, 'rgba(255, 140, 0, 0.1)');
+
+            chartInstance.current = new window.Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(item => item.label),
+                    datasets: [{
+                        label: 'Хешрейт (TH/s)',
+                        data: data.map(item => item.hashrate),
+                        borderColor: '#ff8c00',
+                        backgroundColor: gradient,
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#ff8c00',
+                        pointBorderColor: '#000',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(26, 15, 10, 0.95)',
+                            titleColor: '#ff8c00',
+                            bodyColor: '#ffffff',
+                            borderColor: '#ff8c00',
+                            callbacks: {
+                                label: function(context) {
+                                    return `Хешрейт: ${context.parsed.y.toFixed(2)} TH/s`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 140, 0, 0.1)',
+                            },
+                            ticks: {
+                                color: '#a0a0a0',
+                                maxTicksLimit: 8,
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 140, 0, 0.1)',
+                            },
+                            ticks: {
+                                color: '#ff8c00',
+                                callback: function(value) {
+                                    return value.toFixed(0) + ' TH/s';
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Хешрейт (TH/s)',
+                                color: '#ff8c00'
+                            }
+                        },
+                    }
+                }
+            });
+        }
+
+        return () => {
+            if (chartInstance.current) {
+                chartInstance.current.destroy();
+            }
+        };
+    }, [data]);
+
+    if (!data || data.length === 0) {
+        return (
+            <div className="chart-empty">
+                <div className="empty-message">
+                    <p>📊 Нет данных по хешрейту</p>
+                    <span>Данные появятся после сохранения почасовой статистики</span>
                 </div>
             </div>
+        );
+    }
+
+    return (
+        <div className="chart-wrapper">
+            <div className="chart-header">
+                <h4>📊 ГРАФИК ХЕШРЕЙТА</h4>
+                <div className="current-value hashrate-value">
+                    Текущий: <strong>{currentData?.total_hashrate?.toFixed(2)} TH/s</strong>
+                </div>
+            </div>
+            <canvas ref={chartRef} />
+        </div>
+    );
+};
+
+// График потребления
+const PowerChart = ({ data, currentData }) => {
+    const chartRef = useRef(null);
+    const chartInstance = useRef(null);
+
+    useEffect(() => {
+        if (!window.Chart) {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+            script.onload = renderChart;
+            document.head.appendChild(script);
+        } else {
+            renderChart();
+        }
+
+        function renderChart() {
+            if (chartInstance.current) {
+                chartInstance.current.destroy();
+            }
+
+            if (!data || data.length === 0 || !chartRef.current) {
+                return;
+            }
+
+            const ctx = chartRef.current.getContext('2d');
+
+            // Градиент для потребления
+            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(0, 170, 255, 0.6)');
+            gradient.addColorStop(1, 'rgba(0, 170, 255, 0.1)');
+
+            chartInstance.current = new window.Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(item => item.label),
+                    datasets: [{
+                        label: 'Потребление (кВт)',
+                        data: data.map(item => item.power / 1000),
+                        borderColor: '#00aaff',
+                        backgroundColor: gradient,
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#00aaff',
+                        pointBorderColor: '#000',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(26, 15, 10, 0.95)',
+                            titleColor: '#00aaff',
+                            bodyColor: '#ffffff',
+                            borderColor: '#00aaff',
+                            callbacks: {
+                                label: function(context) {
+                                    return `Потребление: ${context.parsed.y.toFixed(1)} кВт`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(0, 170, 255, 0.1)',
+                            },
+                            ticks: {
+                                color: '#a0a0a0',
+                                maxTicksLimit: 8,
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(0, 170, 255, 0.1)',
+                            },
+                            ticks: {
+                                color: '#00aaff',
+                                callback: function(value) {
+                                    return value.toFixed(0) + ' кВт';
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Потребление (кВт)',
+                                color: '#00aaff'
+                            }
+                        },
+                    }
+                }
+            });
+        }
+
+        return () => {
+            if (chartInstance.current) {
+                chartInstance.current.destroy();
+            }
+        };
+    }, [data]);
+
+    if (!data || data.length === 0) {
+        return (
+            <div className="chart-empty">
+                <div className="empty-message">
+                    <p>⚡ Нет данных по потреблению</p>
+                    <span>Данные появятся после сохранения почасовой статистики</span>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="chart-wrapper">
+            <div className="chart-header">
+                <h4>⚡ ГРАФИК ПОТРЕБЛЕНИЯ</h4>
+                <div className="current-value power-value">
+                    Текущее: <strong>{(currentData?.total_power / 1000)?.toFixed(1)} кВт</strong>
+                </div>
+            </div>
+            <canvas ref={chartRef} />
         </div>
     );
 };
