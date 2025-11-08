@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Outlet } from 'react-router-dom';
 import Header from './Header';
-import Dashboard from './Dashboard';
-import MinersView from './MinersView';
 import AlertsPanel from './AlertsPanel';
 import '../styles/components/FarmLayout.css';
 
@@ -25,16 +23,6 @@ const FarmLayout = () => {
         window.location.href = '/';
     };
 
-    const renderContent = () => {
-        switch (activeTab) {
-            case 'miners':
-                return <MinerView farmNameProp={farmName} />;
-            case 'dashboard':
-            default:
-                return <Dashboard farmNameProp={farmName} />;
-        }
-    };
-
     return (
         <div className="farm-layout">
             <Header
@@ -46,7 +34,7 @@ const FarmLayout = () => {
             />
 
             <main className="farm-content">
-                {renderContent()}
+                <Outlet context={{ farmNameProp: farmName }} />
             </main>
 
             <AlertsPanel

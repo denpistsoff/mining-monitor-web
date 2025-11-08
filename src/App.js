@@ -16,7 +16,8 @@ function App() {
             if (savedAuth) {
                 try {
                     const authData = JSON.parse(savedAuth);
-                    if (Date.now() - authData.timestamp < 30 * 24 * 60 * 60 * 1000) {
+                    // Упрощенная проверка авторизации для демо
+                    if (authData.username && authData.password) {
                         setIsAuthenticated(true);
                     } else {
                         localStorage.removeItem('miningAuth');
@@ -40,6 +41,14 @@ function App() {
 
     const handleLogin = (success) => {
         setIsAuthenticated(success);
+        if (success) {
+            // Сохраняем простую авторизацию для демо
+            localStorage.setItem('miningAuth', JSON.stringify({
+                username: 'demo',
+                password: 'demo',
+                timestamp: Date.now()
+            }));
+        }
     };
 
     if (isLoading) {
@@ -53,16 +62,26 @@ function App() {
         );
     }
 
-    if (!isAuthenticated) {
-        return <Login onLogin={handleLogin} />;
-    }
-
     return (
         <Router>
             <div className="app">
                 <Routes>
-                    <Route path="/" element={<FarmSelection />} />
-                    <Route path="/farm/:farmName/*" element={<FarmLayout />} />
+                    <Route
+                        path="/"
+                        element={
+                            isAuthenticated ?
+                                <FarmSelection /> :
+                                <Login onLogin={handleLogin} />
+                        }
+                    />
+                    <Route
+                        path="/farm/:farmName/*"
+                        element={
+                            isAuthenticated ?
+                                <FarmLayout /> :
+                                <Navigate to="/" replace />
+                        }
+                    />
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </div>

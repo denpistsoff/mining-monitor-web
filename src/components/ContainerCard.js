@@ -6,9 +6,9 @@ const ContainerCard = ({ containerId, container }) => {
     const [isExpanded, setIsExpanded] = useState(true);
     const { stats, miners } = container;
 
-    const onlineCount = miners?.filter(m => m.status === 'online').length || 0;
-    const offlineCount = miners?.filter(m => m.status === 'offline').length || 0;
-    const problematicCount = miners?.filter(m => m.status === 'problematic').length || 0;
+    const onlineCount = stats?.online_miners || 0;
+    const offlineCount = stats?.offline_miners || 0;
+    const problematicCount = stats?.problematic_miners || 0;
 
     return (
         <div className="container-card">
@@ -19,15 +19,15 @@ const ContainerCard = ({ containerId, container }) => {
                 <div className="container-info">
                     <h3 className="container-title">КОНТЕЙНЕР {containerId}</h3>
                     <div className="container-stats">
-            <span className="stat-badge online">
-              ОНЛАЙН: {onlineCount}
-            </span>
+                        <span className="stat-badge online">
+                            ОНЛАЙН: {onlineCount}
+                        </span>
                         <span className="stat-badge offline">
-              ОФФЛАЙН: {offlineCount}
-            </span>
+                            ОФФЛАЙН: {offlineCount}
+                        </span>
                         <span className="stat-badge problematic">
-              ПРОБЛЕМЫ: {problematicCount}
-            </span>
+                            ПРОБЛЕМЫ: {problematicCount}
+                        </span>
                     </div>
                 </div>
 
@@ -51,6 +51,7 @@ const ContainerCard = ({ containerId, container }) => {
                             <MinerCard
                                 key={`${miner.ip}-${index}`}
                                 miner={miner}
+                                showContainer={false}
                             />
                         ))}
                     </div>

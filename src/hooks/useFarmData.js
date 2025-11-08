@@ -14,6 +14,7 @@ export const useFarmData = (farmNameProp) => {
 
         try {
             setLoading(true);
+            setError(null);
 
             const url = `https://raw.githubusercontent.com/denpistsoff/mining-monitor-web/main/data/farm_data_${farmNameProp}.json?t=${Date.now()}`;
 
@@ -35,12 +36,11 @@ export const useFarmData = (farmNameProp) => {
             if (force || !lastUpdateRef.current || lastUpdateRef.current !== currentTimestamp) {
                 lastUpdateRef.current = currentTimestamp;
                 setFarmData(processedData);
-                setError(null);
             }
 
         } catch (err) {
-            setError(err.message);
             console.error('❌ Ошибка загрузки данных:', err);
+            setError(`Ошибка загрузки данных: ${err.message}`);
         } finally {
             setLoading(false);
         }
@@ -51,36 +51,40 @@ export const useFarmData = (farmNameProp) => {
         const containers = data.containers || {};
         const containerEntries = Object.entries(containers);
 
-        // ПРОСТО берем данные как есть из JSON
+        // Создаем summary на основе данных контейнеров
         const summary = {
             total_containers: containerEntries.length,
-            total_miners: data.summary?.total_miners || containerEntries.reduce((sum, [_, container]) =>
+            total_miners: containerEntries.reduce((sum, [_, container]) =>
                 sum + (container.total_miners || 0), 0),
-            online_miners: data.summary?.online_miners || containerEntries.reduce((sum, [_, container]) =>
+            online_miners: containerEntries.reduce((sum, [_, container]) =>
                 sum + (container.online_miners || 0), 0),
-            problematic_miners: data.summary?.problematic_miners || containerEntries.reduce((sum, [_, container]) =>
-                sum + (container.problematic_miners || 0), 0),
-            offline_miners: data.summary?.offline_miners || containerEntries.reduce((sum, [_, container]) =>
-                sum + (container.offline_miners || 0), 0),
-            total_hashrate: data.summary?.total_hashrate || containerEntries.reduce((sum, [_, container]) =>
+            problematic_miners: containerEntries.reduce((sum, [_, container]) =>
+                sum + (container.problematic_count || 0), 0),
+            offline_miners: containerEntries.reduce((sum, [_, container]) =>
+                sum + ((container.total_miners || 0) - (container.online_miners || 0)), 0),
+            total_hashrate: containerEntries.reduce((sum, [_, container]) =>
                 sum + (container.total_hashrate || 0), 0),
-            total_power: data.summary?.total_power || containerEntries.reduce((sum, [_, container]) =>
+            total_power: containerEntries.reduce((sum, [_, container]) =>
                 sum + (container.total_power || 0), 0)
         };
 
         // Обрабатываем контейнеры для единообразной структуры
         const processedContainers = {};
         containerEntries.forEach(([containerId, container]) => {
+            const minersData = container.miners_data || [];
             processedContainers[containerId] = {
                 stats: {
                     total_hashrate: container.total_hashrate,
                     total_power: container.total_power,
                     total_miners: container.total_miners,
                     online_miners: container.online_miners,
-                    problematic_miners: container.problematic_miners,
-                    offline_miners: container.offline_miners
+                    problematic_miners: container.problematic_count,
+                    offline_miners: (container.total_miners || 0) - (container.online_miners || 0)
                 },
-                miners: container.miners || container.miners_data || {} // Используем miners или miners_data из JSON
+                miners: minersData.map(miner => ({
+                    ...miner,
+                    containerId: containerId
+                }))
             };
         });
 
