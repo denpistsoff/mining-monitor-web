@@ -1,17 +1,20 @@
-import React from 'react';
-import { useParams, useNavigate, Routes, Route, Navigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useParams, Outlet } from 'react-router-dom';
 import Header from './Header';
-import Dashboard from './Dashboard';
-import MinersView from './MinersView';
 import AlertsPanel from './AlertsPanel';
+import '../styles/components/FarmLayout.css';
 
 const FarmLayout = () => {
     const { farmName } = useParams();
     const [activeTab, setActiveTab] = useState('dashboard');
     const [alertsOpen, setAlertsOpen] = useState(false);
-    const [unreadAlertsCount, setUnreadAlertsCount] = useState(3); // временно для демо
+    const [unreadAlertsCount, setUnreadAlertsCount] = useState(3);
 
     const handleTabChange = (tab) => {
+        if (tab === 'alerts') {
+            setAlertsOpen(true);
+            return;
+        }
         setActiveTab(tab);
     };
 
@@ -20,38 +23,25 @@ const FarmLayout = () => {
         window.location.href = '/';
     };
 
-    const handleAlertsClick = () => {
-        setAlertsOpen(true);
-    };
-
-    // Определяем активную вкладку из URL
-    const getActiveTab = () => {
-        const path = window.location.pathname;
-        if (path.includes('/miners')) return 'miners';
-        if (path.includes('/alerts')) return 'alerts';
-        return 'dashboard';
-    };
-
-    
-
     return (
         <div className="farm-layout">
             <Header
-                farmName={farmName}
                 activeTab={activeTab}
                 onTabChange={handleTabChange}
+                farmName={farmName}
                 onLogout={handleLogout}
+                unreadAlertsCount={unreadAlertsCount}
             />
 
-            <main className="main-content">
-                <Routes>
-                    <Route index element={<Navigate to={`/farm/${farmName}/dashboard`} replace />} />
-                    <Route path="dashboard" element={<Dashboard farmNameProp={farmName} />} />
-                    <Route path="miners" element={<MinersView farmNameProp={farmName} />} />
-                    <Route path="alerts" element={<AlertsPanel farmNameProp={farmName} />} />
-                    <Route path="*" element={<Navigate to={`/farm/${farmName}/dashboard`} replace />} />
-                </Routes>
+            <main className="farm-content">
+                <Outlet context={{ farmNameProp: farmName }} />
             </main>
+
+            <AlertsPanel
+                farmNameProp={farmName}
+                isOpen={alertsOpen}
+                onClose={() => setAlertsOpen(false)}
+            />
         </div>
     );
 };
