@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Header from './Header';
 import Dashboard from './Dashboard';
-import MinerView from './MinerView';
+import MinersView from './MinersView';
 import AlertsPanel from './AlertsPanel';
 import '../styles/components/FarmLayout.css';
 
@@ -28,7 +28,7 @@ const FarmLayout = () => {
     const renderContent = () => {
         switch (activeTab) {
             case 'miners':
-                return <MinerView farmNameProp={farmName} />;
+                return <MinersView farmNameProp={farmName} />;
             case 'dashboard':
             default:
                 return <Dashboard farmNameProp={farmName} />;
