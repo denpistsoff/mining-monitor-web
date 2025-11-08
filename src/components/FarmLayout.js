@@ -14,15 +14,20 @@ const FarmLayout = () => {
 
     const handleTabChange = (tab) => {
         setActiveTab(tab);
+
+        // Навигация по вкладкам
+        if (tab === 'dashboard') {
+            window.history.pushState(null, '', `/farm/${farmName}`);
+        } else if (tab === 'miners') {
+            window.history.pushState(null, '', `/farm/${farmName}/miners`);
+        } else if (tab === 'alerts') {
+            setAlertsOpen(true);
+        }
     };
 
     const handleLogout = () => {
         localStorage.removeItem('miningAuth');
         window.location.href = '/';
-    };
-
-    const handleAlertsClick = () => {
-        setAlertsOpen(true);
     };
 
     return (
@@ -33,13 +38,12 @@ const FarmLayout = () => {
                 farmName={farmName}
                 onLogout={handleLogout}
                 unreadAlertsCount={unreadAlertsCount}
-                onAlertsClick={handleAlertsClick}
             />
 
             <main className="farm-content">
                 <Routes>
-                    <Route path="/" element={<Dashboard farmNameProp={farmName} />} />
-                    <Route path="/miners" element={<MinerView farmNameProp={farmName} />} />
+                    <Route index element={<Dashboard farmNameProp={farmName} />} />
+                    <Route path="miners" element={<MinerView farmNameProp={farmName} />} />
                 </Routes>
             </main>
 
