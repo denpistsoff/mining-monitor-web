@@ -1,3 +1,4 @@
+// Login.js - Улучшенная версия
 import React, { useState, useEffect } from 'react';
 import '../styles/components/Login.css';
 
@@ -5,7 +6,7 @@ const Login = ({ onLogin }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const [rememberMe, setRememberMe] = useState(false);
+    const [rememberMe, setRememberMe] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
@@ -14,8 +15,8 @@ const Login = ({ onLogin }) => {
         if (savedAuth) {
             try {
                 const authData = JSON.parse(savedAuth);
-                // Автоматический вход если не прошло 30 дней
-                if (Date.now() - authData.timestamp < 30 * 24 * 60 * 60 * 1000) {
+                // Автоматический вход если не прошло 7 дней
+                if (Date.now() - authData.timestamp < 7 * 24 * 60 * 60 * 1000) {
                     handleAutoLogin(authData.username, authData.password);
                 } else {
                     localStorage.removeItem('miningAuth');
@@ -29,22 +30,19 @@ const Login = ({ onLogin }) => {
     const handleAutoLogin = async (savedUser, savedPass) => {
         setIsLoading(true);
         try {
-            const response = await fetch('./data/auth/credentials.json');
-            if (!response.ok) throw new Error('Auth file not found');
+            // Демо-авторизация - в реальном приложении здесь будет запрос к API
+            await new Promise(resolve => setTimeout(resolve, 1000));
 
-            const authData = await response.json();
-            const validUser = authData.users.find(u =>
-                u.username === savedUser && u.password === savedPass
-            );
-
-            if (validUser) {
+            if (savedUser === 'demo' && savedPass === 'demo') {
                 onLogin(true);
             } else {
                 localStorage.removeItem('miningAuth');
+                setError('Сохраненные данные устарели');
             }
         } catch (error) {
             console.error('Auto-login failed:', error);
             localStorage.removeItem('miningAuth');
+            setError('Ошибка автоматического входа');
         }
         setIsLoading(false);
     };
@@ -55,15 +53,11 @@ const Login = ({ onLogin }) => {
         setIsLoading(true);
 
         try {
-            const response = await fetch('./data/auth/credentials.json');
-            if (!response.ok) throw new Error('Auth file not found');
+            // Имитация запроса к серверу
+            await new Promise(resolve => setTimeout(resolve, 1500));
 
-            const authData = await response.json();
-            const validUser = authData.users.find(u =>
-                u.username === username && u.password === password
-            );
-
-            if (validUser) {
+            // Демо-авторизация
+            if (username === 'demo' && password === 'demo') {
                 if (rememberMe) {
                     localStorage.setItem('miningAuth', JSON.stringify({
                         username: username,
@@ -81,13 +75,18 @@ const Login = ({ onLogin }) => {
         setIsLoading(false);
     };
 
+    const handleDemoLogin = () => {
+        setUsername('demo');
+        setPassword('demo');
+    };
+
     if (isLoading) {
         return (
             <div className="login-container">
                 <div className="login-form">
                     <div className="loading">
                         <div className="loading-spinner"></div>
-                        <p>Проверка авторизации...</p>
+                        <p style={{ color: '#ff8c00', marginTop: '16px' }}>Проверка авторизации...</p>
                     </div>
                 </div>
             </div>
@@ -97,8 +96,10 @@ const Login = ({ onLogin }) => {
     return (
         <div className="login-container">
             <div className="login-form">
-                <h2>Мониторинг майнинг фермы</h2>
-                <p className="login-subtitle">Введите данные для доступа</p>
+                <div className="login-header">
+                    <h1 className="login-title">MINING MONITOR</h1>
+                    <p className="login-subtitle">Система мониторинга майнинг ферм</p>
+                </div>
 
                 <form onSubmit={handleLogin}>
                     <div className="input-group">
@@ -140,11 +141,16 @@ const Login = ({ onLogin }) => {
                     <button
                         type="submit"
                         className="login-button"
-                        disabled={isLoading}
+                        disabled={isLoading || !username || !password}
                     >
-                        {isLoading ? 'Вход...' : 'Войти'}
+                        {isLoading ? 'ВХОД...' : 'ВОЙТИ В СИСТЕМУ'}
                     </button>
                 </form>
+
+                <div className="demo-credentials">
+                    <div className="demo-title">Демо доступ:</div>
+                    <div className="demo-info">Логин: demo | Пароль: demo</div>
+                </div>
             </div>
         </div>
     );

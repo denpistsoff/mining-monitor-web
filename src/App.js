@@ -1,3 +1,4 @@
+// App.js - Обновленная версия с улучшенной логикой авторизации
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import FarmSelection from './components/FarmSelection';
@@ -16,15 +17,20 @@ function App() {
             if (savedAuth) {
                 try {
                     const authData = JSON.parse(savedAuth);
-                    // Упрощенная проверка авторизации для демо
-                    if (authData.username && authData.password) {
+                    // Проверяем, не устарели ли данные (больше 7 дней)
+                    if (authData.username && authData.password &&
+                        (Date.now() - authData.timestamp < 7 * 24 * 60 * 60 * 1000)) {
                         setIsAuthenticated(true);
                     } else {
                         localStorage.removeItem('miningAuth');
+                        setIsAuthenticated(false);
                     }
                 } catch (e) {
                     localStorage.removeItem('miningAuth');
+                    setIsAuthenticated(false);
                 }
+            } else {
+                setIsAuthenticated(false);
             }
             setIsLoading(false);
         };
@@ -41,14 +47,14 @@ function App() {
 
     const handleLogin = (success) => {
         setIsAuthenticated(success);
-        if (success) {
-            // Сохраняем простую авторизацию для демо
-            localStorage.setItem('miningAuth', JSON.stringify({
-                username: 'demo',
-                password: 'demo',
-                timestamp: Date.now()
-            }));
+        if (!success) {
+            localStorage.removeItem('miningAuth');
         }
+    };
+
+    const handleLogout = () => {
+        setIsAuthenticated(false);
+        localStorage.removeItem('miningAuth');
     };
 
     if (isLoading) {
@@ -56,7 +62,7 @@ function App() {
             <div className="app">
                 <div className="loading">
                     <div className="loading-spinner"></div>
-                    <p>Загрузка...</p>
+                    <p style={{ color: '#ff8c00', marginTop: '16px' }}>Загрузка системы...</p>
                 </div>
             </div>
         );
@@ -67,11 +73,19 @@ function App() {
             <div className="app">
                 <Routes>
                     <Route
+                        path="/login"
+                        element={
+                            !isAuthenticated ?
+                                <Login onLogin={handleLogin} /> :
+                                <Navigate to="/" replace />
+                        }
+                    />
+                    <Route
                         path="/"
                         element={
                             isAuthenticated ?
-                                <FarmSelection /> :
-                                <Login onLogin={handleLogin} />
+                                <FarmSelection onLogout={handleLogout} /> :
+                                <Navigate to="/login" replace />
                         }
                     />
                     <Route
@@ -79,7 +93,7 @@ function App() {
                         element={
                             isAuthenticated ?
                                 <FarmLayout /> :
-                                <Navigate to="/" replace />
+                                <Navigate to="/login" replace />
                         }
                     />
                     <Route path="*" element={<Navigate to="/" replace />} />
