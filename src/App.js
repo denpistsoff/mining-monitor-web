@@ -64,11 +64,14 @@ function App() {
     }
 
     return (
-        <Router basename="/mining-monitor-web">
+        <Router>
             <div className="app">
                 <Routes>
                     <Route path="/" element={<FarmSelection />} />
-                    <Route path="/farm/:farmName/*" element={<FarmLayout />} />
+                    <Route path="/farm/:farmName" element={<FarmLayout />}>
+                        <Route index element={<Dashboard />} />
+                        <Route path="miners" element={<MinerView />} />
+                    </Route>
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </div>

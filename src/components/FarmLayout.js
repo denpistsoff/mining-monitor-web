@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Routes, Route, useParams, useLocation, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useParams, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Header from './Header';
-import Dashboard from './Dashboard';
-import MinersView from './MinersView';
 import AlertsPanel from './AlertsPanel';
 import '../styles/components/FarmLayout.css';
 
@@ -20,38 +18,29 @@ const FarmLayout = () => {
         return 'dashboard';
     };
 
-    const [activeTab, setActiveTab] = useState(getActiveTab());
-
-    // Обновляем активную вкладку при изменении пути
-    useEffect(() => {
-        setActiveTab(getActiveTab());
-    }, [location.pathname]);
+    const activeTab = getActiveTab();
 
     const handleTabChange = (tab) => {
-        setActiveTab(tab);
-
         if (tab === 'alerts') {
             setAlertsOpen(true);
             return;
         }
 
-        // Навигация по вкладкам с использованием useNavigate
-        const basePath = `/farm/${farmName}`;
+        // Навигация по вкладкам
         if (tab === 'dashboard') {
-            navigate(basePath);
+            navigate(`/farm/${farmName}`);
         } else if (tab === 'miners') {
-            navigate(`${basePath}/miners`);
+            navigate(`/farm/${farmName}/miners`);
         }
     };
 
     const handleLogout = () => {
         localStorage.removeItem('miningAuth');
-        window.location.href = '/mining-monitor-web';
+        window.location.href = '/';
     };
 
-    // Если farmName не определен, редиректим на главную
     if (!farmName) {
-        return <Navigate to="/" replace />;
+        return <div>Ошибка: farmName не определен</div>;
     }
 
     return (
@@ -65,11 +54,7 @@ const FarmLayout = () => {
             />
 
             <main className="farm-content">
-                <Routes>
-                    <Route index element={<Dashboard farmNameProp={farmName} />} />
-                    <Route path="miners" element={<MinerView farmNameProp={farmName} />} />
-                    <Route path="*" element={<Navigate to={`/farm/${farmName}`} replace />} />
-                </Routes>
+                <Outlet context={{ farmNameProp: farmName }} />
             </main>
 
             <AlertsPanel

@@ -1,13 +1,15 @@
 import React, { useState, useMemo } from 'react';
 import { useFarmData } from '../hooks/useFarmData';
+import { useOutletContext } from 'react-router-dom';
 import MinerCard from './MinerCard';
 import '../styles/components/MinerView.css';
 
-const MinersView = ({ farmNameProp }) => {
+const MinersView = () => {
+    const { farmNameProp } = useOutletContext();
     const { farmData, loading, error } = useFarmData(farmNameProp);
     const [selectedContainer, setSelectedContainer] = useState('all');
     const [selectedStatus, setSelectedStatus] = useState('all');
-    const [cardSize, setCardSize] = useState('medium'); // 'small', 'medium', 'large'
+    const [cardSize, setCardSize] = useState('medium');
 
     // Сбор всех майнеров из всех контейнеров
     const allMiners = useMemo(() => {
@@ -35,7 +37,7 @@ const MinersView = ({ farmNameProp }) => {
         });
     }, [allMiners, selectedContainer, selectedStatus]);
 
-    // ПРАВИЛЬНАЯ статистика - берем из summary, а не пересчитываем
+    // Статистика из summary
     const stats = useMemo(() => {
         if (!farmData?.summary) {
             return { online: 0, problematic: 0, offline: 0, total: 0 };
@@ -108,6 +110,7 @@ const MinersView = ({ farmNameProp }) => {
                 </div>
             </div>
 
+            {/* Остальной код MinerView без изменений */}
             <div className="filters-panel">
                 <div className="container-filter">
                     <label>КОНТЕЙНЕР:</label>

@@ -1,10 +1,12 @@
 import React from 'react';
 import { useFarmData } from '../hooks/useFarmData';
+import { useOutletContext } from 'react-router-dom';
 import StatsGrid from './StatsGrid';
 import ContainerCard from './ContainerCard';
 import '../styles/components/Dashboard.css';
 
-const Dashboard = ({ farmNameProp }) => {
+const Dashboard = () => {
+    const { farmNameProp } = useOutletContext();
     const { farmData, loading, error } = useFarmData(farmNameProp);
 
     if (loading) {
