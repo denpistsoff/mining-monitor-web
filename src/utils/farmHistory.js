@@ -10,11 +10,12 @@ class FarmHistory {
         try {
             const response = await fetch(`/api/farm-history?t=${Date.now()}`);
             if (response.ok) {
-                return await response.json();
+                const data = await response.json();
+                return data;
             }
             return this.getDefaultHistory();
         } catch (error) {
-            console.error('Error loading history:', error);
+            console.warn('History data not available yet, using default');
             return this.getDefaultHistory();
         }
     }
@@ -25,11 +26,12 @@ class FarmHistory {
             const history = await this.loadHistory();
             const newEntry = {
                 timestamp: new Date().toISOString(),
-                total_hashrate: farmData.summary.total_hashrate,
-                total_power: farmData.summary.total_power,
-                online_miners: farmData.summary.online_miners,
-                problematic_count: farmData.summary.problematic_count,
-                efficiency: farmData.summary.total_hashrate / (farmData.summary.total_power / 1000) // TH/s per kW
+                total_hashrate: farmData.summary?.total_hashrate || 0,
+                total_power: farmData.summary?.total_power || 0,
+                online_miners: farmData.summary?.online_miners || 0,
+                problematic_count: farmData.summary?.problematic_count || 0,
+                efficiency: farmData.summary?.total_hashrate ?
+                    farmData.summary.total_hashrate / (farmData.summary.total_power / 1000) : 0
             };
 
             // Добавляем новую запись в начало
@@ -40,11 +42,12 @@ class FarmHistory {
                 history.farm_history = history.farm_history.slice(0, this.maxEntries);
             }
 
-            // Сохраняем на сервер
-            await this.saveToServer(history);
+            // Сохраняем на сервер (неблокирующий вызов)
+            this.saveToServer(history).catch(console.error);
             return history;
         } catch (error) {
             console.error('Error saving history:', error);
+            return this.getDefaultHistory();
         }
     }
 
@@ -59,7 +62,7 @@ class FarmHistory {
                 body: JSON.stringify(historyData)
             });
         } catch (error) {
-            console.error('Error saving to server:', error);
+            console.warn('Could not save history to server:', error);
         }
     }
 
@@ -71,10 +74,16 @@ class FarmHistory {
 
     // Получить данные за последние N часов
     getLastNHours(history, hours = 24) {
+        if (!history || !history.farm_history) return [];
+
         const cutoffTime = new Date(Date.now() - hours * 60 * 60 * 1000);
-        return history.farm_history.filter(entry =>
-            new Date(entry.timestamp) >= cutoffTime
-        );
+        return history.farm_history.filter(entry => {
+            try {
+                return new Date(entry.timestamp) >= cutoffTime;
+            } catch {
+                return false;
+            }
+        });
     }
 }
 
