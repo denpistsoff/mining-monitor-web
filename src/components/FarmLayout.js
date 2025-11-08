@@ -5,7 +5,6 @@ import Dashboard from './Dashboard';
 import MinersView from './MinersView';
 import AlertsPanel from './AlertsPanel';
 import '../styles/components/FarmLayout.css';
-import MinersView from "./MinersView";
 
 const FarmLayout = () => {
     const { farmName } = useParams();
