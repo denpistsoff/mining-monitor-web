@@ -56,7 +56,7 @@ const MinersView = ({ farmNameProp }) => {
     };
 
     const handleRefreshData = () => {
-        window.location.refresh();
+        alert('обноалено');
     };
 
     if (loading) {
