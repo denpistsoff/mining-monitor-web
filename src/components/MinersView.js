@@ -51,14 +51,15 @@ const MinersView = ({ farmName }) => {
             miners = miners.filter(miner => {
                 const status = miner.status?.toLowerCase();
                 switch (activeTab) {
-                    case 'online':
-                        return status === 'online' || status === 'normal';
                     case 'problematic':
                         return status === 'warning' || status === 'problematic' || status === 'unstable';
                     case 'offline':
                         return status === 'offline' || status === 'error' || status === 'down';
                     default:
                         return true;
+                }
+                if (activeTab === "online" || activeTab === "problematic") {
+                    return status === 'online' || status === 'normal';
                 }
             });
         }
