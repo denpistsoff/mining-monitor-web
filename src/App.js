@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import FarmSelection from './components/FarmSelection';
 import FarmLayout from './components/FarmLayout';
 import Login from './components/Login';
@@ -17,7 +17,6 @@ function App() {
             if (savedAuth) {
                 try {
                     const authData = JSON.parse(savedAuth);
-                    // 30 дней в миллисекундах
                     if (Date.now() - authData.timestamp < 30 * 24 * 60 * 60 * 1000) {
                         setIsAuthenticated(true);
                     } else {
@@ -30,7 +29,6 @@ function App() {
             setIsLoading(false);
         };
 
-        // Telegram WebApp integration
         if (window.Telegram?.WebApp) {
             const tgApp = window.Telegram.WebApp;
             tgApp.ready();
@@ -66,7 +64,7 @@ function App() {
     }
 
     return (
-        <Router>
+        <Router basename="/mining-monitor-web">
             <div className="app">
                 <Routes>
                     <Route path="/" element={<FarmSelection />} />
