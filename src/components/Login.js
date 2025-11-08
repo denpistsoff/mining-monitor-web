@@ -1,4 +1,4 @@
-// Login.js - Аутентификация через GitHub Repository Secret
+// Login.js - Работа с JSON файлом из public/data/auth/
 import React, { useState, useEffect } from 'react';
 import '../styles/components/Login.css';
 
@@ -8,6 +8,11 @@ const Login = ({ onLogin }) => {
     const [error, setError] = useState('');
     const [rememberMe, setRememberMe] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
+
+    // URL к JSON файлу с учетными данными
+    const CREDENTIALS_URL = process.env.NODE_ENV === 'development'
+        ? '/data/auth/credentials.json'
+        : '/mining-monitor-web/data/auth/credentials.json';
 
     useEffect(() => {
         const savedAuth = localStorage.getItem('miningAuth');
@@ -44,22 +49,20 @@ const Login = ({ onLogin }) => {
 
     const validateCredentials = async (user, pass) => {
         try {
-            // Получаем секретные учетные данные из переменной окружения
-            const secretCredentials = process.env.REACT_APP_AUTH_CREDENTIALS;
+            const response = await fetch(CREDENTIALS_URL + '?t=' + Date.now());
 
-            if (!secretCredentials) {
-                console.error('AUTH_CREDENTIALS not found in environment');
-                return false;
+            if (!response.ok) {
+                throw new Error(`Failed to fetch credentials: ${response.status}`);
             }
 
-            // Парсим JSON из секрета
-            const validUsers = JSON.parse(secretCredentials);
+            const authData = await response.json();
 
             // Проверяем учетные данные
-            return validUsers.some(cred =>
-                cred.username === user && cred.password === pass
+            const validUser = authData.users.find(u =>
+                u.username === user && u.password === pass
             );
 
+            return !!validUser;
         } catch (error) {
             console.error('Credential validation error:', error);
             return false;
@@ -82,7 +85,6 @@ const Login = ({ onLogin }) => {
 
             if (isValid) {
                 if (rememberMe) {
-                    // Сохраняем в localStorage (в реальном приложении лучше хранить токен)
                     localStorage.setItem('miningAuth', JSON.stringify({
                         username: username,
                         timestamp: Date.now()
