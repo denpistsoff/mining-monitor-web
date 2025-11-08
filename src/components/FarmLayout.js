@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { Routes, Route, useParams } from 'react-router-dom';
 import Header from './Header';
 import Dashboard from './Dashboard';
-import MinerView from './MinerView';
+import MinersViewView from './MinerView';
 import AlertsPanel from './AlertsPanel';
 import '../styles/components/FarmLayout.css';
+import MinersView from "./MinersView";
 
 const FarmLayout = () => {
     const { farmName } = useParams();
