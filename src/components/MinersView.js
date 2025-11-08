@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useFarmData } from '../hooks/useFarmData';
-import '../styles/MinerView.css';
+import '../styles/components/MinerView.css';
 
 const MinersView = ({ farmName }) => {
     const { farmData, loading, error, refresh } = useFarmData(farmName);
