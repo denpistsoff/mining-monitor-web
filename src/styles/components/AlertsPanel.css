@@ -28,7 +28,7 @@
     max-height: 80vh;
     display: flex;
     flex-direction: column;
-    box-shadow: var(--shadow-xl);
+    box-shadow: var(--shadow-lg);
     animation: slideUp 0.3s ease;
 }
 
@@ -67,7 +67,7 @@
 .alerts-count {
     background: var(--accent-danger);
     color: white;
-    border-radius: var(--radius-full);
+    border-radius: var(--radius-lg);
     padding: 4px 8px;
     font-size: 0.8rem;
     font-weight: 700;
