@@ -59,7 +59,7 @@ const MinersView = ({ farmName }) => {
                         return true;
                 }
                 if (activeTab === "online" || activeTab === "problematic") {
-                    return status === 'online' || status === 'normal';
+                    return status === 'online';
                 }
             });
         }

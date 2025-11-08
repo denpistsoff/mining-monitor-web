@@ -7,15 +7,21 @@ import AlertsPanel from './AlertsPanel';
 
 const FarmLayout = () => {
     const { farmName } = useParams();
-    const navigate = useNavigate();
+    const [activeTab, setActiveTab] = useState('dashboard');
+    const [alertsOpen, setAlertsOpen] = useState(false);
+    const [unreadAlertsCount, setUnreadAlertsCount] = useState(3); // временно для демо
 
     const handleTabChange = (tab) => {
-        navigate(`/farm/${farmName}/${tab}`);
+        setActiveTab(tab);
     };
 
     const handleLogout = () => {
         localStorage.removeItem('miningAuth');
         window.location.href = '/';
+    };
+
+    const handleAlertsClick = () => {
+        setAlertsOpen(true);
     };
 
     // Определяем активную вкладку из URL
@@ -26,7 +32,7 @@ const FarmLayout = () => {
         return 'dashboard';
     };
 
-    const activeTab = getActiveTab();
+    
 
     return (
         <div className="farm-layout">
