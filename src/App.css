@@ -1,85 +1,72 @@
+/* App.css */
 .app {
-  min-height: 100vh;
-  background: var(--bg-primary);
-  display: flex;
-  flex-direction: column;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a0f0a 50%, #0a0a0a 100%);
+    color: #ffffff;
 }
 
-.main-content {
-  flex: 1;
-  padding: 20px 0;
-}
-
-/* Специфичные стили для Telegram */
-.telegram-app .main-content {
-  padding-bottom: 60px; /* Для кнопки Telegram */
-}
-
-/* Загрузка */
-.loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 400px;
-  gap: 20px;
+.app-loading {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a0f0a 100%);
+    color: #ff8c00;
 }
 
 .loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--bg-tertiary);
-  border-top: 3px solid var(--accent-blue);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+    border: 3px solid rgba(255, 140, 0, 0.3);
+    border-top: 3px solid #ff8c00;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+}
+
+.loading-spinner.large {
+    width: 60px;
+    height: 60px;
+    border-width: 4px;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
-/* Сетка */
-.grid {
-  display: grid;
-  gap: 20px;
+/* Глобальные переменные для оранжево-черной темы */
+:root {
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #1a0f0a;
+    --bg-tertiary: #15100a;
+    --bg-card: rgba(26, 15, 10, 0.9);
+
+    --text-primary: #ffffff;
+    --text-secondary: #ff8c00;
+    --text-muted: #a0a0a0;
+
+    --accent-primary: #ff6b00;
+    --accent-secondary: #ff8c00;
+    --accent-success: #00ff88;
+    --accent-warning: #ff8c00;
+    --accent-danger: #ff4444;
+    --accent-info: #00aaff;
+
+    --gradient-primary: linear-gradient(135deg, #ff6b00, #ff8c00);
+    --gradient-bg: linear-gradient(135deg, #0a0a0a 0%, #1a0f0a 100%);
+
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+
+    --shadow-sm: 0 4px 6px rgba(255, 107, 0, 0.1);
+    --shadow-md: 0 8px 25px rgba(255, 107, 0, 0.15);
+    --shadow-lg: 0 15px 35px rgba(255, 107, 0, 0.2);
+
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
 }
-
-.grid-cols-1 { grid-template-columns: repeat(1, 1fr); }
-.grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
-.grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
-
-@media (max-width: 1024px) {
-  .grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (max-width: 768px) {
-  .grid-cols-2,
-  .grid-cols-3,
-  .grid-cols-4 { grid-template-columns: 1fr; }
-}
-
-/* Утилиты */
-.text-center { text-align: center; }
-.text-right { text-align: right; }
-.mb-4 { margin-bottom: 1rem; }
-.mt-4 { margin-top: 1rem; }
-.p-4 { padding: 1rem; }
-
-/* Текст */
-.text-sm { font-size: 0.875rem; }
-.text-lg { font-size: 1.125rem; }
-.text-xl { font-size: 1.25rem; }
-.text-2xl { font-size: 1.5rem; }
-
-.text-muted { color: var(--text-muted); }
-.text-success { color: var(--accent-green); }
-.text-warning { color: var(--accent-orange); }
-.text-danger { color: var(--accent-red); }
-
-/* Flex */
-.flex { display: flex; }
-.items-center { align-items: center; }
-.justify-between { justify-content: space-between; }
-.gap-4 { gap: 1rem; }

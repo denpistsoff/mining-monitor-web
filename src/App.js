@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import FarmSelection from './components/FarmSelection';
 import FarmLayout from './components/FarmLayout';
 import Login from './components/Login';
 import './styles/dark-theme.css';
+import './styles/components/FarmLayout.css';
 import './App.css';
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
             if (savedAuth) {
                 try {
                     const authData = JSON.parse(savedAuth);
+                    // 30 дней в миллисекундах
                     if (Date.now() - authData.timestamp < 30 * 24 * 60 * 60 * 1000) {
                         setIsAuthenticated(true);
                     } else {
@@ -28,6 +30,7 @@ function App() {
             setIsLoading(false);
         };
 
+        // Telegram WebApp integration
         if (window.Telegram?.WebApp) {
             const tgApp = window.Telegram.WebApp;
             tgApp.ready();
@@ -40,15 +43,20 @@ function App() {
 
     const handleLogin = (success) => {
         setIsAuthenticated(success);
+        if (success) {
+            const authData = {
+                timestamp: Date.now(),
+                authenticated: true
+            };
+            localStorage.setItem('miningAuth', JSON.stringify(authData));
+        }
     };
 
     if (isLoading) {
         return (
-            <div className="app">
-                <div className="loading">
-                    <div className="loading-spinner"></div>
-                    <p>Загрузка...</p>
-                </div>
+            <div className="app-loading">
+                <div className="loading-spinner large"></div>
+                <p>Загрузка...</p>
             </div>
         );
     }
