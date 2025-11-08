@@ -12,17 +12,27 @@ const Dashboard = ({ farmNameProp }) => {
 
     useEffect(() => {
         // Инициализируем историю при первой загрузке
-        historyManager.initHistory();
-        setHistoryData(historyManager.loadHistory());
+        const initialHistory = historyManager.initHistory();
+        setHistoryData(initialHistory);
+        console.log('📊 History initialized:', initialHistory);
     }, []);
 
     useEffect(() => {
         if (farmData && !loading) {
+            console.log('💾 Saving farm data to history...');
             // Сохраняем данные в историю (если прошел час)
             const updatedHistory = historyManager.saveCurrentData(farmData);
             setHistoryData(updatedHistory);
         }
     }, [farmData, loading]);
+
+    // Для отладки - выводим в консоль
+    useEffect(() => {
+        if (historyData) {
+            console.log('📈 Current history stats:', historyManager.getHistoryStats());
+            console.log('📊 History data for chart:', historyManager.getLastNHours(24));
+        }
+    }, [historyData]);
 
     if (loading) {
         return (
@@ -113,6 +123,7 @@ const HistoryChartSection = ({ historyData, timeRange, onTimeRangeChange, curren
             }
 
             if (!historyData || !historyData.farm_history || historyData.farm_history.length === 0) {
+                console.log('📊 No history data available for chart');
                 return;
             }
 
@@ -120,8 +131,11 @@ const HistoryChartSection = ({ historyData, timeRange, onTimeRangeChange, curren
             const filteredData = historyManager.getLastNHours(hours);
 
             if (filteredData.length === 0 || !chartRef.current) {
+                console.log('📊 No filtered data for chart');
                 return;
             }
+
+            console.log('📈 Rendering chart with data:', filteredData);
 
             const ctx = chartRef.current.getContext('2d');
 
@@ -308,6 +322,8 @@ const HistoryChartSection = ({ historyData, timeRange, onTimeRangeChange, curren
                     }
                 }
             });
+
+            console.log('✅ Chart rendered successfully!');
         }
 
         return () => {
@@ -317,15 +333,13 @@ const HistoryChartSection = ({ historyData, timeRange, onTimeRangeChange, curren
         };
     }, [historyData, timeRange]);
 
-    const handleExport = () => {
-        historyManager.exportHistory();
-    };
-
-    const handleClear = () => {
-        if (window.confirm('Очистить всю историю? Это действие нельзя отменить.')) {
-            const clearedHistory = historyManager.clearHistory();
-            setHistoryData(clearedHistory);
-        }
+    const handleTestData = () => {
+        console.log('🧪 Adding test data...');
+        const updatedHistory = historyManager.forceAddTestData(currentData);
+        // Обновляем состояние чтобы перерисовать график
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
     };
 
     const stats = historyManager.getHistoryStats();
@@ -361,15 +375,6 @@ const HistoryChartSection = ({ historyData, timeRange, onTimeRangeChange, curren
                             7ДН
                         </button>
                     </div>
-
-                    <div className="history-actions">
-                        <button className="action-btn export-btn" onClick={handleExport} title="Экспорт данных">
-                            📥
-                        </button>
-                        <button className="action-btn clear-btn" onClick={handleClear} title="Очистить историю">
-                            🗑️
-                        </button>
-                    </div>
                 </div>
             </div>
 
@@ -384,15 +389,8 @@ const HistoryChartSection = ({ historyData, timeRange, onTimeRangeChange, curren
                             <p>📊 Собираем исторические данные...</p>
                             <span>Первые данные появятся через час после начала работы</span>
                             <div className="debug-info">
-                                <button onClick={() => {
-                                    // Принудительно сохраняем текущие данные для теста
-                                    const testData = {
-                                        summary: currentData
-                                    };
-                                    const updatedHistory = historyManager.saveCurrentData(testData);
-                                    setHistoryData(updatedHistory);
-                                }} className="test-btn">
-                                    Тест: добавить текущие данные
+                                <button onClick={handleTestData} className="test-btn">
+                                    🧪 Тест: добавить текущие данные
                                 </button>
                             </div>
                         </div>
