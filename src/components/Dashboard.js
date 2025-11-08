@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useFarmData } from '../hooks/useFarmData';
 import StatsGrid from './StatsGrid';
 import ContainerCard from './ContainerCard';
-import FarmHistory from '../utils/farmHistory';
+import historyManager from '../utils/historyManager';
 import '../styles/components/Dashboard.css';
 
 const Dashboard = ({ farmNameProp }) => {
@@ -11,11 +11,16 @@ const Dashboard = ({ farmNameProp }) => {
     const [chartTimeRange, setChartTimeRange] = useState('24h');
 
     useEffect(() => {
+        // Инициализируем историю при первой загрузке
+        historyManager.initHistory();
+        setHistoryData(historyManager.loadHistory());
+    }, []);
+
+    useEffect(() => {
         if (farmData && !loading) {
-            // Сохраняем текущие данные в историю
-            FarmHistory.saveCurrentData(farmData).then(updatedHistory => {
-                setHistoryData(updatedHistory);
-            });
+            // Сохраняем данные в историю (если прошел час)
+            const updatedHistory = historyManager.saveCurrentData(farmData);
+            setHistoryData(updatedHistory);
         }
     }, [farmData, loading]);
 
@@ -60,43 +65,16 @@ const Dashboard = ({ farmNameProp }) => {
                 </div>
             </div>
 
-            {/* Статистика сверху */}
             <StatsGrid summary={farmData.summary} />
 
-            {/* График по середине */}
-            <div className="history-section">
-                <div className="section-header">
-                    <h3 className="section-title">📊 ИСТОРИЯ РАБОТЫ</h3>
-                    <div className="time-range-selector">
-                        <button
-                            className={`time-range-btn ${chartTimeRange === '24h' ? 'active' : ''}`}
-                            onClick={() => setChartTimeRange('24h')}
-                        >
-                            24Ч
-                        </button>
-                        <button
-                            className={`time-range-btn ${chartTimeRange === '48h' ? 'active' : ''}`}
-                            onClick={() => setChartTimeRange('48h')}
-                        >
-                            48Ч
-                        </button>
-                        <button
-                            className={`time-range-btn ${chartTimeRange === '7d' ? 'active' : ''}`}
-                            onClick={() => setChartTimeRange('7d')}
-                        >
-                            7ДН
-                        </button>
-                    </div>
-                </div>
+            {/* График истории */}
+            <HistoryChartSection
+                historyData={historyData}
+                timeRange={chartTimeRange}
+                onTimeRangeChange={setChartTimeRange}
+                currentData={farmData.summary}
+            />
 
-                <HistoryChartComponent
-                    historyData={historyData}
-                    timeRange={chartTimeRange}
-                    currentData={farmData.summary}
-                />
-            </div>
-
-            {/* Контейнеры снизу */}
             <div className="containers-section">
                 <h3 className="section-title">⚡ КОНТЕЙНЕРЫ</h3>
                 <div className="containers-grid">
@@ -113,51 +91,50 @@ const Dashboard = ({ farmNameProp }) => {
     );
 };
 
-// Компонент графика прямо внутри Dashboard.js
-const HistoryChartComponent = ({ historyData, timeRange, currentData }) => {
-    const chartRef = React.useRef(null);
-    const chartInstance = React.useRef(null);
+// Компонент секции графика
+const HistoryChartSection = ({ historyData, timeRange, onTimeRangeChange, currentData }) => {
+    const chartRef = useRef(null);
+    const chartInstance = useRef(null);
 
-    React.useEffect(() => {
-        if (chartInstance.current) {
-            chartInstance.current.destroy();
+    useEffect(() => {
+        // Загружаем Chart.js динамически
+        if (!window.Chart) {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+            script.onload = renderChart;
+            document.head.appendChild(script);
+        } else {
+            renderChart();
         }
 
-        if (!historyData || !historyData.farm_history || historyData.farm_history.length === 0) {
-            return;
-        }
-
-        const getTimeRangeHours = () => {
-            switch (timeRange) {
-                case '24h': return 24;
-                case '48h': return 48;
-                case '7d': return 168;
-                default: return 24;
+        function renderChart() {
+            if (chartInstance.current) {
+                chartInstance.current.destroy();
             }
-        };
 
-        const filteredData = FarmHistory.getLastNHours(historyData, getTimeRangeHours());
+            if (!historyData || !historyData.farm_history || historyData.farm_history.length === 0) {
+                return;
+            }
 
-        if (filteredData.length === 0) {
-            return;
-        }
+            const hours = timeRange === '24h' ? 24 : timeRange === '48h' ? 48 : 168;
+            const filteredData = historyManager.getLastNHours(hours);
 
-        const ctx = chartRef.current.getContext('2d');
+            if (filteredData.length === 0 || !chartRef.current) {
+                return;
+            }
 
-        // Создаем градиенты
-        const gradientHashrate = ctx.createLinearGradient(0, 0, 0, 300);
-        gradientHashrate.addColorStop(0, 'rgba(255, 140, 0, 0.3)');
-        gradientHashrate.addColorStop(1, 'rgba(255, 140, 0, 0.05)');
+            const ctx = chartRef.current.getContext('2d');
 
-        const gradientPower = ctx.createLinearGradient(0, 0, 0, 300);
-        gradientPower.addColorStop(0, 'rgba(0, 170, 255, 0.3)');
-        gradientPower.addColorStop(1, 'rgba(0, 170, 255, 0.05)');
+            // Создаем градиенты
+            const gradientHashrate = ctx.createLinearGradient(0, 0, 0, 300);
+            gradientHashrate.addColorStop(0, 'rgba(255, 140, 0, 0.4)');
+            gradientHashrate.addColorStop(1, 'rgba(255, 140, 0, 0.05)');
 
-        // Регистрируем Chart.js если нужно
-        if (window.Chart) {
-            const Chart = window.Chart;
+            const gradientPower = ctx.createLinearGradient(0, 0, 0, 300);
+            gradientPower.addColorStop(0, 'rgba(0, 170, 255, 0.4)');
+            gradientPower.addColorStop(1, 'rgba(0, 170, 255, 0.05)');
 
-            chartInstance.current = new Chart(ctx, {
+            chartInstance.current = new window.Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: filteredData.map(entry =>
@@ -180,11 +157,11 @@ const HistoryChartComponent = ({ historyData, timeRange, currentData }) => {
                             pointBorderColor: '#000',
                             pointBorderWidth: 2,
                             pointRadius: 3,
-                            pointHoverRadius: 5,
+                            pointHoverRadius: 6,
                         },
                         {
                             label: 'Потребление (кВт)',
-                            data: filteredData.map(entry => entry.total_power / 1000).reverse(),
+                            data: filteredData.map(entry => (entry.total_power / 1000)).reverse(),
                             borderColor: '#00aaff',
                             backgroundColor: gradientPower,
                             borderWidth: 2,
@@ -195,7 +172,7 @@ const HistoryChartComponent = ({ historyData, timeRange, currentData }) => {
                             pointBorderColor: '#000',
                             pointBorderWidth: 2,
                             pointRadius: 2,
-                            pointHoverRadius: 4,
+                            pointHoverRadius: 5,
                         }
                     ]
                 },
@@ -227,7 +204,7 @@ const HistoryChartComponent = ({ historyData, timeRange, currentData }) => {
                             borderColor: '#ff8c00',
                             borderWidth: 1,
                             cornerRadius: 8,
-                            padding: 10,
+                            padding: 12,
                             usePointStyle: true,
                             callbacks: {
                                 label: function(context) {
@@ -243,6 +220,18 @@ const HistoryChartComponent = ({ historyData, timeRange, currentData }) => {
                                         }
                                     }
                                     return label;
+                                },
+                                title: function(tooltipItems) {
+                                    const dataIndex = tooltipItems[0].dataIndex;
+                                    const originalIndex = filteredData.length - 1 - dataIndex;
+                                    const entry = filteredData[originalIndex];
+                                    return new Date(entry.timestamp).toLocaleString('ru-RU', {
+                                        day: '2-digit',
+                                        month: '2-digit',
+                                        year: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    });
                                 }
                             }
                         }
@@ -255,7 +244,7 @@ const HistoryChartComponent = ({ historyData, timeRange, currentData }) => {
                             },
                             ticks: {
                                 color: '#a0a0a0',
-                                maxTicksLimit: 6,
+                                maxTicksLimit: 8,
                                 font: {
                                     size: 10
                                 }
@@ -281,7 +270,7 @@ const HistoryChartComponent = ({ historyData, timeRange, currentData }) => {
                             },
                             title: {
                                 display: true,
-                                text: 'Хешрейт',
+                                text: 'Хешрейт (TH/s)',
                                 color: '#ff8c00',
                                 font: {
                                     size: 11,
@@ -308,7 +297,7 @@ const HistoryChartComponent = ({ historyData, timeRange, currentData }) => {
                             },
                             title: {
                                 display: true,
-                                text: 'Потребление',
+                                text: 'Потребление (кВт)',
                                 color: '#00aaff',
                                 font: {
                                     size: 11,
@@ -328,56 +317,114 @@ const HistoryChartComponent = ({ historyData, timeRange, currentData }) => {
         };
     }, [historyData, timeRange]);
 
-    if (!historyData || !historyData.farm_history || historyData.farm_history.length === 0) {
-        return (
-            <div className="history-chart-empty">
-                <div className="empty-chart-message">
-                    <p>📊 Собираем исторические данные...</p>
-                    <span>График появится после нескольких обновлений</span>
-                </div>
-            </div>
-        );
-    }
+    const handleExport = () => {
+        historyManager.exportHistory();
+    };
 
-    const filteredData = FarmHistory.getLastNHours(historyData,
-        timeRange === '24h' ? 24 : timeRange === '48h' ? 48 : 168
-    );
+    const handleClear = () => {
+        if (window.confirm('Очистить всю историю? Это действие нельзя отменить.')) {
+            const clearedHistory = historyManager.clearHistory();
+            setHistoryData(clearedHistory);
+        }
+    };
 
-    if (filteredData.length === 0) {
-        return (
-            <div className="history-chart-empty">
-                <div className="empty-chart-message">
-                    <p>⏰ Нет данных за выбранный период</p>
-                    <span>Попробуйте выбрать другой временной диапазон</span>
-                </div>
-            </div>
-        );
-    }
+    const stats = historyManager.getHistoryStats();
 
     return (
-        <div className="history-chart-container">
-            <div className="chart-wrapper">
-                <canvas ref={chartRef} />
+        <div className="history-section">
+            <div className="section-header">
+                <div className="section-title-wrapper">
+                    <h3 className="section-title">📊 ИСТОРИЯ РАБОТЫ</h3>
+                    <div className="history-stats">
+                        <span className="stat-badge">Записей: {stats.total_entries}</span>
+                    </div>
+                </div>
+
+                <div className="chart-controls">
+                    <div className="time-range-selector">
+                        <button
+                            className={`time-range-btn ${timeRange === '24h' ? 'active' : ''}`}
+                            onClick={() => onTimeRangeChange('24h')}
+                        >
+                            24Ч
+                        </button>
+                        <button
+                            className={`time-range-btn ${timeRange === '48h' ? 'active' : ''}`}
+                            onClick={() => onTimeRangeChange('48h')}
+                        >
+                            48Ч
+                        </button>
+                        <button
+                            className={`time-range-btn ${timeRange === '7d' ? 'active' : ''}`}
+                            onClick={() => onTimeRangeChange('7d')}
+                        >
+                            7ДН
+                        </button>
+                    </div>
+
+                    <div className="history-actions">
+                        <button className="action-btn export-btn" onClick={handleExport} title="Экспорт данных">
+                            📥
+                        </button>
+                        <button className="action-btn clear-btn" onClick={handleClear} title="Очистить историю">
+                            🗑️
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            <div className="current-stats-mini">
-                <div className="mini-stat">
-                    <span className="mini-label">Текущий хешрейт:</span>
-                    <span className="mini-value hashrate">
-                        {currentData?.total_hashrate?.toFixed(2)} TH/s
-                    </span>
+            <div className="history-chart-container">
+                <div className="chart-wrapper">
+                    <canvas ref={chartRef} />
                 </div>
-                <div className="mini-stat">
-                    <span className="mini-label">Потребление:</span>
-                    <span className="mini-value power">
-                        {(currentData?.total_power / 1000)?.toFixed(1)} кВт
-                    </span>
-                </div>
-                <div className="mini-stat">
-                    <span className="mini-label">Эффективность:</span>
-                    <span className="mini-value efficiency">
-                        {((currentData?.total_hashrate / (currentData?.total_power / 1000)) || 0).toFixed(2)} TH/кВт
-                    </span>
+
+                {(!historyData || !historyData.farm_history || historyData.farm_history.length === 0) ? (
+                    <div className="history-chart-empty">
+                        <div className="empty-chart-message">
+                            <p>📊 Собираем исторические данные...</p>
+                            <span>Первые данные появятся через час после начала работы</span>
+                            <div className="debug-info">
+                                <button onClick={() => {
+                                    // Принудительно сохраняем текущие данные для теста
+                                    const testData = {
+                                        summary: currentData
+                                    };
+                                    const updatedHistory = historyManager.saveCurrentData(testData);
+                                    setHistoryData(updatedHistory);
+                                }} className="test-btn">
+                                    Тест: добавить текущие данные
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                ) : historyManager.getLastNHours(timeRange === '24h' ? 24 : timeRange === '48h' ? 48 : 168).length === 0 ? (
+                    <div className="history-chart-empty">
+                        <div className="empty-chart-message">
+                            <p>⏰ Нет данных за выбранный период</p>
+                            <span>Попробуйте выбрать другой временной диапазон</span>
+                        </div>
+                    </div>
+                ) : null}
+
+                <div className="current-stats-mini">
+                    <div className="mini-stat">
+                        <span className="mini-label">Текущий хешрейт:</span>
+                        <span className="mini-value hashrate">
+                            {currentData?.total_hashrate?.toFixed(2)} TH/s
+                        </span>
+                    </div>
+                    <div className="mini-stat">
+                        <span className="mini-label">Потребление:</span>
+                        <span className="mini-value power">
+                            {(currentData?.total_power / 1000)?.toFixed(1)} кВт
+                        </span>
+                    </div>
+                    <div className="mini-stat">
+                        <span className="mini-label">Эффективность:</span>
+                        <span className="mini-value efficiency">
+                            {((currentData?.total_hashrate / (currentData?.total_power / 1000)) || 0).toFixed(2)} TH/кВт
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>

@@ -1,5 +1,4 @@
-/* Dashboard.css - добавь эти стили */
-
+/* Dashboard.css - Полная обновленная версия */
 .dashboard {
     padding: 20px;
     max-width: 1400px;
@@ -46,11 +45,41 @@
     gap: 16px;
 }
 
+.section-title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
 .section-title {
     color: #ff8c00;
     margin: 0;
     font-size: 20px;
     font-weight: 700;
+}
+
+.history-stats {
+    display: flex;
+    gap: 8px;
+}
+
+.stat-badge {
+    background: rgba(255, 140, 0, 0.2);
+    color: #ff8c00;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    border: 1px solid rgba(255, 140, 0, 0.3);
+    white-space: nowrap;
+}
+
+.chart-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
 }
 
 .time-range-selector {
@@ -84,6 +113,40 @@
     box-shadow: var(--shadow-sm);
 }
 
+.history-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    background: rgba(255, 140, 0, 0.1);
+    border: 1px solid rgba(255, 140, 0, 0.3);
+    color: #ff8c00;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.action-btn:hover {
+    background: rgba(255, 140, 0, 0.2);
+    transform: translateY(-1px);
+}
+
+.export-btn:hover {
+    background: rgba(0, 170, 255, 0.2);
+    border-color: rgba(0, 170, 255, 0.5);
+}
+
+.clear-btn:hover {
+    background: rgba(255, 68, 68, 0.2);
+    border-color: rgba(255, 68, 68, 0.5);
+}
+
 /* Контейнер графика */
 .history-chart-container {
     background: rgba(10, 10, 10, 0.7);
@@ -112,6 +175,7 @@
 .empty-chart-message {
     text-align: center;
     color: #a0a0a0;
+    padding: 20px;
 }
 
 .empty-chart-message p {
@@ -124,6 +188,27 @@
 .empty-chart-message span {
     font-size: 12px;
     color: #666;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.debug-info {
+    margin-top: 12px;
+}
+
+.test-btn {
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    color: #00ff88;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.test-btn:hover {
+    background: rgba(0, 255, 136, 0.2);
 }
 
 /* Мини-статистика */
@@ -144,6 +229,12 @@
     background: rgba(255, 140, 0, 0.05);
     border-radius: var(--radius-md);
     border: 1px solid rgba(255, 140, 0, 0.1);
+    transition: var(--transition-fast);
+}
+
+.mini-stat:hover {
+    background: rgba(255, 140, 0, 0.1);
+    transform: translateY(-2px);
 }
 
 .mini-label {
@@ -183,10 +274,131 @@
     padding-bottom: 12px;
 }
 
+/* Стили для состояний загрузки и ошибок */
+.dashboard-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.loading-spinner.large {
+    border: 4px solid rgba(255, 140, 0, 0.3);
+    border-top: 4px solid #ff8c00;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+.dashboard-loading p {
+    color: #ff8c00;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.dashboard-error {
+    text-align: center;
+    padding: 40px 20px;
+    background: rgba(255, 68, 68, 0.1);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 68, 68, 0.3);
+    margin: 20px;
+}
+
+.error-title {
+    color: #ff4444;
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.error-message {
+    color: #ffffff;
+    margin-bottom: 24px;
+    font-size: 16px;
+}
+
+.retry-button {
+    background: var(--gradient-primary);
+    border: none;
+    color: #000;
+    padding: 12px 24px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.retry-button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.no-data {
+    text-align: center;
+    padding: 60px 20px;
+    background: rgba(255, 140, 0, 0.1);
+    border-radius: var(--radius-lg);
+    border: 2px dashed rgba(255, 140, 0, 0.3);
+    margin: 20px;
+}
+
+.no-data-title {
+    color: #ff8c00;
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.no-data-message {
+    color: #a0a0a0;
+    font-size: 16px;
+}
+
+/* Анимации */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Плавные переходы для всех интерактивных элементов */
+.time-range-btn,
+.action-btn,
+.mini-stat,
+.retry-button,
+.test-btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Эффекты при наведении для лучшего UX */
+.time-range-btn:active,
+.action-btn:active {
+    transform: translateY(0);
+}
+
 /* Адаптивность */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .dashboard {
         padding: 16px;
+    }
+
+    .history-section {
+        padding: 20px;
+    }
+
+    .chart-wrapper {
+        height: 320px;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard {
+        padding: 12px;
     }
 
     .dashboard-title h2 {
@@ -201,10 +413,27 @@
     .section-header {
         flex-direction: column;
         align-items: stretch;
+        gap: 12px;
+    }
+
+    .section-title-wrapper {
+        justify-content: center;
+        text-align: center;
+    }
+
+    .chart-controls {
+        justify-content: center;
     }
 
     .time-range-selector {
         justify-content: center;
+        width: 100%;
+    }
+
+    .time-range-btn {
+        flex: 1;
+        text-align: center;
+        min-width: auto;
     }
 
     .chart-wrapper {
@@ -220,10 +449,29 @@
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
+        padding: 16px;
+    }
+
+    .history-actions {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .action-btn {
+        flex: 1;
+        text-align: center;
     }
 }
 
 @media (max-width: 480px) {
+    .dashboard-title h2 {
+        font-size: 20px;
+    }
+
+    .section-title {
+        font-size: 18px;
+    }
+
     .chart-wrapper {
         height: 250px;
     }
@@ -231,6 +479,135 @@
     .time-range-btn {
         padding: 6px 12px;
         font-size: 11px;
-        min-width: 50px;
     }
+
+    .action-btn {
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+
+    .mini-label {
+        font-size: 10px;
+    }
+
+    .mini-value {
+        font-size: 13px;
+    }
+
+    .history-chart-empty {
+        height: 180px;
+    }
+
+    .empty-chart-message p {
+        font-size: 14px;
+    }
+
+    .empty-chart-message span {
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 360px) {
+    .dashboard {
+        padding: 8px;
+    }
+
+    .history-section {
+        padding: 12px;
+        margin: 12px 0;
+    }
+
+    .chart-wrapper {
+        height: 220px;
+    }
+
+    .time-range-selector {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .time-range-btn {
+        padding: 8px;
+    }
+
+    .current-stats-mini {
+        gap: 8px;
+    }
+
+    .mini-stat {
+        padding: 12px 8px;
+    }
+}
+
+/* Темная тема дополнения */
+@media (prefers-color-scheme: dark) {
+    .history-chart-container {
+        background: rgba(0, 0, 0, 0.8);
+    }
+
+    .history-chart-empty {
+        background: rgba(0, 0, 0, 0.6);
+    }
+}
+
+/* Улучшенная доступность */
+.time-range-btn:focus-visible,
+.action-btn:focus-visible,
+.retry-button:focus-visible,
+.test-btn:focus-visible {
+    outline: 2px solid #ff8c00;
+    outline-offset: 2px;
+}
+
+/* Стили для скроллбара в контейнерах */
+.containers-grid::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.containers-grid::-webkit-scrollbar-track {
+    background: rgba(255, 140, 0, 0.1);
+    border-radius: 4px;
+}
+
+.containers-grid::-webkit-scrollbar-thumb {
+    background: rgba(255, 140, 0, 0.3);
+    border-radius: 4px;
+}
+
+.containers-grid::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 140, 0, 0.5);
+}
+
+/* Плавное появление элементов */
+.dashboard > * {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Задержки для последовательной анимации */
+.dashboard-header {
+    animation-delay: 0.1s;
+}
+
+.stats-grid {
+    animation-delay: 0.2s;
+}
+
+.history-section {
+    animation-delay: 0.3s;
+}
+
+.containers-section {
+    animation-delay: 0.4s;
 }
