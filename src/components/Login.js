@@ -1,4 +1,3 @@
-// Login.js - Старая логика с новыми стилями
 import React, { useState, useEffect } from 'react';
 import '../styles/components/Login.css';
 
@@ -9,13 +8,21 @@ const Login = ({ onLogin }) => {
     const [rememberMe, setRememberMe] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
+    // Правильный путь к credentials.json
+    const getCredentialsPath = () => {
+        // Для GitHub Pages
+        if (window.location.hostname.includes('github.io')) {
+            return '/mining-monitor-web/data/auth/credentials.json';
+        }
+        // Для локальной разработки
+        return '/data/auth/credentials.json';
+    };
+
     useEffect(() => {
-        // Проверяем сохраненные данные при загрузке
         const savedAuth = localStorage.getItem('miningAuth');
         if (savedAuth) {
             try {
                 const authData = JSON.parse(savedAuth);
-                // Автоматический вход если не прошло 30 дней
                 if (Date.now() - authData.timestamp < 30 * 24 * 60 * 60 * 1000) {
                     handleAutoLogin(authData.username, authData.password);
                 } else {
@@ -30,7 +37,8 @@ const Login = ({ onLogin }) => {
     const handleAutoLogin = async (savedUser, savedPass) => {
         setIsLoading(true);
         try {
-            const response = await fetch('./data/auth/credentials.json');
+            const credentialsPath = getCredentialsPath();
+            const response = await fetch(credentialsPath + '?t=' + Date.now());
             if (!response.ok) throw new Error('Auth file not found');
 
             const authData = await response.json();
@@ -56,7 +64,8 @@ const Login = ({ onLogin }) => {
         setIsLoading(true);
 
         try {
-            const response = await fetch('./data/auth/credentials.json');
+            const credentialsPath = getCredentialsPath();
+            const response = await fetch(credentialsPath + '?t=' + Date.now());
             if (!response.ok) throw new Error('Auth file not found');
 
             const authData = await response.json();
@@ -78,6 +87,7 @@ const Login = ({ onLogin }) => {
             }
         } catch (error) {
             setError('Ошибка авторизации. Проверьте подключение.');
+            console.error('Login error:', error);
         }
         setIsLoading(false);
     };
