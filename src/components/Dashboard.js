@@ -12,32 +12,22 @@ const Dashboard = ({ farmNameProp }) => {
     const [chartTimeRange, setChartTimeRange] = useState('24h');
 
     useEffect(() => {
-        // Инициализируем историю при первой загрузке
         const initialHistory = historyManager.initHistory();
         setHistoryData(initialHistory);
-        console.log('📊 History initialized:', historyManager.getHistoryStats());
     }, []);
 
     useEffect(() => {
         if (farmData && !loading) {
-            console.log('💾 Saving farm data to history...');
             const updatedHistory = historyManager.saveCurrentData(farmData);
             setHistoryData(updatedHistory);
         }
     }, [farmData, loading]);
 
     const handleClearHistory = () => {
-        if (window.confirm('Очистить всю историю? Тестовые данные будут удалены, а реальные начнут собираться заново через час.')) {
+        if (window.confirm('Очистить всю историю? Данные начнут собираться заново через 30 минут.')) {
             const clearedHistory = historyManager.clearHistory();
             setHistoryData(clearedHistory);
-            console.log('🗑️ History cleared');
         }
-    };
-
-    const handleAddTestData = () => {
-        const updatedHistory = historyManager.addTestData();
-        setHistoryData(updatedHistory);
-        console.log('🧪 Test data added');
     };
 
     const handleExportHistory = () => {
@@ -95,7 +85,6 @@ const Dashboard = ({ farmNameProp }) => {
                 onTimeRangeChange={setChartTimeRange}
                 currentData={farmData.summary}
                 onClearHistory={handleClearHistory}
-                onAddTestData={handleAddTestData}
                 onExportHistory={handleExportHistory}
             />
 
@@ -124,7 +113,6 @@ const ChartTabsSection = ({
                               onTimeRangeChange,
                               currentData,
                               onClearHistory,
-                              onAddTestData,
                               onExportHistory
                           }) => {
     const [hourlyData, setHourlyData] = useState([]);
@@ -146,12 +134,7 @@ const ChartTabsSection = ({
                     <h3 className="section-title">📈 ИСТОРИЯ РАБОТЫ</h3>
                     <div className="history-stats">
                         <span className="stat-badge">Записей: {stats.total_entries}</span>
-                        {stats.is_test_data && (
-                            <span className="stat-badge test-badge">ТЕСТ</span>
-                        )}
-                        {stats.test_entries > 0 && (
-                            <span className="stat-badge test-count">Тестовых: {stats.test_entries}</span>
-                        )}
+                        <span className="stat-badge">Интервал: 30min</span>
                     </div>
                 </div>
 
@@ -196,9 +179,6 @@ const ChartTabsSection = ({
                         <button className="action-btn export-btn" onClick={onExportHistory} title="Экспорт данных">
                             📥 Экспорт
                         </button>
-                        <button className="action-btn test-btn" onClick={onAddTestData} title="Добавить тестовые данные">
-                            🧪 Тест
-                        </button>
                         <button className="action-btn clear-btn" onClick={onClearHistory} title="Очистить историю">
                             🗑️ Очистить
                         </button>
@@ -211,14 +191,12 @@ const ChartTabsSection = ({
                     <HashrateChart
                         data={hourlyData}
                         currentData={currentData}
-                        isTestData={stats.is_test_data}
                     />
                 )}
                 {activeTab === 'power' && (
                     <PowerChart
                         data={hourlyData}
                         currentData={currentData}
-                        isTestData={stats.is_test_data}
                     />
                 )}
 
@@ -226,12 +204,7 @@ const ChartTabsSection = ({
                     <div className="chart-empty">
                         <div className="empty-message">
                             <p>📊 Нет исторических данных</p>
-                            <span>Данные начнут собираться автоматически через час</span>
-                            <div className="debug-info">
-                                <button onClick={onAddTestData} className="test-btn">
-                                    🧪 Добавить тестовые данные за 2 часа
-                                </button>
-                            </div>
+                            <span>Данные начнут собираться автоматически через 30 минут</span>
                         </div>
                     </div>
                 )}
@@ -239,17 +212,13 @@ const ChartTabsSection = ({
 
             {/* Информация о данных */}
             <div className="data-info">
-                {stats.is_test_data ? (
-                    <div className="info-message test-message">
-                        <strong>🧪 ТЕСТОВЫЕ ДАННЫЕ</strong> - Это демо-данные за 2 часа. Реальные данные начнут собираться через час после очистки.
-                    </div>
-                ) : stats.real_entries === 0 ? (
+                {stats.total_entries === 0 ? (
                     <div className="info-message waiting-message">
-                        <strong>⏳ ОЖИДАНИЕ ДАННЫХ</strong> - Первые реальные данные появятся через час работы системы.
+                        <strong>⏳ ОЖИДАНИЕ ДАННЫХ</strong> - Первые данные появятся через 30 минут работы системы.
                     </div>
                 ) : (
                     <div className="info-message real-message">
-                        <strong>✅ РЕАЛЬНЫЕ ДАННЫЕ</strong> - Собирается каждый час. Всего записей: {stats.real_entries}
+                        <strong>✅ ДАННЫЕ СОБИРАЮТСЯ</strong> - Каждые 30 минут. Всего записей: {stats.total_entries}
                     </div>
                 )}
             </div>
@@ -257,8 +226,8 @@ const ChartTabsSection = ({
     );
 };
 
-// График хешрейта (остается без изменений)
-const HashrateChart = ({ data, currentData, isTestData }) => {
+// График хешрейта
+const HashrateChart = ({ data, currentData }) => {
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
 
@@ -289,12 +258,8 @@ const HashrateChart = ({ data, currentData, isTestData }) => {
             chartInstance.current = new window.Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: data.map(item =>
-                        new Date(item.timestamp).toLocaleTimeString('ru-RU', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        })
-                    ),
+                    // Данные уже отсортированы от старых к новым
+                    labels: data.map(item => item.time_label),
                     datasets: [{
                         label: 'Хешрейт (TH/s)',
                         data: data.map(item => item.total_hashrate),
@@ -306,8 +271,8 @@ const HashrateChart = ({ data, currentData, isTestData }) => {
                         pointBackgroundColor: '#ff8c00',
                         pointBorderColor: '#000',
                         pointBorderWidth: 2,
-                        pointRadius: 4,
-                        pointHoverRadius: 6,
+                        pointRadius: 3,
+                        pointHoverRadius: 5,
                     }]
                 },
                 options: {
@@ -330,7 +295,7 @@ const HashrateChart = ({ data, currentData, isTestData }) => {
                     scales: {
                         x: {
                             grid: { color: 'rgba(255, 140, 0, 0.1)' },
-                            ticks: { color: '#a0a0a0', maxTicksLimit: 8 }
+                            ticks: { color: '#a0a0a0', maxTicksLimit: 12 }
                         },
                         y: {
                             grid: { color: 'rgba(255, 140, 0, 0.1)' },
@@ -359,7 +324,7 @@ const HashrateChart = ({ data, currentData, isTestData }) => {
     return (
         <div className="chart-wrapper">
             <div className="chart-header">
-                <h4>📊 ГРАФИК ХЕШРЕЙТА {isTestData && '🧪'}</h4>
+                <h4>📊 ГРАФИК ХЕШРЕЙТА</h4>
                 <div className="current-value hashrate-value">
                     Текущий: <strong>{currentData?.total_hashrate?.toFixed(2)} TH/s</strong>
                 </div>
@@ -369,8 +334,8 @@ const HashrateChart = ({ data, currentData, isTestData }) => {
     );
 };
 
-// График потребления (остается без изменений)
-const PowerChart = ({ data, currentData, isTestData }) => {
+// График потребления
+const PowerChart = ({ data, currentData }) => {
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
 
@@ -401,12 +366,7 @@ const PowerChart = ({ data, currentData, isTestData }) => {
             chartInstance.current = new window.Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: data.map(item =>
-                        new Date(item.timestamp).toLocaleTimeString('ru-RU', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        })
-                    ),
+                    labels: data.map(item => item.time_label),
                     datasets: [{
                         label: 'Потребление (кВт)',
                         data: data.map(item => item.total_power / 1000),
@@ -418,8 +378,8 @@ const PowerChart = ({ data, currentData, isTestData }) => {
                         pointBackgroundColor: '#00aaff',
                         pointBorderColor: '#000',
                         pointBorderWidth: 2,
-                        pointRadius: 4,
-                        pointHoverRadius: 6,
+                        pointRadius: 3,
+                        pointHoverRadius: 5,
                     }]
                 },
                 options: {
@@ -442,7 +402,7 @@ const PowerChart = ({ data, currentData, isTestData }) => {
                     scales: {
                         x: {
                             grid: { color: 'rgba(0, 170, 255, 0.1)' },
-                            ticks: { color: '#a0a0a0', maxTicksLimit: 8 }
+                            ticks: { color: '#a0a0a0', maxTicksLimit: 12 }
                         },
                         y: {
                             grid: { color: 'rgba(0, 170, 255, 0.1)' },
@@ -471,7 +431,7 @@ const PowerChart = ({ data, currentData, isTestData }) => {
     return (
         <div className="chart-wrapper">
             <div className="chart-header">
-                <h4>⚡ ГРАФИК ПОТРЕБЛЕНИЯ {isTestData && '🧪'}</h4>
+                <h4>⚡ ГРАФИК ПОТРЕБЛЕНИЯ</h4>
                 <div className="current-value power-value">
                     Текущее: <strong>{(currentData?.total_power / 1000)?.toFixed(1)} кВт</strong>
                 </div>
