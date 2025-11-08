@@ -51,20 +51,20 @@ export const useFarmData = (farmNameProp) => {
         const containers = data.containers || {};
         const containerEntries = Object.entries(containers);
 
-        // ПРОСТОЙ подсчет - берем данные как есть из JSON
+        // ПРОСТО берем данные как есть из JSON
         const summary = {
             total_containers: containerEntries.length,
-            total_miners: containerEntries.reduce((sum, [_, container]) =>
+            total_miners: data.summary?.total_miners || containerEntries.reduce((sum, [_, container]) =>
                 sum + (container.total_miners || 0), 0),
-            online_miners: containerEntries.reduce((sum, [_, container]) =>
+            online_miners: data.summary?.online_miners || containerEntries.reduce((sum, [_, container]) =>
                 sum + (container.online_miners || 0), 0),
-            problematic_miners: containerEntries.reduce((sum, [_, container]) =>
+            problematic_miners: data.summary?.problematic_miners || containerEntries.reduce((sum, [_, container]) =>
                 sum + (container.problematic_miners || 0), 0),
-            offline_miners: containerEntries.reduce((sum, [_, container]) =>
+            offline_miners: data.summary?.offline_miners || containerEntries.reduce((sum, [_, container]) =>
                 sum + (container.offline_miners || 0), 0),
-            total_hashrate: containerEntries.reduce((sum, [_, container]) =>
+            total_hashrate: data.summary?.total_hashrate || containerEntries.reduce((sum, [_, container]) =>
                 sum + (container.total_hashrate || 0), 0),
-            total_power: containerEntries.reduce((sum, [_, container]) =>
+            total_power: data.summary?.total_power || containerEntries.reduce((sum, [_, container]) =>
                 sum + (container.total_power || 0), 0)
         };
 
@@ -80,7 +80,7 @@ export const useFarmData = (farmNameProp) => {
                     problematic_miners: container.problematic_miners,
                     offline_miners: container.offline_miners
                 },
-                miners: container.miners_data || [] // Используем miners_data из JSON
+                miners: container.miners || container.miners_data || {} // Используем miners или miners_data из JSON
             };
         });
 
