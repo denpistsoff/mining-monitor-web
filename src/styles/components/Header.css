@@ -275,4 +275,54 @@
         padding: 12px 8px;
         font-size: 0.8rem;
     }
+    /* Дополнения к Header.css */
+    .alerts-button {
+        position: relative;
+        background: var(--bg-tertiary);
+        border: 1px solid #333;
+        border-radius: var(--radius-md);
+        padding: 8px 12px;
+        cursor: pointer;
+        transition: var(--transition-fast);
+        font-size: 1.2rem;
+    }
+
+    .alerts-button:hover {
+        background: var(--accent-primary);
+        transform: translateY(-2px);
+    }
+
+    .alerts-button.has-alerts {
+        border-color: var(--accent-warning);
+        background: var(--accent-warning);
+        color: #000;
+    }
+
+    .alerts-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: var(--accent-danger);
+        color: white;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        font-size: 0.7rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .action-btn.small {
+        padding: 8px 12px;
+        font-size: 1.2rem;
+        min-width: auto;
+    }
 }
