@@ -1,4 +1,4 @@
-// Login.js - Работа с JSON файлом из public/data/auth/
+// Login.js - Старая логика с новыми стилями
 import React, { useState, useEffect } from 'react';
 import '../styles/components/Login.css';
 
@@ -6,20 +6,17 @@ const Login = ({ onLogin }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const [rememberMe, setRememberMe] = useState(true);
+    const [rememberMe, setRememberMe] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
-    // URL к JSON файлу с учетными данными
-    const CREDENTIALS_URL = process.env.NODE_ENV === 'development'
-        ? '/data/auth/credentials.json'
-        : '/mining-monitor-web/data/auth/credentials.json';
-
     useEffect(() => {
+        // Проверяем сохраненные данные при загрузке
         const savedAuth = localStorage.getItem('miningAuth');
         if (savedAuth) {
             try {
                 const authData = JSON.parse(savedAuth);
-                if (Date.now() - authData.timestamp < 7 * 24 * 60 * 60 * 1000) {
+                // Автоматический вход если не прошло 30 дней
+                if (Date.now() - authData.timestamp < 30 * 24 * 60 * 60 * 1000) {
                     handleAutoLogin(authData.username, authData.password);
                 } else {
                     localStorage.removeItem('miningAuth');
@@ -33,60 +30,45 @@ const Login = ({ onLogin }) => {
     const handleAutoLogin = async (savedUser, savedPass) => {
         setIsLoading(true);
         try {
-            const isValid = await validateCredentials(savedUser, savedPass);
-            if (isValid) {
+            const response = await fetch('./data/auth/credentials.json');
+            if (!response.ok) throw new Error('Auth file not found');
+
+            const authData = await response.json();
+            const validUser = authData.users.find(u =>
+                u.username === savedUser && u.password === savedPass
+            );
+
+            if (validUser) {
                 onLogin(true);
             } else {
                 localStorage.removeItem('miningAuth');
-                setError('Сохраненные данные устарели');
             }
         } catch (error) {
+            console.error('Auto-login failed:', error);
             localStorage.removeItem('miningAuth');
-            setError('Ошибка автоматического входа');
         }
         setIsLoading(false);
-    };
-
-    const validateCredentials = async (user, pass) => {
-        try {
-            const response = await fetch(CREDENTIALS_URL + '?t=' + Date.now());
-
-            if (!response.ok) {
-                throw new Error(`Failed to fetch credentials: ${response.status}`);
-            }
-
-            const authData = await response.json();
-
-            // Проверяем учетные данные
-            const validUser = authData.users.find(u =>
-                u.username === user && u.password === pass
-            );
-
-            return !!validUser;
-        } catch (error) {
-            console.error('Credential validation error:', error);
-            return false;
-        }
     };
 
     const handleLogin = async (e) => {
         e.preventDefault();
         setError('');
-
-        if (!username.trim() || !password.trim()) {
-            setError('Введите логин и пароль');
-            return;
-        }
-
         setIsLoading(true);
 
         try {
-            const isValid = await validateCredentials(username, password);
+            const response = await fetch('./data/auth/credentials.json');
+            if (!response.ok) throw new Error('Auth file not found');
 
-            if (isValid) {
+            const authData = await response.json();
+            const validUser = authData.users.find(u =>
+                u.username === username && u.password === password
+            );
+
+            if (validUser) {
                 if (rememberMe) {
                     localStorage.setItem('miningAuth', JSON.stringify({
                         username: username,
+                        password: password,
                         timestamp: Date.now()
                     }));
                 }
@@ -96,7 +78,6 @@ const Login = ({ onLogin }) => {
             }
         } catch (error) {
             setError('Ошибка авторизации. Проверьте подключение.');
-            console.error('Login error:', error);
         }
         setIsLoading(false);
     };
@@ -119,7 +100,7 @@ const Login = ({ onLogin }) => {
             <div className="login-form">
                 <div className="login-header">
                     <h1 className="login-title">MINING MONITOR</h1>
-                    <p className="login-subtitle">Защищенный доступ к системе мониторинга</p>
+                    <p className="login-subtitle">Система мониторинга майнинг ферм</p>
                 </div>
 
                 <form onSubmit={handleLogin}>
@@ -164,18 +145,11 @@ const Login = ({ onLogin }) => {
                     <button
                         type="submit"
                         className="login-button"
-                        disabled={isLoading || !username || !password}
+                        disabled={isLoading}
                     >
                         {isLoading ? 'ВХОД...' : 'ВОЙТИ В СИСТЕМУ'}
                     </button>
                 </form>
-
-                <div className="security-notice">
-                    <div className="security-icon">🔒</div>
-                    <div className="security-text">
-                        Доступ ограничен. Используйте выданные учетные данные.
-                    </div>
-                </div>
             </div>
         </div>
     );
