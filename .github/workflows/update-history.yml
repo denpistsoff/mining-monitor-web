@@ -2,7 +2,7 @@ name: Update Farm History
 
 on:
   schedule:
-    - cron: '*/30 * * * *'  # Каждые 30 минут
+    - cron: '0,30 * * * *'  # Каждые 30 минут (в :00 и :30)
   workflow_dispatch:  # Ручной запуск
 
 jobs:
@@ -17,158 +17,124 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
+      - name: Setup jq for JSON processing
+        run: sudo apt-get install -y jq
 
       - name: Update farm history
         run: |
-          # Создаем скрипт для обновления истории
-          cat > update-history.js << 'EOF'
-          const https = require('https');
-          const fs = require('fs');
+          echo "🔄 Starting farm history update..."
           
-          const FARM_NAME = 'main'; // Измени на нужное имя фермы
+          # Пути к файлам
+          HISTORY_FILE="data/farm_history_main.json"
+          FARM_DATA_URL="https://raw.githubusercontent.com/denpistsoff/mining-monitor-web/main/data/farm_data_main.json?t=$(date +%s)"
           
-          async function updateHistory() {
-            try {
-              console.log('🔄 Загружаем текущие данные фермы...');
+          # Создаем папку data если не существует
+          mkdir -p data
           
-              // Загружаем текущие данные фермы
-              const currentData = await fetchFarmData(FARM_NAME);
-              if (!currentData || currentData._isOfflineData) {
-                console.log('❌ Ферма offline, пропускаем обновление');
-                return;
-              }
+          # Загружаем текущие данные фермы
+          echo "📥 Loading farm data from: $FARM_DATA_URL"
+          FARM_JSON=$(curl -f -s "$FARM_DATA_URL" || echo "{}")
           
-              console.log('✅ Данные получены:', {
-                hashrate: currentData.summary?.total_hashrate,
-                power: currentData.summary?.total_power,
-                miners: currentData.summary?.online_miners
-              });
-          
-              // Загружаем существующую историю
-              const history = await loadHistory(FARM_NAME);
-          
-              // Создаем новую запись
-              const now = new Date();
-              const minutes = now.getMinutes();
-              const roundedMinutes = minutes < 30 ? 0 : 30;
-              const timestamp = new Date(now);
-              timestamp.setMinutes(roundedMinutes, 0, 0);
-          
-              const newEntry = {
-                timestamp: timestamp.toISOString(),
-                time_label: `${timestamp.getHours().toString().padStart(2, '0')}:${roundedMinutes.toString().padStart(2, '0')}`,
-                date: timestamp.toLocaleDateString('ru-RU'),
-                total_hashrate: currentData.summary?.total_hashrate || 0,
-                total_power: currentData.summary?.total_power || 0,
-                online_miners: currentData.summary?.online_miners || 0,
-                problematic_miners: currentData.summary?.problematic_miners || 0,
-                total_miners: currentData.summary?.total_miners || 0,
-                efficiency: currentData.summary?.total_hashrate && currentData.summary.total_power ? 
-                  parseFloat((currentData.summary.total_hashrate / (currentData.summary.total_power / 1000)).toFixed(3)) : 0
-              };
-          
-              console.log('📊 Новая запись:', newEntry);
-          
-              // Проверяем, нет ли уже записи для этого временного слота
-              const existingIndex = history.farm_history.findIndex(entry => 
-                entry.time_label === newEntry.time_label && 
-                entry.date === newEntry.date
-              );
-          
-              if (existingIndex === -1) {
-                // Добавляем новую запись в начало
-                history.farm_history.unshift(newEntry);
-                console.log('✅ Добавлена новая запись в историю');
-              } else {
-                // Обновляем существующую запись
-                history.farm_history[existingIndex] = newEntry;
-                console.log('✅ Обновлена существующая запись');
-              }
-          
-              // Ограничиваем размер истории (2 недели)
-              if (history.farm_history.length > 672) { // 14 дней * 48 записей в день
-                history.farm_history = history.farm_history.slice(0, 672);
-                console.log('✂️ Обрезана история до 672 записей');
-              }
-          
-              // Добавляем метаданные
-              history.last_update = new Date().toISOString();
-              history.farm_name = FARM_NAME;
-          
-              // Сохраняем историю
-              await saveHistory(FARM_NAME, history);
-              console.log('💾 История сохранена');
-          
-            } catch (error) {
-              console.error('❌ Ошибка обновления истории:', error);
-            }
-          }
-          
-          async function fetchFarmData(farmName) {
-            return new Promise((resolve) => {
-              const url = `https://raw.githubusercontent.com/denpistsoff/mining-monitor-web/main/data/farm_data_${farmName}.json?t=${Date.now()}`;
-          
-              https.get(url, (res) => {
-                let data = '';
-                res.on('data', chunk => data += chunk);
-                res.on('end', () => {
-                  try {
-                    resolve(JSON.parse(data));
-                  } catch {
-                    console.log('❌ Ошибка парсинга данных фермы');
-                    resolve(null);
-                  }
-                });
-              }).on('error', (err) => {
-                console.log('❌ Ошибка загрузки данных фермы:', err.message);
-                resolve(null);
-              });
-            });
-          }
-          
-          async function loadHistory(farmName) {
-            try {
-              const historyFile = `data/farm_history_${farmName}.json`;
-              if (fs.existsSync(historyFile)) {
-                const history = JSON.parse(fs.readFileSync(historyFile, 'utf8'));
-                console.log(`📖 Загружена история из ${historyFile}, записей: ${history.farm_history.length}`);
-                return history;
-              }
-            } catch (error) {
-              console.log('📝 Создаем новую историю');
-            }
-            return { farm_history: [] };
-          }
-          
-          async function saveHistory(farmName, history) {
-            const historyFile = `data/farm_history_${farmName}.json`;
-            fs.writeFileSync(historyFile, JSON.stringify(history, null, 2));
-            console.log(`💾 Сохранено в ${historyFile}, записей: ${history.farm_history.length}`);
-          }
-          
-          updateHistory();
-          EOF
-          
-          node update-history.js
-
-      - name: Check if history files were created
-        id: check_files
-        run: |
-          if ls data/farm_history_*.json 1> /dev/null 2>&1; then
-            echo "files_changed=true" >> $GITHUB_OUTPUT
-          else
-            echo "files_changed=false" >> $GITHUB_OUTPUT
+          if [ "$FARM_JSON" = "{}" ]; then
+            echo "❌ Failed to load farm data"
+            exit 0
           fi
+          
+          # Проверяем что ферма онлайн (ищем _isOfflineData или _dataStatus)
+          if echo "$FARM_JSON" | grep -q "_isOfflineData\" *: *true"; then
+            echo "❌ Farm is offline, skipping update"
+            exit 0
+          fi
+          
+          if echo "$FARM_JSON" | grep -q "_dataStatus\" *: *\"offline\""; then
+            echo "❌ Farm data status is offline, skipping update"
+            exit 0
+          fi
+          
+          # Извлекаем данные из JSON
+          HASH_RATE=$(echo "$FARM_JSON" | jq -r '.summary.total_hashrate // 0' 2>/dev/null || echo "0")
+          POWER=$(echo "$FARM_JSON" | jq -r '.summary.total_power // 0' 2>/dev/null || echo "0")
+          ONLINE_MINERS=$(echo "$FARM_JSON" | jq -r '.summary.online_miners // 0' 2>/dev/null || echo "0")
+          PROBLEMATIC_MINERS=$(echo "$FARM_JSON" | jq -r '.summary.problematic_miners // 0' 2>/dev/null || echo "0")
+          TOTAL_MINERS=$(echo "$FARM_JSON" | jq -r '.summary.total_miners // 0' 2>/dev/null || echo "0")
+          
+          echo "✅ Farm data loaded:"
+          echo "   Hash Rate: $HASH_RATE TH/s"
+          echo "   Power: $POWER W" 
+          echo "   Online Miners: $ONLINE_MINERS"
+          echo "   Total Miners: $TOTAL_MINERS"
+          
+          # Создаем временную метку (округляем до 30 минут)
+          CURRENT_MINUTES=$(date +%M)
+          if [ $CURRENT_MINUTES -lt 30 ]; then
+            ROUNDED_MINUTES="00"
+          else
+            ROUNDED_MINUTES="30"
+          fi
+          
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:${ROUNDED_MINUTES}:00.000Z")
+          TIME_LABEL=$(date +"%H:${ROUNDED_MINUTES}")
+          DATE_LABEL=$(date +"%d.%m.%Y")
+          
+          # Вычисляем эффективность (TH/s per kW)
+          if [ "$POWER" != "0" ] && [ "$POWER" != "" ] && [ "$POWER" != "null" ]; then
+            EFFICIENCY=$(echo "scale=3; $HASH_RATE / ($POWER / 1000)" | bc -l 2>/dev/null || echo "0")
+          else
+            EFFICIENCY="0"
+          fi
+          
+          # Создаем объект новой записи
+          NEW_ENTRY_JSON=$(jq -n \
+            --arg timestamp "$TIMESTAMP" \
+            --arg time_label "$TIME_LABEL" \
+            --arg date "$DATE_LABEL" \
+            --argjson hashrate "$HASH_RATE" \
+            --argjson power "$POWER" \
+            --argjson online_miners "$ONLINE_MINERS" \
+            --argjson problematic_miners "$PROBLEMATIC_MINERS" \
+            --argjson total_miners "$TOTAL_MINERS" \
+            --argjson efficiency "$EFFICIENCY" \
+            '{
+              timestamp: $timestamp,
+              time_label: $time_label,
+              date: $date,
+              total_hashrate: $hashrate,
+              total_power: $power,
+              online_miners: $online_miners,
+              problematic_miners: $problematic_miners,
+              total_miners: $total_miners,
+              efficiency: $efficiency
+            }')
+          
+          echo "📊 New entry created:"
+          echo "$NEW_ENTRY_JSON" | jq '.'
+          
+          # Загружаем существующую историю или создаем новую
+          if [ -f "$HISTORY_FILE" ]; then
+            echo "📖 Loading existing history from $HISTORY_FILE"
+            HISTORY_JSON=$(cat "$HISTORY_FILE")
+          else
+            echo "🎯 Creating NEW history file (first run)"
+            HISTORY_JSON='{"farm_name":"main","created_at":"'$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")'","farm_history":[]}'
+          fi
+          
+          # Обновляем историю - добавляем новую запись и ограничиваем размер
+          UPDATED_HISTORY=$(echo "$HISTORY_JSON" | jq \
+            --argjson new_entry "$NEW_ENTRY_JSON" \
+            '.farm_history |= [$new_entry] + . |
+             .farm_history |= .[0:672] |  # Ограничиваем 2 неделями данных (14 дней * 48 записей/день)
+             .last_update = (now | strftime("%Y-%m-%dT%H:%M:%S.000Z")) |
+             .total_entries = (.farm_history | length)')
+          
+          # Сохраняем обновленную историю
+          echo "$UPDATED_HISTORY" > "$HISTORY_FILE"
+          echo "💾 History saved to $HISTORY_FILE"
+          echo "📈 Total entries: $(echo "$UPDATED_HISTORY" | jq '.farm_history | length')"
 
       - name: Commit and push changes
-        if: steps.check_files.outputs.files_changed == 'true'
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add data/
-          git commit -m "🤖 Auto-update farm history [skip ci]"
+          git diff --staged --quiet || git commit -m "🤖 Auto-update farm history $(date +%H:%M)"
           git push
