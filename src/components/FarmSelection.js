@@ -41,10 +41,10 @@ const FarmSelection = () => {
 
         console.log(`🕒 Проверка свежести ${data.farm_name}: ${dataTime}, разница: ${diffMinutes.toFixed(1)} мин`);
 
-        if (diffMinutes > 60) {
-            return 'offline'; // Данные старше 60 минут - считаем что ферма offline
-        } else if (diffMinutes > 30) {
-            return 'stale'; // Данные старше 30 минут - устаревшие
+        if (diffMinutes > 30) {
+            return 'offline'; // Данные старше 30 минут - считаем что ферма offline
+        } else if (diffMinutes > 5) {
+            return 'stale'; // Данные старше 5 минут - устаревшие
         } else {
             return 'fresh'; // Свежие данные
         }

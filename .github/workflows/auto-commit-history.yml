@@ -1,0 +1,42 @@
+name: Auto Commit Farm History
+
+on:
+  push:
+    paths:
+      - 'data/farm_history.json'
+  workflow_dispatch:
+  schedule:
+    - cron: '*/30 * * * *'  # Каждые 30 минут
+
+jobs:
+  commit-history:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Git config
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Check for history file changes
+        id: check_changes
+        run: |
+          if git diff --name-only HEAD~1 HEAD | grep -q "data/farm_history.json"; then
+            echo "changes_detected=true" >> $GITHUB_OUTPUT
+          else
+            echo "changes_detected=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push if changes detected
+        if: steps.check_changes.outputs.changes_detected == 'true'
+        run: |
+          git add data/farm_history.json
+          git commit -m "🤖 Auto-update farm history: $(date +'%Y-%m-%d %H:%M')"
+          git push
