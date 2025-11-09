@@ -18,11 +18,46 @@ const FarmSelection = () => {
         }
     ];
 
+    // Функция проверки свежести данных
+    const checkDataFreshness = (data) => {
+        if (!data || (!data.timestamp && !data.last_update)) {
+            return 'offline';
+        }
+
+        // Парсим timestamp из данных
+        let dataTime;
+        if (data.timestamp) {
+            // Если timestamp в секундах (UNIX time)
+            dataTime = new Date(data.timestamp * 1000);
+        } else if (data.last_update) {
+            // Если строка даты "2025-11-09 09:18:30"
+            dataTime = new Date(data.last_update.replace(' ', 'T'));
+        } else {
+            return 'offline';
+        }
+
+        const now = new Date();
+        const diffMinutes = (now - dataTime) / (1000 * 60);
+
+        console.log(`🕒 Проверка свежести ${data.farm_name}: ${dataTime}, разница: ${diffMinutes.toFixed(1)} мин`);
+
+        if (diffMinutes > 30) {
+            return 'offline'; // Данные старше 30 минут - считаем что ферма offline
+        } else if (diffMinutes > 5) {
+            return 'stale'; // Данные старше 5 минут - устаревшие
+        } else {
+            return 'fresh'; // Свежие данные
+        }
+    };
+
     const loadFarmData = async (farmFile) => {
         try {
             const response = await fetch(farmFile.url + '?t=' + Date.now());
             if (response.ok) {
-                return await response.json();
+                const data = await response.json();
+                // Проверяем свежесть данных
+                const freshness = checkDataFreshness(data);
+                return { ...data, _dataStatus: freshness };
             }
         } catch (error) {
             console.error(`Ошибка загрузки ${farmFile.name}:`, error);
@@ -47,34 +82,49 @@ const FarmSelection = () => {
                 const hashrate = containerList.reduce((sum, c) => sum + (c.total_hashrate || 0), 0);
                 const totalContainers = Object.keys(containers).length;
 
+                // Определяем статус на основе свежести данных
                 let status = 'empty';
+                let freshnessStatus = data._dataStatus || 'fresh';
+
                 if (totalMiners > 0) {
-                    status = onlineMiners === totalMiners ? 'online' :
-                        onlineMiners > 0 ? 'warning' : 'offline';
+                    if (freshnessStatus === 'offline') {
+                        status = 'offline';
+                    } else if (freshnessStatus === 'stale') {
+                        status = 'stale';
+                    } else {
+                        status = onlineMiners === totalMiners ? 'online' :
+                            onlineMiners > 0 ? 'warning' : 'offline';
+                    }
+                } else {
+                    status = 'empty';
                 }
 
                 farmsList.push({
                     name: farmFile.name,
                     displayName: data.farm_name || farmFile.name,
                     status: status,
+                    freshness: freshnessStatus,
                     miners: totalMiners,
                     onlineMiners: onlineMiners,
                     hashrate: hashrate,
                     containers: totalContainers,
                     lastUpdate: data.last_update,
-                    exists: true
+                    exists: true,
+                    dataStatus: freshnessStatus
                 });
             } else {
                 farmsList.push({
                     name: farmFile.name,
                     displayName: farmFile.name,
                     status: 'not-found',
+                    freshness: 'offline',
                     miners: 0,
                     onlineMiners: 0,
                     hashrate: 0,
                     containers: 0,
                     lastUpdate: null,
-                    exists: false
+                    exists: false,
+                    dataStatus: 'offline'
                 });
             }
         }
@@ -85,7 +135,7 @@ const FarmSelection = () => {
 
     useEffect(() => {
         loadFarms();
-        const interval = setInterval(loadFarms, 60000);
+        const interval = setInterval(loadFarms, 60000); // Обновляем каждую минуту
         return () => clearInterval(interval);
     }, []);
 
@@ -94,15 +144,62 @@ const FarmSelection = () => {
         navigate(`/farm/${farmName}/dashboard`);
     };
 
-    const getStatusInfo = (status) => {
-        switch (status) {
-            case 'online': return { text: 'ОНЛАЙН', class: 'online' };
-            case 'warning': return { text: 'ПРОБЛЕМЫ', class: 'warning' };
-            case 'offline': return { text: 'ОФФЛАЙН', class: 'offline' };
-            case 'empty': return { text: 'ПУСТО', class: 'empty' };
-            case 'not-found': return { text: 'НЕ НАЙДЕНО', class: 'not-found' };
-            default: return { text: 'НЕИЗВЕСТНО', class: 'unknown' };
+    const getStatusInfo = (status, freshness) => {
+        // Приоритет для статуса свежести данных
+        if (freshness === 'offline') {
+            return { text: 'OFFLINE', class: 'offline', subtext: 'Нет связи >30мин' };
+        } else if (freshness === 'stale') {
+            return { text: 'УСТАРЕЛО', class: 'stale', subtext: 'Данные старые' };
         }
+
+        // Старый статус для свежих данных
+        switch (status) {
+            case 'online':
+                return { text: 'ОНЛАЙН', class: 'online', subtext: 'Все системы в норме' };
+            case 'warning':
+                return { text: 'ПРОБЛЕМЫ', class: 'warning', subtext: 'Есть неисправности' };
+            case 'offline':
+                return { text: 'ОФФЛАЙН', class: 'offline', subtext: 'Нет работающих майнеров' };
+            case 'empty':
+                return { text: 'ПУСТО', class: 'empty', subtext: 'Нет майнеров' };
+            case 'not-found':
+                return { text: 'НЕ НАЙДЕНО', class: 'not-found', subtext: 'Файл данных отсутствует' };
+            default:
+                return { text: 'НЕИЗВЕСТНО', class: 'unknown', subtext: 'Статус не определен' };
+        }
+    };
+
+    const getStatusIcon = (status, freshness) => {
+        if (freshness === 'offline') return '🔴';
+        if (freshness === 'stale') return '🟡';
+
+        switch (status) {
+            case 'online': return '🟢';
+            case 'warning': return '🟡';
+            case 'offline': return '🔴';
+            case 'empty': return '⚪';
+            case 'not-found': return '❌';
+            default: return '❓';
+        }
+    };
+
+    const formatHashrate = (hashrate) => {
+        if (hashrate >= 1000) {
+            return `${(hashrate / 1000).toFixed(1)} PH/s`;
+        }
+        return `${hashrate.toFixed(1)} TH/s`;
+    };
+
+    const formatLastUpdate = (lastUpdate, dataStatus) => {
+        if (!lastUpdate) return 'Нет данных';
+
+        if (dataStatus === 'offline') {
+            return `🔄 ${lastUpdate} (OFFLINE)`;
+        } else if (dataStatus === 'stale') {
+            return `⏳ ${lastUpdate} (Устарело)`;
+        }
+
+        return `✅ ${lastUpdate}`;
     };
 
     return (
@@ -112,11 +209,26 @@ const FarmSelection = () => {
             <div className="hero-section">
                 <h1 className="hero-title">MINING MONITOR</h1>
                 <p className="hero-subtitle">СИСТЕМА МОНИТОРИНГА МАЙНИНГ ФЕРМ</p>
+                <div className="status-legend">
+                    <div className="legend-item">
+                        <span className="legend-icon">🟢</span>
+                        <span>ОНЛАЙН</span>
+                    </div>
+                    <div className="legend-item">
+                        <span className="legend-icon">🟡</span>
+                        <span>УСТАРЕЛО/ПРОБЛЕМЫ</span>
+                    </div>
+                    <div className="legend-item">
+                        <span className="legend-icon">🔴</span>
+                        <span>OFFLINE</span>
+                    </div>
+                </div>
             </div>
 
             <div className="farms-grid">
                 {farms.map(farm => {
-                    const status = getStatusInfo(farm.status);
+                    const status = getStatusInfo(farm.status, farm.freshness);
+                    const statusIcon = getStatusIcon(farm.status, farm.freshness);
 
                     return (
                         <div
@@ -130,7 +242,7 @@ const FarmSelection = () => {
                                 <div className="farm-header">
                                     <div className="farm-icon">
                                         <div className="icon-wrapper">
-                                            {farm.exists ? 'M' : 'F'}
+                                            {farm.exists ? '⚡' : '❌'}
                                         </div>
                                     </div>
                                     <div className="farm-titles">
@@ -139,10 +251,14 @@ const FarmSelection = () => {
                                             {farm.displayName}
                                         </div>
                                     </div>
+                                    <div className="status-icon">
+                                        {statusIcon}
+                                    </div>
                                 </div>
 
                                 <div className={`status-indicator ${status.class}`}>
                                     <span className="status-text">{status.text}</span>
+                                    <span className="status-subtext">{status.subtext}</span>
                                 </div>
 
                                 {farm.exists ? (
@@ -151,10 +267,24 @@ const FarmSelection = () => {
                                             <div className="stat-item">
                                                 <div className="stat-value">{farm.onlineMiners}/{farm.miners}</div>
                                                 <div className="stat-label">МАЙНЕРЫ</div>
+                                                <div className="stat-progress">
+                                                    <div
+                                                        className="progress-bar"
+                                                        style={{
+                                                            width: `${farm.miners > 0 ? (farm.onlineMiners / farm.miners) * 100 : 0}%`,
+                                                            backgroundColor: farm.freshness === 'offline' ? '#ff4444' :
+                                                                farm.freshness === 'stale' ? '#ffc107' : '#00ff88'
+                                                        }}
+                                                    ></div>
+                                                </div>
                                             </div>
                                             <div className="stat-item">
-                                                <div className="stat-value">{farm.hashrate.toFixed(1)}</div>
-                                                <div className="stat-label">TH/S</div>
+                                                <div className="stat-value">{formatHashrate(farm.hashrate)}</div>
+                                                <div className="stat-label">ХЕШРЕЙТ</div>
+                                                <div className={`hashrate-status ${farm.freshness}`}>
+                                                    {farm.freshness === 'offline' ? 'OFFLINE' :
+                                                        farm.freshness === 'stale' ? 'УСТАРЕЛО' : 'АКТИВЕН'}
+                                                </div>
                                             </div>
                                             <div className="stat-item">
                                                 <div className="stat-value">{farm.containers}</div>
@@ -164,17 +294,21 @@ const FarmSelection = () => {
 
                                         {farm.lastUpdate && (
                                             <div className="update-info">
-                                                <div className="update-text">Обновлено: {farm.lastUpdate}</div>
+                                                <div className={`update-text ${farm.dataStatus}`}>
+                                                    {formatLastUpdate(farm.lastUpdate, farm.dataStatus)}
+                                                </div>
                                             </div>
                                         )}
 
-                                        <button className="action-button">
-                                            ОТКРЫТЬ ДАШБОРД
+                                        <button className={`action-button ${farm.dataStatus}`}>
+                                            {farm.dataStatus === 'offline' ? 'ПРОВЕРИТЬ СВЯЗЬ' :
+                                                farm.dataStatus === 'stale' ? 'ОБНОВИТЬ ДАННЫЕ' : 'ОТКРЫТЬ ДАШБОРД'}
                                         </button>
                                     </>
                                 ) : (
                                     <div className="error-state">
                                         <div className="error-text">Файл данных не найден</div>
+                                        <div className="error-subtext">Проверьте настройки фермы</div>
                                     </div>
                                 )}
                             </div>
@@ -191,17 +325,57 @@ const FarmSelection = () => {
                             <span className="info-value">{farms.length}</span>
                         </div>
                         <div className="info-item">
-                            <span className="info-label">АКТИВНЫХ:</span>
-                            <span className="info-value">{farms.filter(f => f.exists && f.status === 'online').length}</span>
+                            <span className="info-label">ОНЛАЙН:</span>
+                            <span className="info-value online">
+                                {farms.filter(f => f.exists && f.dataStatus === 'fresh' && f.status === 'online').length}
+                            </span>
+                        </div>
+                        <div className="info-item">
+                            <span className="info-label">ПРОБЛЕМЫ:</span>
+                            <span className="info-value warning">
+                                {farms.filter(f => f.exists && (
+                                    f.dataStatus === 'stale' ||
+                                    (f.dataStatus === 'fresh' && f.status === 'warning')
+                                )).length}
+                            </span>
+                        </div>
+                        <div className="info-item">
+                            <span className="info-label">OFFLINE:</span>
+                            <span className="info-value offline">
+                                {farms.filter(f => !f.exists || f.dataStatus === 'offline' || f.status === 'offline').length}
+                            </span>
                         </div>
                     </div>
 
                     <button
                         className={`refresh-button ${loading ? 'loading' : ''}`}
                         onClick={loadFarms}
+                        disabled={loading}
                     >
-                        {loading ? 'ОБНОВЛЕНИЕ...' : 'ОБНОВИТЬ'}
+                        {loading ? (
+                            <>
+                                <div className="loading-spinner"></div>
+                                ОБНОВЛЕНИЕ...
+                            </>
+                        ) : (
+                            '🔄 ОБНОВИТЬ'
+                        )}
                     </button>
+                </div>
+            </div>
+
+            <div className="data-freshness-info">
+                <div className="freshness-item">
+                    <span className="freshness-dot fresh"></span>
+                    <span>Свежие данные (до 5 мин)</span>
+                </div>
+                <div className="freshness-item">
+                    <span className="freshness-dot stale"></span>
+                    <span>Устаревшие данные (5-30 мин)</span>
+                </div>
+                <div className="freshness-item">
+                    <span className="freshness-dot offline"></span>
+                    <span>OFFLINE (более 30 мин)</span>
                 </div>
             </div>
         </div>
