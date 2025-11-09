@@ -22,6 +22,28 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y jq curl
 
+      - name: Clear history on manual run
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "🧹 Manual run detected - clearing existing history files"
+          FARM_NAME="denis"
+          HISTORY_FILE="data/farm_history_${FARM_NAME}.json"
+          
+          if [ -f "$HISTORY_FILE" ]; then
+            echo "🗑️ Clearing existing history file: $HISTORY_FILE"
+            jq -n \
+              --arg created_at "$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")" \
+              '{
+                farm_history: [],
+                created_at: $created_at,
+                cleared_at: (now | strftime("%Y-%m-%dT%H:%M:%S.000Z")),
+                cleared_by: "manual_workflow_dispatch"
+              }' > "$HISTORY_FILE"
+            echo "✅ History cleared"
+          else
+            echo "📝 No existing history file found"
+          fi
+
       - name: Update farm history
         run: |
           echo "🔄 Starting farm history update..."
