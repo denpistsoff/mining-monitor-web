@@ -27,7 +27,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         run: |
           echo "🧹 Manual run detected - clearing existing history files"
-          FARM_NAME="denis"
+          FARM_NAME="VISOKOVKA"
           HISTORY_FILE="data/farm_history_${FARM_NAME}.json"
           
           if [ -f "$HISTORY_FILE" ]; then
