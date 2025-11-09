@@ -1,0 +1,159 @@
+name: Update Farm History
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'  # Каждые 30 минут
+  workflow_dispatch:  # Ручной запуск
+
+jobs:
+  update-history:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Update farm history
+        run: |
+          # Создаем скрипт для обновления истории
+          cat > update-history.js << 'EOF'
+          const https = require('https');
+          const fs = require('fs');
+          
+          const FARM_NAME = 'main'; // Измени на нужное имя фермы
+          
+          async function updateHistory() {
+            try {
+              console.log('🔄 Загружаем текущие данные фермы...');
+          
+              // Загружаем текущие данные фермы
+              const currentData = await fetchFarmData(FARM_NAME);
+              if (!currentData || currentData._isOfflineData) {
+                console.log('❌ Ферма offline, пропускаем обновление');
+                return;
+              }
+          
+              console.log('✅ Данные получены:', {
+                hashrate: currentData.summary?.total_hashrate,
+                power: currentData.summary?.total_power,
+                miners: currentData.summary?.online_miners
+              });
+          
+              // Загружаем существующую историю
+              const history = await loadHistory(FARM_NAME);
+          
+              // Создаем новую запись
+              const now = new Date();
+              const minutes = now.getMinutes();
+              const roundedMinutes = minutes < 30 ? 0 : 30;
+              const timestamp = new Date(now);
+              timestamp.setMinutes(roundedMinutes, 0, 0);
+          
+              const newEntry = {
+                timestamp: timestamp.toISOString(),
+                time_label: `${timestamp.getHours().toString().padStart(2, '0')}:${roundedMinutes.toString().padStart(2, '0')}`,
+                date: timestamp.toLocaleDateString('ru-RU'),
+                total_hashrate: currentData.summary?.total_hashrate || 0,
+                total_power: currentData.summary?.total_power || 0,
+                online_miners: currentData.summary?.online_miners || 0,
+                problematic_miners: currentData.summary?.problematic_miners || 0,
+                total_miners: currentData.summary?.total_miners || 0,
+                efficiency: currentData.summary?.total_hashrate && currentData.summary.total_power ? 
+                  parseFloat((currentData.summary.total_hashrate / (currentData.summary.total_power / 1000)).toFixed(3)) : 0
+              };
+          
+              console.log('📊 Новая запись:', newEntry);
+          
+              // Проверяем, нет ли уже записи для этого временного слота
+              const existingIndex = history.farm_history.findIndex(entry => 
+                entry.time_label === newEntry.time_label && 
+                entry.date === newEntry.date
+              );
+          
+              if (existingIndex === -1) {
+                // Добавляем новую запись в начало
+                history.farm_history.unshift(newEntry);
+                console.log('✅ Добавлена новая запись в историю');
+              } else {
+                // Обновляем существующую запись
+                history.farm_history[existingIndex] = newEntry;
+                console.log('✅ Обновлена существующая запись');
+              }
+          
+              // Ограничиваем размер истории (2 недели)
+              if (history.farm_history.length > 672) { // 14 дней * 48 записей в день
+                history.farm_history = history.farm_history.slice(0, 672);
+                console.log('✂️ Обрезана история до 672 записей');
+              }
+          
+              // Сохраняем историю
+              await saveHistory(FARM_NAME, history);
+              console.log('💾 История сохранена');
+          
+            } catch (error) {
+              console.error('❌ Ошибка обновления истории:', error);
+            }
+          }
+          
+          async function fetchFarmData(farmName) {
+            return new Promise((resolve) => {
+              const url = `https://raw.githubusercontent.com/denpistsoff/mining-monitor-web/main/data/farm_data_${farmName}.json?t=${Date.now()}`;
+          
+              https.get(url, (res) => {
+                let data = '';
+                res.on('data', chunk => data += chunk);
+                res.on('end', () => {
+                  try {
+                    resolve(JSON.parse(data));
+                  } catch {
+                    console.log('❌ Ошибка парсинга данных фермы');
+                    resolve(null);
+                  }
+                });
+              }).on('error', (err) => {
+                console.log('❌ Ошибка загрузки данных фермы:', err.message);
+                resolve(null);
+              });
+            });
+          }
+          
+          async function loadHistory(farmName) {
+            try {
+              const historyFile = `data/farm_history_${farmName}.json`;
+              if (fs.existsSync(historyFile)) {
+                const history = JSON.parse(fs.readFileSync(historyFile, 'utf8'));
+                console.log(`📖 Загружена история из ${historyFile}, записей: ${history.farm_history.length}`);
+                return history;
+              }
+            } catch (error) {
+              console.log('📝 Создаем новую историю');
+            }
+            return { farm_history: [] };
+          }
+          
+          async function saveHistory(farmName, history) {
+            const historyFile = `data/farm_history_${farmName}.json`;
+            fs.writeFileSync(historyFile, JSON.stringify(history, null, 2));
+            console.log(`💾 Сохранено в ${historyFile}, записей: ${history.farm_history.length}`);
+          }
+          
+          updateHistory();
+          EOF
+          
+          node update-history.js
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add data/farm_history_*.json
+          git diff --staged --quiet || (git commit -m "🤖 Auto-update farm history [skip ci]" && git push)

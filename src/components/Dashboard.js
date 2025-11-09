@@ -2,37 +2,40 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useFarmData } from '../hooks/useFarmData';
 import StatsGrid from './StatsGrid';
 import ContainerCard from './ContainerCard';
-import historyManager from '../utils/historyManager';
 import '../styles/components/Dashboard.css';
 
 const Dashboard = ({ farmNameProp }) => {
     const { farmData, loading, error, dataStatus } = useFarmData(farmNameProp);
     const [historyData, setHistoryData] = useState(null);
+    const [historyLoading, setHistoryLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('hashrate');
     const [chartTimeRange, setChartTimeRange] = useState('24h');
 
-    useEffect(() => {
-        const initialHistory = historyManager.initHistory();
-        setHistoryData(initialHistory);
-    }, []);
+    const GITHUB_HISTORY_URL = `https://raw.githubusercontent.com/denpistsoff/mining-monitor-web/main/data/farm_history_${farmNameProp}.json`;
 
-    useEffect(() => {
-        if (farmData && !loading && farmData._dataStatus !== 'offline') {
-            const updatedHistory = historyManager.saveCurrentData(farmData);
-            setHistoryData(updatedHistory);
-        }
-    }, [farmData, loading]);
-
-    const handleClearHistory = () => {
-        if (window.confirm('Очистить всю историю? Данные начнут собираться заново через 30 минут.')) {
-            const clearedHistory = historyManager.clearHistory();
-            setHistoryData(clearedHistory);
+    // Функция загрузки истории из GitHub
+    const loadHistoryFromGitHub = async () => {
+        try {
+            setHistoryLoading(true);
+            const response = await fetch(`${GITHUB_HISTORY_URL}?t=${Date.now()}`);
+            if (response.ok) {
+                const data = await response.json();
+                setHistoryData(data);
+            } else {
+                setHistoryData({ farm_history: [] });
+            }
+        } catch (error) {
+            console.error('Error loading history:', error);
+            setHistoryData({ farm_history: [] });
+        } finally {
+            setHistoryLoading(false);
         }
     };
 
-    const handleExportHistory = () => {
-        historyManager.exportHistory();
-    };
+    // Загружаем историю при монтировании
+    useEffect(() => {
+        loadHistoryFromGitHub();
+    }, [farmNameProp]);
 
     if (loading) {
         return (
@@ -88,14 +91,14 @@ const Dashboard = ({ farmNameProp }) => {
 
             <ChartTabsSection
                 historyData={historyData}
+                historyLoading={historyLoading}
                 activeTab={activeTab}
                 onTabChange={setActiveTab}
                 timeRange={chartTimeRange}
                 onTimeRangeChange={setChartTimeRange}
                 currentData={farmData.summary}
-                onClearHistory={handleClearHistory}
-                onExportHistory={handleExportHistory}
                 dataStatus={farmData._dataStatus}
+                onRefreshHistory={loadHistoryFromGitHub}
             />
 
             <div className="containers-section">
@@ -123,26 +126,58 @@ const Dashboard = ({ farmNameProp }) => {
 // Компонент с табами для графиков
 const ChartTabsSection = ({
                               historyData,
+                              historyLoading,
                               activeTab,
                               onTabChange,
                               timeRange,
                               onTimeRangeChange,
                               currentData,
-                              onClearHistory,
-                              onExportHistory,
-                              dataStatus
+                              dataStatus,
+                              onRefreshHistory
                           }) => {
     const [hourlyData, setHourlyData] = useState([]);
 
     useEffect(() => {
-        if (historyData) {
+        if (historyData && historyData.farm_history) {
             const hours = timeRange === '24h' ? 24 : timeRange === '48h' ? 48 : 168;
-            const filteredData = historyManager.getLastNHours(hours);
+            const cutoffTime = new Date(Date.now() - hours * 60 * 60 * 1000);
+
+            const filteredData = historyData.farm_history.filter(entry => {
+                try {
+                    return new Date(entry.timestamp) >= cutoffTime;
+                } catch {
+                    return false;
+                }
+            });
+
             setHourlyData(filteredData);
         }
     }, [historyData, timeRange]);
 
-    const stats = historyManager.getHistoryStats();
+    // Функция для получения статистики
+    const getHistoryStats = () => {
+        if (!historyData) return { total_entries: 0 };
+
+        const totalEntries = historyData.farm_history?.length || 0;
+
+        return {
+            total_entries: totalEntries,
+            last_update: historyData.last_update
+        };
+    };
+
+    const stats = getHistoryStats();
+
+    if (historyLoading) {
+        return (
+            <div className="chart-tabs-section">
+                <div className="chart-loading">
+                    <div className="loading-spinner"></div>
+                    <p>Загрузка истории...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="chart-tabs-section">
@@ -151,8 +186,6 @@ const ChartTabsSection = ({
                     <h3 className="section-title">📈 ИСТОРИЯ РАБОТЫ</h3>
                     <div className="history-stats">
                         <span className="stat-badge">Записей: {stats.total_entries}</span>
-                        <span className="stat-badge">Онлайн: {stats.online_entries}</span>
-                        <span className="stat-badge">Оффлайн: {stats.offline_entries}</span>
                         <span className="stat-badge">Интервал: 30min</span>
                         {dataStatus === 'offline' && (
                             <span className="stat-badge offline">OFFLINE</span>
@@ -198,11 +231,8 @@ const ChartTabsSection = ({
                     </div>
 
                     <div className="history-actions">
-                        <button className="action-btn export-btn" onClick={onExportHistory} title="Экспорт данных">
-                            📥 Экспорт
-                        </button>
-                        <button className="action-btn clear-btn" onClick={onClearHistory} title="Очистить историю">
-                            🗑️ Очистить
+                        <button className="action-btn refresh-btn" onClick={onRefreshHistory} title="Обновить историю">
+                            🔄 Обновить
                         </button>
                     </div>
                 </div>
@@ -224,7 +254,7 @@ const ChartTabsSection = ({
                     />
                 )}
 
-                {hourlyData.length === 0 && (
+                {hourlyData.length === 0 && !historyLoading && (
                     <div className="chart-empty">
                         <div className="empty-message">
                             <p>📊 Нет исторических данных</p>
