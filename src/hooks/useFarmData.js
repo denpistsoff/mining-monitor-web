@@ -4,23 +4,19 @@ export const useFarmData = (farmNameProp) => {
     const [farmData, setFarmData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [dataStatus, setDataStatus] = useState('fresh'); // 'fresh', 'stale', 'offline'
+    const [dataStatus, setDataStatus] = useState('fresh');
     const lastUpdateRef = useRef(null);
     const lastKnownDataRef = useRef(null);
 
-    // Функция проверки свежести данных
     const checkDataFreshness = (data) => {
         if (!data || (!data.timestamp && !data.last_update)) {
             return 'offline';
         }
 
-        // Парсим timestamp из данных
         let dataTime;
         if (data.timestamp) {
-            // Если timestamp в секундах (UNIX time)
             dataTime = new Date(data.timestamp * 1000);
         } else if (data.last_update) {
-            // Если строка даты "2025-11-09 09:18:30"
             dataTime = new Date(data.last_update.replace(' ', 'T'));
         } else {
             return 'offline';
@@ -32,15 +28,14 @@ export const useFarmData = (farmNameProp) => {
         console.log(`🕒 Проверка свежести: ${dataTime}, разница: ${diffMinutes.toFixed(1)} мин`);
 
         if (diffMinutes > 30) {
-            return 'offline'; // Данные старше 30 минут - считаем что ферма offline
+            return 'offline';
         } else if (diffMinutes > 5) {
-            return 'stale'; // Данные старше 5 минут - устаревшие
+            return 'stale';
         } else {
-            return 'fresh'; // Свежие данные
+            return 'fresh';
         }
     };
 
-    // Функция создания offline данных
     const createOfflineData = (lastKnownData) => {
         const offlineTime = new Date().toLocaleString('ru-RU');
 
@@ -52,11 +47,11 @@ export const useFarmData = (farmNameProp) => {
             summary: {
                 total_containers: lastKnownData?.summary?.total_containers || 0,
                 total_miners: lastKnownData?.summary?.total_miners || 0,
-                online_miners: 0, // Все майнеры offline
+                online_miners: 0,
                 problematic_miners: lastKnownData?.summary?.problematic_miners || 0,
                 offline_miners: lastKnownData?.summary?.total_miners || 0,
-                total_hashrate: 0, // Хешрейт нулевой
-                total_power: 0 // Потребление нулевое
+                total_hashrate: 0,
+                total_power: 0
             },
             containers: lastKnownData ? createOfflineContainers(lastKnownData.containers) : {},
             _isOfflineData: true,
@@ -67,7 +62,6 @@ export const useFarmData = (farmNameProp) => {
         return offlineData;
     };
 
-    // Создание offline контейнеров
     const createOfflineContainers = (containers) => {
         const offlineContainers = {};
 
@@ -88,7 +82,6 @@ export const useFarmData = (farmNameProp) => {
         return offlineContainers;
     };
 
-    // Создание offline майнеров
     const createOfflineMiners = (miners) => {
         if (!miners || !Array.isArray(miners)) return [];
 
@@ -123,26 +116,29 @@ export const useFarmData = (farmNameProp) => {
             const data = await response.json();
             console.log(`✅ Данные получены:`, data);
 
-            // Проверяем свежесть данных
             const freshness = checkDataFreshness(data);
             setDataStatus(freshness);
 
             let processedData;
 
             if (freshness === 'offline') {
-                // Данные устарели - показываем offline состояние
                 console.log('⚠️ Данные устарели, показываем offline состояние');
                 processedData = createOfflineData(lastKnownDataRef.current || data);
                 processedData._dataStatus = 'offline';
             } else {
-                // Данные свежие - обрабатываем как обычно
                 processedData = processFarmData(data);
                 processedData._dataStatus = freshness;
-                // Сохраняем последние известные хорошие данные
-                lastKnownDataRef.current = processedData;
+                lastKnownDataRef.current = {
+                    ...processedData,
+                    containers: processedData.containers,
+                    summary: {
+                        ...processedData.summary,
+                        total_miners: processedData.summary.total_miners,
+                        total_containers: processedData.summary.total_containers
+                    }
+                };
             }
 
-            // Проверяем, изменились ли данные
             const currentTimestamp = data.timestamp || data.last_update;
             if (force || !lastUpdateRef.current || lastUpdateRef.current !== currentTimestamp) {
                 lastUpdateRef.current = currentTimestamp;
@@ -153,7 +149,6 @@ export const useFarmData = (farmNameProp) => {
         } catch (err) {
             console.error('❌ Ошибка загрузки данных:', err);
 
-            // При ошибке загрузки показываем offline данные
             setDataStatus('offline');
             const offlineData = createOfflineData(lastKnownDataRef.current);
             offlineData._dataStatus = 'offline_error';
@@ -164,7 +159,6 @@ export const useFarmData = (farmNameProp) => {
         }
     };
 
-    // Функция для обработки структуры данных
     const processFarmData = (data) => {
         const containers = data.containers || {};
         const containerEntries = Object.entries(containers);
@@ -213,7 +207,7 @@ export const useFarmData = (farmNameProp) => {
 
         loadData(true);
 
-        const interval = setInterval(loadData, 60000); // Проверяем каждую минуту
+        const interval = setInterval(loadData, 60000);
         return () => clearInterval(interval);
     }, [farmNameProp]);
 
@@ -226,6 +220,6 @@ export const useFarmData = (farmNameProp) => {
         loading,
         error,
         refresh,
-        dataStatus // 'fresh', 'stale', 'offline'
+        dataStatus
     };
 };

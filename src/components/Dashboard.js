@@ -151,6 +151,8 @@ const ChartTabsSection = ({
                     <h3 className="section-title">📈 ИСТОРИЯ РАБОТЫ</h3>
                     <div className="history-stats">
                         <span className="stat-badge">Записей: {stats.total_entries}</span>
+                        <span className="stat-badge">Онлайн: {stats.online_entries}</span>
+                        <span className="stat-badge">Оффлайн: {stats.offline_entries}</span>
                         <span className="stat-badge">Интервал: 30min</span>
                         {dataStatus === 'offline' && (
                             <span className="stat-badge offline">OFFLINE</span>
