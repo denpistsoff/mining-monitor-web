@@ -1,4 +1,4 @@
-/* Dashboard.css - Полная версия для графиков с табами */
+/* Dashboard.css - Полная версия с мобильной оптимизацией */
 .dashboard {
     padding: 20px;
     max-width: 1400px;
@@ -102,6 +102,7 @@
     cursor: pointer;
     transition: var(--transition-fast);
     white-space: nowrap;
+    min-height: 44px;
 }
 
 .tab-btn:hover {
@@ -134,6 +135,7 @@
     cursor: pointer;
     transition: var(--transition-fast);
     min-width: 60px;
+    min-height: 40px;
 }
 
 .time-range-btn:hover {
@@ -394,283 +396,6 @@
     font-size: 16px;
 }
 
-/* Анимации */
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Плавные переходы */
-.tab-btn,
-.time-range-btn,
-.test-btn,
-.mini-stat,
-.retry-button {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Последовательная анимация элементов */
-.dashboard > * {
-    animation: fadeInUp 0.6s ease-out;
-}
-
-.dashboard-header {
-    animation-delay: 0.1s;
-}
-
-.stats-grid {
-    animation-delay: 0.2s;
-}
-
-.chart-tabs-section {
-    animation-delay: 0.3s;
-}
-
-.containers-section {
-    animation-delay: 0.4s;
-}
-
-/* Адаптивность */
-@media (max-width: 1024px) {
-    .dashboard {
-        padding: 16px;
-    }
-
-    .chart-tabs-section {
-        padding: 20px;
-    }
-
-    .chart-wrapper {
-        height: 320px;
-    }
-}
-
-@media (max-width: 768px) {
-    .dashboard {
-        padding: 12px;
-    }
-
-    .dashboard-title h2 {
-        font-size: 22px;
-    }
-
-    .chart-tabs-section {
-        padding: 16px;
-        margin: 16px 0;
-    }
-
-    .section-header {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
-    }
-
-    .section-title-wrapper {
-        justify-content: center;
-        text-align: center;
-    }
-
-    .chart-controls {
-        flex-direction: column;
-        gap: 12px;
-        width: 100%;
-    }
-
-    .tabs-container {
-        margin-right: 0;
-        width: 100%;
-        justify-content: center;
-    }
-
-    .tab-btn {
-        flex: 1;
-        text-align: center;
-        padding: 12px 16px;
-    }
-
-    .time-range-selector {
-        justify-content: center;
-        width: 100%;
-    }
-
-    .time-range-btn {
-        flex: 1;
-        text-align: center;
-        min-width: auto;
-    }
-
-    .chart-header {
-        flex-direction: column;
-        gap: 10px;
-        text-align: center;
-    }
-
-    .chart-wrapper {
-        height: 280px;
-    }
-
-    .current-stats-mini {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-
-    .mini-stat {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-        padding: 16px;
-    }
-}
-
-@media (max-width: 480px) {
-    .dashboard-title h2 {
-        font-size: 20px;
-    }
-
-    .section-title {
-        font-size: 18px;
-    }
-
-    .chart-wrapper {
-        height: 250px;
-    }
-
-    .tab-btn {
-        padding: 10px 12px;
-        font-size: 11px;
-    }
-
-    .time-range-btn {
-        padding: 6px 12px;
-        font-size: 11px;
-    }
-
-    .chart-header h4 {
-        font-size: 16px;
-    }
-
-    .current-value {
-        font-size: 13px;
-    }
-
-    .current-value strong {
-        font-size: 14px;
-    }
-
-    .mini-label {
-        font-size: 10px;
-    }
-
-    .mini-value {
-        font-size: 13px;
-    }
-
-    .chart-empty {
-        height: 250px;
-    }
-
-    .empty-message p {
-        font-size: 16px;
-    }
-
-    .empty-message span {
-        font-size: 12px;
-    }
-}
-
-@media (max-width: 360px) {
-    .dashboard {
-        padding: 8px;
-    }
-
-    .chart-tabs-section {
-        padding: 12px;
-        margin: 12px 0;
-    }
-
-    .chart-wrapper {
-        height: 220px;
-    }
-
-    .tabs-container {
-        flex-direction: column;
-        gap: 4px;
-    }
-
-    .time-range-selector {
-        flex-direction: column;
-        gap: 4px;
-    }
-
-    .tab-btn,
-    .time-range-btn {
-        padding: 8px;
-    }
-
-    .current-stats-mini {
-        gap: 8px;
-    }
-
-    .mini-stat {
-        padding: 12px 8px;
-    }
-}
-
-/* Улучшенная доступность */
-.tab-btn:focus-visible,
-.time-range-btn:focus-visible,
-.test-btn:focus-visible,
-.retry-button:focus-visible {
-    outline: 2px solid #ff8c00;
-    outline-offset: 2px;
-}
-
-/* Стили для скроллбара */
-.containers-grid::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-.containers-grid::-webkit-scrollbar-track {
-    background: rgba(255, 140, 0, 0.1);
-    border-radius: 4px;
-}
-
-.containers-grid::-webkit-scrollbar-thumb {
-    background: rgba(255, 140, 0, 0.3);
-    border-radius: 4px;
-}
-
-.containers-grid::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 140, 0, 0.5);
-}
-
-/* Темная тема дополнения */
-@media (prefers-color-scheme: dark) {
-    .chart-container {
-        background: rgba(0, 0, 0, 0.8);
-    }
-
-    .chart-empty {
-        background: rgba(0, 0, 0, 0.6);
-    }
-}
-
-/* Эффекты для графиков */
-.chart-wrapper canvas {
-    border-radius: var(--radius-md);
-}
 /* Новые стили для управления историей */
 .history-actions {
     display: flex;
@@ -688,6 +413,7 @@
     font-size: 12px;
     font-weight: 600;
     white-space: nowrap;
+    min-height: 40px;
 }
 
 .action-btn:hover {
@@ -755,8 +481,170 @@
     color: #ff8c00;
 }
 
-/* Адаптивность для кнопок */
+/* Анимации */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Плавные переходы */
+.tab-btn,
+.time-range-btn,
+.test-btn,
+.mini-stat,
+.retry-button,
+.action-btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Последовательная анимация элементов */
+.dashboard > * {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.dashboard-header {
+    animation-delay: 0.1s;
+}
+
+.stats-grid {
+    animation-delay: 0.2s;
+}
+
+.chart-tabs-section {
+    animation-delay: 0.3s;
+}
+
+.containers-section {
+    animation-delay: 0.4s;
+}
+
+/* МОБИЛЬНАЯ ОПТИМИЗАЦИЯ ГРАФИКОВ */
+@media (max-width: 1024px) {
+    .dashboard {
+        padding: 16px;
+    }
+
+    .chart-tabs-section {
+        padding: 20px;
+    }
+
+    .chart-wrapper {
+        height: 320px;
+    }
+}
+
 @media (max-width: 768px) {
+    .dashboard {
+        padding: 12px;
+    }
+
+    .dashboard-title h2 {
+        font-size: 22px;
+    }
+
+    .chart-tabs-section {
+        padding: 16px;
+        margin: 16px 0;
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .section-title-wrapper {
+        justify-content: center;
+        text-align: center;
+    }
+
+    .chart-controls {
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+    }
+
+    .tabs-container {
+        margin-right: 0;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .tab-btn {
+        flex: 1;
+        text-align: center;
+        padding: 12px 8px;
+        font-size: 11px;
+        min-height: 44px;
+    }
+
+    .time-range-selector {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .time-range-btn {
+        flex: 1;
+        text-align: center;
+        min-width: auto;
+        padding: 10px 8px;
+        font-size: 11px;
+        min-height: 40px;
+    }
+
+    .chart-container {
+        padding: 12px;
+        min-height: 300px;
+    }
+
+    .chart-wrapper {
+        height: 250px !important;
+    }
+
+    .chart-header {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+        margin-bottom: 12px;
+        padding-bottom: 10px;
+    }
+
+    .chart-header h4 {
+        font-size: 16px;
+        margin: 0;
+    }
+
+    .current-value {
+        font-size: 13px;
+    }
+
+    .current-value strong {
+        font-size: 14px;
+    }
+
+    .current-stats-mini {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .mini-stat {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px;
+    }
+
     .history-actions {
         width: 100%;
         justify-content: center;
@@ -767,5 +655,151 @@
         text-align: center;
         padding: 10px 8px;
         font-size: 11px;
+        min-height: 40px;
     }
+}
+
+@media (max-width: 480px) {
+    .dashboard-title h2 {
+        font-size: 20px;
+    }
+
+    .section-title {
+        font-size: 18px;
+    }
+
+    .chart-wrapper {
+        height: 220px !important;
+    }
+
+    .chart-container {
+        min-height: 250px;
+        padding: 8px;
+    }
+
+    .chart-header h4 {
+        font-size: 15px;
+    }
+
+    .current-value {
+        font-size: 12px;
+    }
+
+    .current-value strong {
+        font-size: 13px;
+    }
+
+    .mini-label {
+        font-size: 10px;
+    }
+
+    .mini-value {
+        font-size: 13px;
+    }
+
+    .chart-empty {
+        height: 250px;
+    }
+
+    .empty-message p {
+        font-size: 16px;
+    }
+
+    .empty-message span {
+        font-size: 12px;
+    }
+
+    /* Вертикальное расположение контролов на очень маленьких экранах */
+    .chart-controls {
+        gap: 8px;
+    }
+
+    .tabs-container {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .time-range-selector {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .history-actions {
+        flex-direction: column;
+        gap: 4px;
+    }
+}
+
+@media (max-width: 360px) {
+    .dashboard {
+        padding: 8px;
+    }
+
+    .chart-tabs-section {
+        padding: 12px;
+        margin: 12px 0;
+    }
+
+    .chart-wrapper {
+        height: 200px !important;
+    }
+
+    .tab-btn,
+    .time-range-btn {
+        padding: 8px;
+    }
+
+    .current-stats-mini {
+        gap: 8px;
+    }
+
+    .mini-stat {
+        padding: 12px 8px;
+    }
+}
+
+/* Улучшенная доступность */
+.tab-btn:focus-visible,
+.time-range-btn:focus-visible,
+.test-btn:focus-visible,
+.retry-button:focus-visible,
+.action-btn:focus-visible {
+    outline: 2px solid #ff8c00;
+    outline-offset: 2px;
+}
+
+/* Стили для скроллбара */
+.containers-grid::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.containers-grid::-webkit-scrollbar-track {
+    background: rgba(255, 140, 0, 0.1);
+    border-radius: 4px;
+}
+
+.containers-grid::-webkit-scrollbar-thumb {
+    background: rgba(255, 140, 0, 0.3);
+    border-radius: 4px;
+}
+
+.containers-grid::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 140, 0, 0.5);
+}
+
+/* Темная тема дополнения */
+@media (prefers-color-scheme: dark) {
+    .chart-container {
+        background: rgba(0, 0, 0, 0.8);
+    }
+
+    .chart-empty {
+        background: rgba(0, 0, 0, 0.6);
+    }
+}
+
+/* Эффекты для графиков */
+.chart-wrapper canvas {
+    border-radius: var(--radius-md);
 }

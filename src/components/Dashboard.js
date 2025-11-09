@@ -230,6 +230,18 @@ const ChartTabsSection = ({
 const HashrateChart = ({ data, currentData }) => {
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     useEffect(() => {
         if (!window.Chart) {
@@ -251,28 +263,42 @@ const HashrateChart = ({ data, currentData }) => {
             }
 
             const ctx = chartRef.current.getContext('2d');
-            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+            const gradient = ctx.createLinearGradient(0, 0, 0, isMobile ? 200 : 300);
             gradient.addColorStop(0, 'rgba(255, 140, 0, 0.6)');
             gradient.addColorStop(1, 'rgba(255, 140, 0, 0.1)');
+
+            // Настройки для мобильных
+            const mobileOptions = {
+                pointRadius: 2,
+                pointHoverRadius: 4,
+                borderWidth: 2,
+            };
+
+            const desktopOptions = {
+                pointRadius: 3,
+                pointHoverRadius: 5,
+                borderWidth: 3,
+            };
+
+            const chartOptions = isMobile ? mobileOptions : desktopOptions;
 
             chartInstance.current = new window.Chart(ctx, {
                 type: 'line',
                 data: {
-                    // Данные уже отсортированы от старых к новым
                     labels: data.map(item => item.time_label),
                     datasets: [{
                         label: 'Хешрейт (TH/s)',
                         data: data.map(item => item.total_hashrate),
                         borderColor: '#ff8c00',
                         backgroundColor: gradient,
-                        borderWidth: 3,
+                        borderWidth: chartOptions.borderWidth,
                         fill: true,
                         tension: 0.4,
                         pointBackgroundColor: '#ff8c00',
                         pointBorderColor: '#000',
-                        pointBorderWidth: 2,
-                        pointRadius: 3,
-                        pointHoverRadius: 5,
+                        pointBorderWidth: 1,
+                        pointRadius: chartOptions.pointRadius,
+                        pointHoverRadius: chartOptions.pointHoverRadius,
                     }]
                 },
                 options: {
@@ -285,6 +311,12 @@ const HashrateChart = ({ data, currentData }) => {
                             titleColor: '#ff8c00',
                             bodyColor: '#ffffff',
                             borderColor: '#ff8c00',
+                            titleFont: {
+                                size: isMobile ? 12 : 14
+                            },
+                            bodyFont: {
+                                size: isMobile ? 12 : 14
+                            },
                             callbacks: {
                                 label: function(context) {
                                     return `Хешрейт: ${context.parsed.y.toFixed(2)} TH/s`;
@@ -295,20 +327,36 @@ const HashrateChart = ({ data, currentData }) => {
                     scales: {
                         x: {
                             grid: { color: 'rgba(255, 140, 0, 0.1)' },
-                            ticks: { color: '#a0a0a0', maxTicksLimit: 12 }
+                            ticks: {
+                                color: '#a0a0a0',
+                                maxTicksLimit: isMobile ? 6 : 12,
+                                font: {
+                                    size: isMobile ? 10 : 12
+                                }
+                            }
                         },
                         y: {
                             grid: { color: 'rgba(255, 140, 0, 0.1)' },
                             ticks: {
                                 color: '#ff8c00',
-                                callback: function(value) { return value.toFixed(0) + ' TH/s'; }
+                                callback: function(value) { return value.toFixed(0) + ' TH/s'; },
+                                font: {
+                                    size: isMobile ? 10 : 12
+                                }
                             },
                             title: {
-                                display: true,
+                                display: !isMobile,
                                 text: 'Хешрейт (TH/s)',
-                                color: '#ff8c00'
+                                color: '#ff8c00',
+                                font: {
+                                    size: 12
+                                }
                             }
                         },
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
                     }
                 }
             });
@@ -319,7 +367,7 @@ const HashrateChart = ({ data, currentData }) => {
                 chartInstance.current.destroy();
             }
         };
-    }, [data]);
+    }, [data, isMobile]);
 
     return (
         <div className="chart-wrapper">
@@ -329,7 +377,13 @@ const HashrateChart = ({ data, currentData }) => {
                     Текущий: <strong>{currentData?.total_hashrate?.toFixed(2)} TH/s</strong>
                 </div>
             </div>
-            <canvas ref={chartRef} />
+            <canvas
+                ref={chartRef}
+                style={{
+                    maxHeight: isMobile ? '250px' : '350px',
+                    minHeight: isMobile ? '200px' : '300px'
+                }}
+            />
         </div>
     );
 };
@@ -338,6 +392,18 @@ const HashrateChart = ({ data, currentData }) => {
 const PowerChart = ({ data, currentData }) => {
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     useEffect(() => {
         if (!window.Chart) {
@@ -359,9 +425,24 @@ const PowerChart = ({ data, currentData }) => {
             }
 
             const ctx = chartRef.current.getContext('2d');
-            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+            const gradient = ctx.createLinearGradient(0, 0, 0, isMobile ? 200 : 300);
             gradient.addColorStop(0, 'rgba(0, 170, 255, 0.6)');
             gradient.addColorStop(1, 'rgba(0, 170, 255, 0.1)');
+
+            // Настройки для мобильных
+            const mobileOptions = {
+                pointRadius: 2,
+                pointHoverRadius: 4,
+                borderWidth: 2,
+            };
+
+            const desktopOptions = {
+                pointRadius: 3,
+                pointHoverRadius: 5,
+                borderWidth: 3,
+            };
+
+            const chartOptions = isMobile ? mobileOptions : desktopOptions;
 
             chartInstance.current = new window.Chart(ctx, {
                 type: 'line',
@@ -372,14 +453,14 @@ const PowerChart = ({ data, currentData }) => {
                         data: data.map(item => item.total_power / 1000),
                         borderColor: '#00aaff',
                         backgroundColor: gradient,
-                        borderWidth: 3,
+                        borderWidth: chartOptions.borderWidth,
                         fill: true,
                         tension: 0.4,
                         pointBackgroundColor: '#00aaff',
                         pointBorderColor: '#000',
-                        pointBorderWidth: 2,
-                        pointRadius: 3,
-                        pointHoverRadius: 5,
+                        pointBorderWidth: 1,
+                        pointRadius: chartOptions.pointRadius,
+                        pointHoverRadius: chartOptions.pointHoverRadius,
                     }]
                 },
                 options: {
@@ -392,6 +473,12 @@ const PowerChart = ({ data, currentData }) => {
                             titleColor: '#00aaff',
                             bodyColor: '#ffffff',
                             borderColor: '#00aaff',
+                            titleFont: {
+                                size: isMobile ? 12 : 14
+                            },
+                            bodyFont: {
+                                size: isMobile ? 12 : 14
+                            },
                             callbacks: {
                                 label: function(context) {
                                     return `Потребление: ${context.parsed.y.toFixed(1)} кВт`;
@@ -402,20 +489,36 @@ const PowerChart = ({ data, currentData }) => {
                     scales: {
                         x: {
                             grid: { color: 'rgba(0, 170, 255, 0.1)' },
-                            ticks: { color: '#a0a0a0', maxTicksLimit: 12 }
+                            ticks: {
+                                color: '#a0a0a0',
+                                maxTicksLimit: isMobile ? 6 : 12,
+                                font: {
+                                    size: isMobile ? 10 : 12
+                                }
+                            }
                         },
                         y: {
                             grid: { color: 'rgba(0, 170, 255, 0.1)' },
                             ticks: {
                                 color: '#00aaff',
-                                callback: function(value) { return value.toFixed(0) + ' кВт'; }
+                                callback: function(value) { return value.toFixed(0) + ' кВт'; },
+                                font: {
+                                    size: isMobile ? 10 : 12
+                                }
                             },
                             title: {
-                                display: true,
+                                display: !isMobile,
                                 text: 'Потребление (кВт)',
-                                color: '#00aaff'
+                                color: '#00aaff',
+                                font: {
+                                    size: 12
+                                }
                             }
                         },
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
                     }
                 }
             });
@@ -426,7 +529,7 @@ const PowerChart = ({ data, currentData }) => {
                 chartInstance.current.destroy();
             }
         };
-    }, [data]);
+    }, [data, isMobile]);
 
     return (
         <div className="chart-wrapper">
@@ -436,7 +539,13 @@ const PowerChart = ({ data, currentData }) => {
                     Текущее: <strong>{(currentData?.total_power / 1000)?.toFixed(1)} кВт</strong>
                 </div>
             </div>
-            <canvas ref={chartRef} />
+            <canvas
+                ref={chartRef}
+                style={{
+                    maxHeight: isMobile ? '250px' : '350px',
+                    minHeight: isMobile ? '200px' : '300px'
+                }}
+            />
         </div>
     );
 };
