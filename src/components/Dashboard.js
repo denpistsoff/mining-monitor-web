@@ -6,7 +6,7 @@ import historyManager from '../utils/historyManager';
 import '../styles/components/Dashboard.css';
 
 const Dashboard = ({ farmNameProp }) => {
-    const { farmData, loading, error } = useFarmData(farmNameProp);
+    const { farmData, loading, error, dataStatus } = useFarmData(farmNameProp);
     const [historyData, setHistoryData] = useState(null);
     const [activeTab, setActiveTab] = useState('hashrate');
     const [chartTimeRange, setChartTimeRange] = useState('24h');
@@ -17,7 +17,7 @@ const Dashboard = ({ farmNameProp }) => {
     }, []);
 
     useEffect(() => {
-        if (farmData && !loading) {
+        if (farmData && !loading && farmData._dataStatus !== 'offline') {
             const updatedHistory = historyManager.saveCurrentData(farmData);
             setHistoryData(updatedHistory);
         }
@@ -71,11 +71,20 @@ const Dashboard = ({ farmNameProp }) => {
                     <h2>ДАШБОРД ФЕРМЫ {farmNameProp}</h2>
                     <div className="last-update">
                         Последнее обновление: {farmData.last_update}
+                        {farmData._dataStatus === 'offline' && (
+                            <span className="status-badge offline"> 🔴 OFFLINE</span>
+                        )}
+                        {farmData._dataStatus === 'stale' && (
+                            <span className="status-badge stale"> 🟡 УСТАРЕЛО</span>
+                        )}
+                        {farmData._dataStatus === 'fresh' && (
+                            <span className="status-badge fresh"> 🟢 ONLINE</span>
+                        )}
                     </div>
                 </div>
             </div>
 
-            <StatsGrid summary={farmData.summary} />
+            <StatsGrid summary={farmData.summary} dataStatus={farmData._dataStatus} />
 
             <ChartTabsSection
                 historyData={historyData}
@@ -86,16 +95,23 @@ const Dashboard = ({ farmNameProp }) => {
                 currentData={farmData.summary}
                 onClearHistory={handleClearHistory}
                 onExportHistory={handleExportHistory}
+                dataStatus={farmData._dataStatus}
             />
 
             <div className="containers-section">
                 <h3 className="section-title">⚡ КОНТЕЙНЕРЫ</h3>
+                {farmData._dataStatus === 'offline' && (
+                    <div className="offline-warning">
+                        ⚠️ Ферма в режиме OFFLINE - данные не обновляются более 30 минут
+                    </div>
+                )}
                 <div className="containers-grid">
                     {Object.entries(farmData.containers || {}).map(([containerId, container]) => (
                         <ContainerCard
                             key={containerId}
                             containerId={containerId}
                             container={container}
+                            dataStatus={farmData._dataStatus}
                         />
                     ))}
                 </div>
@@ -113,7 +129,8 @@ const ChartTabsSection = ({
                               onTimeRangeChange,
                               currentData,
                               onClearHistory,
-                              onExportHistory
+                              onExportHistory,
+                              dataStatus
                           }) => {
     const [hourlyData, setHourlyData] = useState([]);
 
@@ -135,6 +152,9 @@ const ChartTabsSection = ({
                     <div className="history-stats">
                         <span className="stat-badge">Записей: {stats.total_entries}</span>
                         <span className="stat-badge">Интервал: 30min</span>
+                        {dataStatus === 'offline' && (
+                            <span className="stat-badge offline">OFFLINE</span>
+                        )}
                     </div>
                 </div>
 
@@ -191,12 +211,14 @@ const ChartTabsSection = ({
                     <HashrateChart
                         data={hourlyData}
                         currentData={currentData}
+                        dataStatus={dataStatus}
                     />
                 )}
                 {activeTab === 'power' && (
                     <PowerChart
                         data={hourlyData}
                         currentData={currentData}
+                        dataStatus={dataStatus}
                     />
                 )}
 
@@ -216,6 +238,10 @@ const ChartTabsSection = ({
                     <div className="info-message waiting-message">
                         <strong>⏳ ОЖИДАНИЕ ДАННЫХ</strong> - Первые данные появятся через 30 минут работы системы.
                     </div>
+                ) : dataStatus === 'offline' ? (
+                    <div className="info-message offline-message">
+                        <strong>🔴 ФЕРМА OFFLINE</strong> - Данные не обновляются более 30 минут. Проверьте соединение.
+                    </div>
                 ) : (
                     <div className="info-message real-message">
                         <strong>✅ ДАННЫЕ СОБИРАЮТСЯ</strong> - Каждые 30 минут. Всего записей: {stats.total_entries}
@@ -227,7 +253,7 @@ const ChartTabsSection = ({
 };
 
 // График хешрейта
-const HashrateChart = ({ data, currentData }) => {
+const HashrateChart = ({ data, currentData, dataStatus }) => {
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
     const [isMobile, setIsMobile] = useState(false);
@@ -263,9 +289,18 @@ const HashrateChart = ({ data, currentData }) => {
             }
 
             const ctx = chartRef.current.getContext('2d');
+
+            // Разные цвета для offline состояния
+            const borderColor = dataStatus === 'offline' ? '#ff4444' : '#ff8c00';
             const gradient = ctx.createLinearGradient(0, 0, 0, isMobile ? 200 : 300);
-            gradient.addColorStop(0, 'rgba(255, 140, 0, 0.6)');
-            gradient.addColorStop(1, 'rgba(255, 140, 0, 0.1)');
+
+            if (dataStatus === 'offline') {
+                gradient.addColorStop(0, 'rgba(255, 68, 68, 0.6)');
+                gradient.addColorStop(1, 'rgba(255, 68, 68, 0.1)');
+            } else {
+                gradient.addColorStop(0, 'rgba(255, 140, 0, 0.6)');
+                gradient.addColorStop(1, 'rgba(255, 140, 0, 0.1)');
+            }
 
             // Настройки для мобильных
             const mobileOptions = {
@@ -289,12 +324,12 @@ const HashrateChart = ({ data, currentData }) => {
                     datasets: [{
                         label: 'Хешрейт (TH/s)',
                         data: data.map(item => item.total_hashrate),
-                        borderColor: '#ff8c00',
+                        borderColor: borderColor,
                         backgroundColor: gradient,
                         borderWidth: chartOptions.borderWidth,
                         fill: true,
                         tension: 0.4,
-                        pointBackgroundColor: '#ff8c00',
+                        pointBackgroundColor: borderColor,
                         pointBorderColor: '#000',
                         pointBorderWidth: 1,
                         pointRadius: chartOptions.pointRadius,
@@ -308,9 +343,9 @@ const HashrateChart = ({ data, currentData }) => {
                         legend: { display: false },
                         tooltip: {
                             backgroundColor: 'rgba(26, 15, 10, 0.95)',
-                            titleColor: '#ff8c00',
+                            titleColor: borderColor,
                             bodyColor: '#ffffff',
-                            borderColor: '#ff8c00',
+                            borderColor: borderColor,
                             titleFont: {
                                 size: isMobile ? 12 : 14
                             },
@@ -326,7 +361,7 @@ const HashrateChart = ({ data, currentData }) => {
                     },
                     scales: {
                         x: {
-                            grid: { color: 'rgba(255, 140, 0, 0.1)' },
+                            grid: { color: `rgba(${dataStatus === 'offline' ? '255,68,68' : '255,140,0'}, 0.1)` },
                             ticks: {
                                 color: '#a0a0a0',
                                 maxTicksLimit: isMobile ? 6 : 12,
@@ -336,9 +371,9 @@ const HashrateChart = ({ data, currentData }) => {
                             }
                         },
                         y: {
-                            grid: { color: 'rgba(255, 140, 0, 0.1)' },
+                            grid: { color: `rgba(${dataStatus === 'offline' ? '255,68,68' : '255,140,0'}, 0.1)` },
                             ticks: {
-                                color: '#ff8c00',
+                                color: borderColor,
                                 callback: function(value) { return value.toFixed(0) + ' TH/s'; },
                                 font: {
                                     size: isMobile ? 10 : 12
@@ -347,7 +382,7 @@ const HashrateChart = ({ data, currentData }) => {
                             title: {
                                 display: !isMobile,
                                 text: 'Хешрейт (TH/s)',
-                                color: '#ff8c00',
+                                color: borderColor,
                                 font: {
                                     size: 12
                                 }
@@ -367,14 +402,15 @@ const HashrateChart = ({ data, currentData }) => {
                 chartInstance.current.destroy();
             }
         };
-    }, [data, isMobile]);
+    }, [data, isMobile, dataStatus]);
 
     return (
         <div className="chart-wrapper">
             <div className="chart-header">
                 <h4>📊 ГРАФИК ХЕШРЕЙТА</h4>
-                <div className="current-value hashrate-value">
+                <div className={`current-value hashrate-value ${dataStatus === 'offline' ? 'offline' : ''}`}>
                     Текущий: <strong>{currentData?.total_hashrate?.toFixed(2)} TH/s</strong>
+                    {dataStatus === 'offline' && ' 🔴'}
                 </div>
             </div>
             <canvas
@@ -389,7 +425,7 @@ const HashrateChart = ({ data, currentData }) => {
 };
 
 // График потребления
-const PowerChart = ({ data, currentData }) => {
+const PowerChart = ({ data, currentData, dataStatus }) => {
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
     const [isMobile, setIsMobile] = useState(false);
@@ -425,9 +461,18 @@ const PowerChart = ({ data, currentData }) => {
             }
 
             const ctx = chartRef.current.getContext('2d');
+
+            // Разные цвета для offline состояния
+            const borderColor = dataStatus === 'offline' ? '#ff4444' : '#00aaff';
             const gradient = ctx.createLinearGradient(0, 0, 0, isMobile ? 200 : 300);
-            gradient.addColorStop(0, 'rgba(0, 170, 255, 0.6)');
-            gradient.addColorStop(1, 'rgba(0, 170, 255, 0.1)');
+
+            if (dataStatus === 'offline') {
+                gradient.addColorStop(0, 'rgba(255, 68, 68, 0.6)');
+                gradient.addColorStop(1, 'rgba(255, 68, 68, 0.1)');
+            } else {
+                gradient.addColorStop(0, 'rgba(0, 170, 255, 0.6)');
+                gradient.addColorStop(1, 'rgba(0, 170, 255, 0.1)');
+            }
 
             // Настройки для мобильных
             const mobileOptions = {
@@ -451,12 +496,12 @@ const PowerChart = ({ data, currentData }) => {
                     datasets: [{
                         label: 'Потребление (кВт)',
                         data: data.map(item => item.total_power / 1000),
-                        borderColor: '#00aaff',
+                        borderColor: borderColor,
                         backgroundColor: gradient,
                         borderWidth: chartOptions.borderWidth,
                         fill: true,
                         tension: 0.4,
-                        pointBackgroundColor: '#00aaff',
+                        pointBackgroundColor: borderColor,
                         pointBorderColor: '#000',
                         pointBorderWidth: 1,
                         pointRadius: chartOptions.pointRadius,
@@ -470,9 +515,9 @@ const PowerChart = ({ data, currentData }) => {
                         legend: { display: false },
                         tooltip: {
                             backgroundColor: 'rgba(26, 15, 10, 0.95)',
-                            titleColor: '#00aaff',
+                            titleColor: borderColor,
                             bodyColor: '#ffffff',
-                            borderColor: '#00aaff',
+                            borderColor: borderColor,
                             titleFont: {
                                 size: isMobile ? 12 : 14
                             },
@@ -488,7 +533,7 @@ const PowerChart = ({ data, currentData }) => {
                     },
                     scales: {
                         x: {
-                            grid: { color: 'rgba(0, 170, 255, 0.1)' },
+                            grid: { color: `rgba(${dataStatus === 'offline' ? '255,68,68' : '0,170,255'}, 0.1)` },
                             ticks: {
                                 color: '#a0a0a0',
                                 maxTicksLimit: isMobile ? 6 : 12,
@@ -498,9 +543,9 @@ const PowerChart = ({ data, currentData }) => {
                             }
                         },
                         y: {
-                            grid: { color: 'rgba(0, 170, 255, 0.1)' },
+                            grid: { color: `rgba(${dataStatus === 'offline' ? '255,68,68' : '0,170,255'}, 0.1)` },
                             ticks: {
-                                color: '#00aaff',
+                                color: borderColor,
                                 callback: function(value) { return value.toFixed(0) + ' кВт'; },
                                 font: {
                                     size: isMobile ? 10 : 12
@@ -509,7 +554,7 @@ const PowerChart = ({ data, currentData }) => {
                             title: {
                                 display: !isMobile,
                                 text: 'Потребление (кВт)',
-                                color: '#00aaff',
+                                color: borderColor,
                                 font: {
                                     size: 12
                                 }
@@ -529,14 +574,15 @@ const PowerChart = ({ data, currentData }) => {
                 chartInstance.current.destroy();
             }
         };
-    }, [data, isMobile]);
+    }, [data, isMobile, dataStatus]);
 
     return (
         <div className="chart-wrapper">
             <div className="chart-header">
                 <h4>⚡ ГРАФИК ПОТРЕБЛЕНИЯ</h4>
-                <div className="current-value power-value">
+                <div className={`current-value power-value ${dataStatus === 'offline' ? 'offline' : ''}`}>
                     Текущее: <strong>{(currentData?.total_power / 1000)?.toFixed(1)} кВт</strong>
+                    {dataStatus === 'offline' && ' 🔴'}
                 </div>
             </div>
             <canvas
