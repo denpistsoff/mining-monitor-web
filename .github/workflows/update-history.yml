@@ -16,6 +16,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0  # Получаем всю историю
 
       - name: Setup tools
         run: |
@@ -205,10 +206,13 @@ jobs:
           echo "💾 History saved to $HISTORY_FILE"
           echo "📈 Total entries: $(echo "$UPDATED_HISTORY" | jq '.farm_history | length')"
 
-      - name: Commit and push changes
+      - name: Pull latest changes
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
+          git pull origin main --rebase
+
+      - name: Commit and push changes
+        run: |
           git add data/
-          git diff --staged --quiet || git commit -m "🤖 Auto-update farm history $(date +%H:%M)"
-          git push
+          git diff --staged --quiet || (git commit -m "🤖 Auto-update farm history $(date +%H:%M)" && git push)
