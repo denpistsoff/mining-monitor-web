@@ -95,6 +95,10 @@ jobs:
                 console.log('✂️ Обрезана история до 672 записей');
               }
           
+              // Добавляем метаданные
+              history.last_update = new Date().toISOString();
+              history.farm_name = FARM_NAME;
+          
               // Сохраняем историю
               await saveHistory(FARM_NAME, history);
               console.log('💾 История сохранена');
@@ -151,9 +155,20 @@ jobs:
           
           node update-history.js
 
+      - name: Check if history files were created
+        id: check_files
+        run: |
+          if ls data/farm_history_*.json 1> /dev/null 2>&1; then
+            echo "files_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "files_changed=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Commit and push changes
+        if: steps.check_files.outputs.files_changed == 'true'
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add data/farm_history_*.json
-          git diff --staged --quiet || (git commit -m "🤖 Auto-update farm history [skip ci]" && git push)
+          git add data/
+          git commit -m "🤖 Auto-update farm history [skip ci]"
+          git push
