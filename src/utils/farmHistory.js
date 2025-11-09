@@ -66,11 +66,6 @@ class FarmHistory {
                 const lastTime = new Date(lastEntry.timestamp);
                 const currentTime = new Date();
                 const diffMinutes = (currentTime - lastTime) / (1000 * 60);
-
-                if (diffMinutes < 25) {
-                    console.log('🔄 Пропускаем дублирующую запись в историю');
-                    return history;
-                }
             }
 
             // Добавляем новую запись в начало

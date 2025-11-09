@@ -27,9 +27,9 @@ export const useFarmData = (farmNameProp) => {
 
         console.log(`🕒 Проверка свежести: ${dataTime}, разница: ${diffMinutes.toFixed(1)} мин`);
 
-        if (diffMinutes > 30) {
+        if (diffMinutes > 60) {
             return 'offline';
-        } else if (diffMinutes > 5) {
+        } else if (diffMinutes > 30) {
             return 'stale';
         } else {
             return 'fresh';
