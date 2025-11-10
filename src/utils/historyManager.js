@@ -17,6 +17,24 @@ class HistoryManager {
         console.log('🔐 GitHub API:', this.githubToken ? 'Token configured' : 'Using public access');
     }
 
+    // ДОБАВЛЕННЫЙ МЕТОД - инициализация истории
+    async initHistory() {
+        try {
+            console.log('📥 Инициализация истории...');
+            const history = await this.loadFromGitHub();
+            console.log('✅ История загружена, записей:', history.farm_history?.length || 0);
+            return history;
+        } catch (error) {
+            console.error('❌ Ошибка инициализации истории:', error);
+            return this.getDefaultHistory();
+        }
+    }
+
+    // ДОБАВЛЕННЫЙ МЕТОД - для совместимости со старым кодом
+    async loadHistory() {
+        return this.initHistory();
+    }
+
     // Основной метод сохранения - теперь принудительно каждые 30 минут
     async saveCurrentData(farmData) {
         try {
@@ -196,7 +214,7 @@ class HistoryManager {
         }
     }
 
-    // Остальные методы остаются без изменений...
+    // Загрузка истории из GitHub
     async loadFromGitHub() {
         try {
             const url = `https://raw.githubusercontent.com/${this.githubRepo}/${this.githubBranch}/data/${this.historyFile}?t=${Date.now()}`;
@@ -218,6 +236,7 @@ class HistoryManager {
         }
     }
 
+    // Получение данных за последние N часов
     async getLastNHours(hours = 24) {
         try {
             const history = await this.loadFromGitHub();
@@ -242,6 +261,7 @@ class HistoryManager {
         }
     }
 
+    // Получение статистики истории
     async getHistoryStats() {
         try {
             const history = await this.loadFromGitHub();
@@ -276,6 +296,7 @@ class HistoryManager {
         }
     }
 
+    // Проверка доступа к GitHub
     async checkGitHubAccess() {
         try {
             const response = await fetch(`${this.apiBase}/${this.githubRepo}`, {
@@ -303,6 +324,7 @@ class HistoryManager {
         }
     }
 
+    // Получение SHA файла
     async getFileSHA() {
         try {
             const response = await fetch(
@@ -329,6 +351,7 @@ class HistoryManager {
         }
     }
 
+    // Очистка истории
     async clearHistory() {
         try {
             const emptyHistory = this.getDefaultHistory();
@@ -346,6 +369,7 @@ class HistoryManager {
         }
     }
 
+    // Экспорт истории
     async exportHistory() {
         try {
             const history = await this.loadFromGitHub();
@@ -363,6 +387,15 @@ class HistoryManager {
         }
     }
 
+    // ДОБАВЛЕННЫЙ МЕТОД - экспорт локальной очереди (для совместимости)
+    async exportLocalQueue() {
+        console.log('📤 Экспорт локальной очереди...');
+        // В данной реализации нет локальной очереди, так как используется GitHub
+        // Этот метод добавлен для совместимости с Dashboard.js
+        await this.exportHistory();
+    }
+
+    // Получение дефолтной истории
     getDefaultHistory() {
         return {
             farm_history: [],
