@@ -33,22 +33,22 @@ jobs:
           echo "REACT_APP_GITHUB_REPO=denpistsoff/mining-monitor-web" >> .env
           echo "Building with GitHub Token: ${#REACT_APP_GITHUB_TOKEN} characters"
 
+      - name: Build React app
+        run: npm run build
+
       - name: Create auth credentials from secret
         run: |
-          # Создаем директорию для данных аутентификации
+          # Создаем директорию для данных аутентификации в собранном приложении
           mkdir -p build/data/auth
           
           # Записываем данные из секрета в credentials.json
-          echo '${{ secrets.AUTH_CREDENTIALS }}' > data/auth/credentials.json
+          echo '${{ secrets.AUTH_CREDENTIALS }}' > build/data/auth/credentials.json
           
           # Проверяем что файл создан
           echo "Auth credentials file created:"
-          ls -la data/auth/
-          echo "File content preview:"
-          cat data/auth/credentials.json | head -c 100
-
-      - name: Build React app
-        run: npm run build
+          ls -la build/data/auth/
+          echo "File content:"
+          cat build/data/auth/credentials.json
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -69,7 +69,6 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-  # Новый job для автоматического коммита истории
   auto-commit-history:
     runs-on: ubuntu-latest
     needs: deploy
