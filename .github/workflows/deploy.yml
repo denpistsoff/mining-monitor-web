@@ -39,7 +39,7 @@ jobs:
           mkdir -p build/data/auth
           
           # Записываем данные из секрета в credentials.json
-          echo '${{ secrets.AUTH_CREDENTIALS }}' > build/data/auth/credentials.json
+          echo '${{ secrets.AUTH_CREDENTIALS }}' > data/auth/credentials.json
           
           # Проверяем что файл создан
           echo "Auth credentials file created:"
