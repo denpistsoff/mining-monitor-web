@@ -38,7 +38,7 @@ const Login = ({ onLogin }) => {
         setIsLoading(true);
         try {
             const credentialsPath = getCredentialsPath();
-            const response = await fetch(credentialsPath + '?t=' + Date.now());
+            const response = await fetch(credentialsPath);
             if (!response.ok) throw new Error('Auth file not found');
 
             const authData = await response.json();
@@ -65,7 +65,7 @@ const Login = ({ onLogin }) => {
 
         try {
             const credentialsPath = getCredentialsPath();
-            const response = await fetch(credentialsPath + '?t=' + Date.now());
+            const response = await fetch(credentialsPath);
             if (!response.ok) throw new Error('Auth file not found');
 
             const authData = await response.json();

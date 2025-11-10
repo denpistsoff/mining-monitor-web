@@ -33,6 +33,20 @@ jobs:
           echo "REACT_APP_GITHUB_REPO=denpistsoff/mining-monitor-web" >> .env
           echo "Building with GitHub Token: ${#REACT_APP_GITHUB_TOKEN} characters"
 
+      - name: Create auth credentials from secret
+        run: |
+          # Создаем директорию для данных аутентификации
+          mkdir -p build/data/auth
+          
+          # Записываем данные из секрета в credentials.json
+          echo '${{ secrets.AUTH_CREDENTIALS }}' > build/data/auth/credentials.json
+          
+          # Проверяем что файл создан
+          echo "Auth credentials file created:"
+          ls -la build/data/auth/
+          echo "File content preview:"
+          cat build/data/auth/credentials.json | head -c 100
+
       - name: Build React app
         run: npm run build
 
