@@ -43,9 +43,9 @@ jobs:
           
           # Проверяем что файл создан
           echo "Auth credentials file created:"
-          ls -la build/data/auth/
+          ls -la data/auth/
           echo "File content preview:"
-          cat build/data/auth/credentials.json | head -c 100
+          cat data/auth/credentials.json | head -c 100
 
       - name: Build React app
         run: npm run build
