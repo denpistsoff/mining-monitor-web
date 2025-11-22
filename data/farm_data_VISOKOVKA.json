@@ -1,14 +1,14 @@
 {
-  "timestamp": 1763809221.8024795,
+  "timestamp": 1763809300.4467046,
   "farm_name": "DESKTOP-GO47CCS",
   "json_filename": "farm_data_VISOKOVKA.json",
-  "last_update": "2025-11-22 16:00:21",
+  "last_update": "2025-11-22 16:01:40",
   "containers": {
     "1й": {
       "total_miners": 190,
-      "online_miners": 3,
-      "total_hashrate": 314.79783688,
-      "total_power": 11029.0,
+      "online_miners": 0,
+      "total_hashrate": 0,
+      "total_power": 0,
       "problematic_count": 0,
       "users_count": 6,
       "miners_data": [
@@ -734,13 +734,13 @@
         },
         {
           "ip": "192.168.80.157",
-          "type": "whatsminer",
-          "hashrate": 112.123196,
-          "temperature": 73.75,
-          "power": 3685,
-          "pool": "visota333.prmx80x55@btc.ru.viabtc.world",
-          "status": "online",
-          "problem_reason": null
+          "type": "unknown",
+          "hashrate": 0,
+          "temperature": "N/A",
+          "power": "N/A",
+          "pool": "нет данных",
+          "status": "offline",
+          "problem_reason": "не отвечает"
         },
         {
           "ip": "192.168.80.138",
@@ -1244,23 +1244,23 @@
         },
         {
           "ip": "192.168.80.173",
-          "type": "whatsminer",
-          "hashrate": 109.47571535,
-          "temperature": 76.38,
-          "power": 3660,
-          "pool": "visota333.prmx80x116@btc.ru.viabtc.world",
-          "status": "online",
-          "problem_reason": null
+          "type": "unknown",
+          "hashrate": 0,
+          "temperature": "N/A",
+          "power": "N/A",
+          "pool": "нет данных",
+          "status": "offline",
+          "problem_reason": "не отвечает"
         },
         {
           "ip": "192.168.80.179",
-          "type": "whatsminer",
-          "hashrate": 93.19892553,
-          "temperature": 74.25,
-          "power": 3684,
-          "pool": "visota333.prmx80x31@btc.ru.viabtc.world",
-          "status": "online",
-          "problem_reason": null
+          "type": "unknown",
+          "hashrate": 0,
+          "temperature": "N/A",
+          "power": "N/A",
+          "pool": "нет данных",
+          "status": "offline",
+          "problem_reason": "не отвечает"
         },
         {
           "ip": "192.168.80.151",
