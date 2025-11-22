@@ -1,14 +1,14 @@
 {
-  "timestamp": 1763850953.3812037,
+  "timestamp": 1763851032.5707483,
   "farm_name": "DESKTOP-GO47CCS",
   "json_filename": "farm_data_VISOKOVKA.json",
-  "last_update": "2025-11-23 03:35:53",
+  "last_update": "2025-11-23 03:37:12",
   "containers": {
     "1й": {
       "total_miners": 190,
-      "online_miners": 3,
-      "total_hashrate": 338.43702364,
-      "total_power": 11045.0,
+      "online_miners": 0,
+      "total_hashrate": 0,
+      "total_power": 0,
       "problematic_count": 0,
       "users_count": 6,
       "miners_data": [
@@ -734,13 +734,13 @@
         },
         {
           "ip": "192.168.80.157",
-          "type": "whatsminer",
-          "hashrate": 111.47851025,
-          "temperature": 74.0,
-          "power": 3667,
-          "pool": "visota333.prmx80x55@btc.ru.viabtc.world",
-          "status": "online",
-          "problem_reason": null
+          "type": "unknown",
+          "hashrate": 0,
+          "temperature": "N/A",
+          "power": "N/A",
+          "pool": "нет данных",
+          "status": "offline",
+          "problem_reason": "не отвечает"
         },
         {
           "ip": "192.168.80.138",
@@ -784,13 +784,13 @@
         },
         {
           "ip": "192.168.80.161",
-          "type": "whatsminer",
-          "hashrate": 114.96141733,
-          "temperature": 75.0,
-          "power": 3692,
-          "pool": "visota333.prmx80x54@btc.ru.viabtc.world",
-          "status": "online",
-          "problem_reason": null
+          "type": "unknown",
+          "hashrate": 0,
+          "temperature": "N/A",
+          "power": "N/A",
+          "pool": "нет данных",
+          "status": "offline",
+          "problem_reason": "не отвечает"
         },
         {
           "ip": "192.168.80.136",
@@ -804,13 +804,13 @@
         },
         {
           "ip": "192.168.80.159",
-          "type": "whatsminer",
-          "hashrate": 111.99709606,
-          "temperature": 74.44,
-          "power": 3686,
-          "pool": "visota333.prmx80x21@btc.ru.viabtc.world",
-          "status": "online",
-          "problem_reason": null
+          "type": "unknown",
+          "hashrate": 0,
+          "temperature": "N/A",
+          "power": "N/A",
+          "pool": "нет данных",
+          "status": "offline",
+          "problem_reason": "не отвечает"
         },
         {
           "ip": "192.168.80.134",
