@@ -1,14 +1,14 @@
 {
-  "timestamp": 1763940884.7716289,
+  "timestamp": 1763940963.7583103,
   "farm_name": "DESKTOP-GO47CCS",
   "json_filename": "farm_data_VISOKOVKA.json",
-  "last_update": "2025-11-24 04:34:44",
+  "last_update": "2025-11-24 04:36:03",
   "containers": {
     "1й": {
       "total_miners": 190,
-      "online_miners": 1,
-      "total_hashrate": 112.93290913,
-      "total_power": 3680.0,
+      "online_miners": 0,
+      "total_hashrate": 0,
+      "total_power": 0,
       "problematic_count": 0,
       "users_count": 6,
       "miners_data": [
@@ -924,13 +924,13 @@
         },
         {
           "ip": "192.168.80.158",
-          "type": "whatsminer",
-          "hashrate": 112.93290913,
-          "temperature": 74.56,
-          "power": 3680,
-          "pool": "visota333.prmx80x85@btc.ru.viabtc.world",
-          "status": "online",
-          "problem_reason": null
+          "type": "unknown",
+          "hashrate": 0,
+          "temperature": "N/A",
+          "power": "N/A",
+          "pool": "нет данных",
+          "status": "offline",
+          "problem_reason": "не отвечает"
         },
         {
           "ip": "192.168.80.149",
