@@ -1,15 +1,15 @@
 {
-  "timestamp": 1763963530.6118066,
+  "timestamp": 1763963609.361557,
   "farm_name": "DESKTOP-GO47CCS",
   "json_filename": "farm_data_VISOKOVKA.json",
-  "last_update": "2025-11-24 10:52:10",
+  "last_update": "2025-11-24 10:53:29",
   "containers": {
     "1й": {
       "total_miners": 190,
-      "online_miners": 5,
-      "total_hashrate": 192.3051772,
-      "total_power": 4551.0,
-      "problematic_count": 0,
+      "online_miners": 7,
+      "total_hashrate": 248.37007351000003,
+      "total_power": 8829.0,
+      "problematic_count": 1,
       "users_count": 6,
       "miners_data": [
         {
@@ -205,12 +205,12 @@
         {
           "ip": "192.168.80.77",
           "type": "whatsminer",
-          "hashrate": 25.71211071,
-          "temperature": 20.56,
-          "power": 566,
-          "pool": "visota333.prmx80x174@ibtc.viabtc.vip",
-          "status": "online",
-          "problem_reason": null
+          "hashrate": 0.0,
+          "temperature": 35.19,
+          "power": 1029,
+          "pool": "visota333.prmx80x174@btc.ru.viabtc.world",
+          "status": "problematic",
+          "problem_reason": "нулевой хешрейт"
         },
         {
           "ip": "192.168.80.70",
@@ -265,9 +265,9 @@
         {
           "ip": "192.168.80.80",
           "type": "whatsminer",
-          "hashrate": 50.313062130000006,
-          "temperature": 18.38,
-          "power": 509,
+          "hashrate": 57.22088792,
+          "temperature": 58.5,
+          "power": 1434,
           "pool": "visota333.prmx80x163@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -295,10 +295,10 @@
         {
           "ip": "192.168.80.117",
           "type": "whatsminer",
-          "hashrate": 52.14016991,
-          "temperature": 29.06,
-          "power": 790,
-          "pool": "visota333.prmx80x134@ibtc.viabtc.vip",
+          "hashrate": 2.79995685,
+          "temperature": 30.38,
+          "power": 1242,
+          "pool": "visota333.prmx80x134@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
         },
@@ -324,13 +324,13 @@
         },
         {
           "ip": "192.168.80.90",
-          "type": "unknown",
-          "hashrate": 0,
-          "temperature": "N/A",
-          "power": "N/A",
-          "pool": "нет данных",
-          "status": "offline",
-          "problem_reason": "не отвечает"
+          "type": "whatsminer",
+          "hashrate": 45.26354396,
+          "temperature": 12.81,
+          "power": 387,
+          "pool": "visota333.prmx80x123@ibtc.viabtc.vip",
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.95",
@@ -345,22 +345,22 @@
         {
           "ip": "192.168.80.88",
           "type": "whatsminer",
-          "hashrate": 19.58003974,
-          "temperature": 69.12,
-          "power": 2193,
+          "hashrate": 30.86817433,
+          "temperature": 70.56,
+          "power": 2961,
           "pool": "visota333.prmx80x13@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
         },
         {
           "ip": "192.168.80.83",
-          "type": "unknown",
-          "hashrate": 0,
-          "temperature": "N/A",
-          "power": "N/A",
-          "pool": "нет данных",
-          "status": "offline",
-          "problem_reason": "не отвечает"
+          "type": "whatsminer",
+          "hashrate": 40.51224146,
+          "temperature": 13.25,
+          "power": 384,
+          "pool": "visota333.prmx80x121@ibtc.viabtc.vip",
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.81",
@@ -405,9 +405,9 @@
         {
           "ip": "192.168.80.106",
           "type": "whatsminer",
-          "hashrate": 44.55979471,
-          "temperature": 16.94,
-          "power": 493,
+          "hashrate": 71.70526899000001,
+          "temperature": 55.81,
+          "power": 1392,
           "pool": "visota333.prmx80x215@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
