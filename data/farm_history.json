@@ -1,22 +1,6 @@
 {
   "farm_history": [
     {
-      "timestamp": "2025-11-13T04:30:00.000Z",
-      "date": "13.11.2025",
-      "hour": 9,
-      "minute": 30,
-      "time_label": "09:30",
-      "total_hashrate": 21036.147678470003,
-      "total_power": 705452,
-      "online_miners": 193,
-      "problematic_miners": 0,
-      "total_miners": 194,
-      "total_containers": 1,
-      "efficiency": 29.819,
-      "is_offline": false,
-      "farm_name": "DESKTOP-GO47CCS"
-    },
-    {
       "timestamp": "2025-11-13T05:00:00.000Z",
       "date": "13.11.2025",
       "hour": 10,
@@ -5375,9 +5359,25 @@
       "efficiency": 30.879,
       "is_offline": false,
       "farm_name": "DESKTOP-GO47CCS"
+    },
+    {
+      "timestamp": "2025-11-24T10:30:00.000Z",
+      "date": "24.11.2025",
+      "hour": 15,
+      "minute": 30,
+      "time_label": "15:30",
+      "total_hashrate": 6177.917922289999,
+      "total_power": 202881,
+      "online_miners": 55,
+      "problematic_miners": 0,
+      "total_miners": 190,
+      "total_containers": 1,
+      "efficiency": 30.451,
+      "is_offline": false,
+      "farm_name": "DESKTOP-GO47CCS"
     }
   ],
-  "last_update": "2025-11-24T10:26:00.640Z",
+  "last_update": "2025-11-24T10:30:00.864Z",
   "total_entries": 336,
   "version": "1.0"
 }
