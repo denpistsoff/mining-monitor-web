@@ -1,23 +1,23 @@
 {
-  "timestamp": 1764258108.0963523,
+  "timestamp": 1764258180.8028555,
   "farm_name": "DESKTOP-GO47CCS",
   "json_filename": "farm_data_VISOKOVKA.json",
-  "last_update": "2025-11-27 20:41:48",
+  "last_update": "2025-11-27 20:43:00",
   "containers": {
     "1й": {
       "total_miners": 149,
       "online_miners": 137,
-      "total_hashrate": 4721.54870598,
-      "total_power": 498513.0,
-      "problematic_count": 78,
+      "total_hashrate": 11058.798892100007,
+      "total_power": 498519.0,
+      "problematic_count": 37,
       "users_count": 6,
       "miners_data": [
         {
           "ip": "192.168.80.73",
           "type": "whatsminer",
-          "hashrate": 0.00324323,
-          "temperature": 69.81,
-          "power": 3717,
+          "hashrate": 2e-08,
+          "temperature": 70.19,
+          "power": 3720,
           "pool": "visota333.prmxprmx80x125@btc.ru.viabtc.world",
           "status": "problematic",
           "problem_reason": "низкий хешрейт"
@@ -25,9 +25,9 @@
         {
           "ip": "192.168.80.68",
           "type": "whatsminer",
-          "hashrate": 0.00324067,
-          "temperature": 69.88,
-          "power": 3707,
+          "hashrate": 2e-08,
+          "temperature": 70.19,
+          "power": 3706,
           "pool": "visota333.prmx80x68@btc.ru.viabtc.world",
           "status": "problematic",
           "problem_reason": "низкий хешрейт"
@@ -55,12 +55,12 @@
         {
           "ip": "192.168.80.77",
           "type": "whatsminer",
-          "hashrate": 0.0032358,
+          "hashrate": 104.58735967999999,
           "temperature": 69.81,
-          "power": 3689,
+          "power": 3690,
           "pool": "visota333.prmx80x174@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.79",
@@ -75,9 +75,9 @@
         {
           "ip": "192.168.80.74",
           "type": "whatsminer",
-          "hashrate": 114.93960348,
+          "hashrate": 115.82631348999999,
           "temperature": 69.88,
-          "power": 3705,
+          "power": 3706,
           "pool": "visota333.prmx80x182@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -85,19 +85,19 @@
         {
           "ip": "192.168.80.69",
           "type": "whatsminer",
-          "hashrate": 0.00312672,
-          "temperature": 70.0,
-          "power": 3713,
+          "hashrate": 107.07515100999998,
+          "temperature": 69.94,
+          "power": 3715,
           "pool": "visota333.prmx80x161@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.80",
           "type": "whatsminer",
-          "hashrate": 116.67120063000002,
-          "temperature": 70.25,
-          "power": 3716,
+          "hashrate": 116.61178297000001,
+          "temperature": 70.12,
+          "power": 3714,
           "pool": "visota333.prmx80x163@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -105,19 +105,19 @@
         {
           "ip": "192.168.80.83",
           "type": "whatsminer",
-          "hashrate": 0.00346898,
-          "temperature": 69.88,
-          "power": 3707,
+          "hashrate": 103.80674084,
+          "temperature": 69.94,
+          "power": 3708,
           "pool": "visota333.prmx80x121@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.85",
           "type": "whatsminer",
-          "hashrate": 110.15596895,
-          "temperature": 70.19,
-          "power": 3479,
+          "hashrate": 109.58011273000001,
+          "temperature": 69.94,
+          "power": 3478,
           "pool": "visota333.prmxprmx80x209@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -125,52 +125,52 @@
         {
           "ip": "192.168.80.93",
           "type": "whatsminer",
-          "hashrate": 0.0032449099999999997,
-          "temperature": 70.19,
-          "power": 3714,
+          "hashrate": 104.42173363,
+          "temperature": 70.06,
+          "power": 3713,
           "pool": "visota333.prmx80x12@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
-        },
-        {
-          "ip": "192.168.80.94",
-          "type": "whatsminer",
-          "hashrate": 0.00319169,
-          "temperature": 69.88,
-          "power": 3686,
-          "pool": "visota333.prmxprmx80x137@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
-        },
-        {
-          "ip": "192.168.80.86",
-          "type": "whatsminer",
-          "hashrate": 0.5401996600000001,
-          "temperature": 70.12,
-          "power": 3701,
-          "pool": "visota333.prmxprmx80x130@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
         },
         {
-          "ip": "192.168.80.89",
+          "ip": "192.168.80.94",
           "type": "whatsminer",
-          "hashrate": 0.00315916,
-          "temperature": 69.94,
-          "power": 3710,
-          "pool": "visota333.prmx80x162@btc.ru.viabtc.world",
+          "hashrate": 104.42053021,
+          "temperature": 69.75,
+          "power": 3687,
+          "pool": "visota333.prmxprmx80x137@btc.ru.viabtc.world",
+          "status": "online",
+          "problem_reason": null
+        },
+        {
+          "ip": "192.168.80.86",
+          "type": "whatsminer",
+          "hashrate": 2.8199999999999997e-06,
+          "temperature": 70.0,
+          "power": 3703,
+          "pool": "visota333.prmxprmx80x130@btc.ru.viabtc.world",
           "status": "problematic",
           "problem_reason": "низкий хешрейт"
         },
         {
+          "ip": "192.168.80.89",
+          "type": "whatsminer",
+          "hashrate": 107.23875838,
+          "temperature": 70.06,
+          "power": 3708,
+          "pool": "visota333.prmx80x162@btc.ru.viabtc.world",
+          "status": "online",
+          "problem_reason": null
+        },
+        {
           "ip": "192.168.80.88",
           "type": "whatsminer",
-          "hashrate": 0.00335863,
-          "temperature": 70.06,
-          "power": 3669,
+          "hashrate": 100.69218292,
+          "temperature": 69.88,
+          "power": 3671,
           "pool": "visota333.prmx80x13@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.92",
@@ -185,27 +185,27 @@
         {
           "ip": "192.168.80.95",
           "type": "whatsminer",
-          "hashrate": 0.00326708,
-          "temperature": 76.0,
-          "power": 3716,
+          "hashrate": 104.33636298000002,
+          "temperature": 75.81,
+          "power": 3715,
           "pool": "visota333.prmx80x95@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.103",
           "type": "whatsminer",
-          "hashrate": 0.00329447,
-          "temperature": 70.0,
-          "power": 3709,
+          "hashrate": 102.54367812999999,
+          "temperature": 70.19,
+          "power": 3711,
           "pool": "visota333.prmx80x15@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.87",
           "type": "whatsminer",
-          "hashrate": 106.92934938,
+          "hashrate": 100.97883385,
           "temperature": 72.0,
           "power": 3431,
           "pool": "visota333.prmx80x195@btc.ru.viabtc.world",
@@ -215,22 +215,22 @@
         {
           "ip": "192.168.80.90",
           "type": "whatsminer",
-          "hashrate": 0.00343706,
-          "temperature": 70.0,
-          "power": 3713,
+          "hashrate": 104.74122453,
+          "temperature": 69.69,
+          "power": 3714,
           "pool": "visota333.prmx80x123@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.84",
           "type": "whatsminer",
-          "hashrate": 0.00308679,
-          "temperature": 70.12,
-          "power": 3702,
+          "hashrate": 104.80889423000002,
+          "temperature": 69.88,
+          "power": 3703,
           "pool": "visota333.prmx80x198@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.96",
@@ -255,32 +255,32 @@
         {
           "ip": "192.168.80.101",
           "type": "whatsminer",
-          "hashrate": 0.00311682,
-          "temperature": 69.81,
-          "power": 3678,
+          "hashrate": 103.96452137999998,
+          "temperature": 69.75,
+          "power": 3677,
           "pool": "visota333.prmxprmx80x138@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.106",
           "type": "whatsminer",
-          "hashrate": 0.00280846,
-          "temperature": 73.88,
-          "power": 3714,
+          "hashrate": 96.66634622000001,
+          "temperature": 74.0,
+          "power": 3713,
           "pool": "visota333.prmx80x215@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.113",
           "type": "whatsminer",
-          "hashrate": 0.0034239,
-          "temperature": 70.19,
+          "hashrate": 103.58533559999998,
+          "temperature": 69.88,
           "power": 3714,
           "pool": "visota333.prmx80x16@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.120",
@@ -295,12 +295,12 @@
         {
           "ip": "192.168.80.119",
           "type": "whatsminer",
-          "hashrate": 0.00308304,
-          "temperature": 70.69,
-          "power": 3713,
+          "hashrate": 107.75287571999999,
+          "temperature": 70.44,
+          "power": 3714,
           "pool": "visota333.prmx80x181@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.122",
@@ -315,32 +315,32 @@
         {
           "ip": "192.168.80.123",
           "type": "whatsminer",
-          "hashrate": 0.00277977,
+          "hashrate": 103.29449398,
           "temperature": 72.75,
-          "power": 3655,
+          "power": 3654,
           "pool": "visota333.prmx80x175@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.126",
           "type": "whatsminer",
-          "hashrate": 0.00331766,
-          "temperature": 69.81,
-          "power": 3709,
+          "hashrate": 105.58512672,
+          "temperature": 69.94,
+          "power": 3708,
           "pool": "visota333.prmx80x10@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.129",
           "type": "whatsminer",
-          "hashrate": 0.00285863,
-          "temperature": 70.0,
-          "power": 3702,
+          "hashrate": 101.70929433,
+          "temperature": 69.94,
+          "power": 3700,
           "pool": "visota333.prmx80x122@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.128",
@@ -355,9 +355,9 @@
         {
           "ip": "192.168.80.131",
           "type": "whatsminer",
-          "hashrate": 0.0028445500000000004,
+          "hashrate": 2e-08,
           "temperature": 69.94,
-          "power": 3696,
+          "power": 3695,
           "pool": "visota333.prmx80x173@btc.ru.viabtc.world",
           "status": "problematic",
           "problem_reason": "низкий хешрейт"
@@ -365,29 +365,29 @@
         {
           "ip": "192.168.80.133",
           "type": "whatsminer",
-          "hashrate": 0.00287049,
+          "hashrate": 103.9070679,
           "temperature": 69.88,
           "power": 3703,
           "pool": "visota333.prmx80x14@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.134",
           "type": "whatsminer",
-          "hashrate": 0.00282856,
+          "hashrate": 105.98965179000001,
           "temperature": 69.88,
-          "power": 3715,
+          "power": 3717,
           "pool": "visota333.prmx80x11@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.117",
           "type": "whatsminer",
-          "hashrate": 107.38205952999999,
-          "temperature": 74.0,
-          "power": 3653,
+          "hashrate": 108.23068773,
+          "temperature": 73.81,
+          "power": 3652,
           "pool": "visota333.prmx80x134@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -395,19 +395,19 @@
         {
           "ip": "192.168.80.116",
           "type": "whatsminer",
-          "hashrate": 0.00272781,
-          "temperature": 69.81,
+          "hashrate": 104.49172585,
+          "temperature": 70.19,
           "power": 3652,
           "pool": "visota333.prmxprmx80x144@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.124",
           "type": "whatsminer",
-          "hashrate": 0.00302317,
-          "temperature": 69.75,
-          "power": 3685,
+          "hashrate": 2e-08,
+          "temperature": 69.88,
+          "power": 3684,
           "pool": "visota333.prmx80x145@btc.ru.viabtc.world",
           "status": "problematic",
           "problem_reason": "низкий хешрейт"
@@ -415,29 +415,29 @@
         {
           "ip": "192.168.80.135",
           "type": "whatsminer",
-          "hashrate": 0.5328744799999999,
-          "temperature": 70.19,
-          "power": 3704,
+          "hashrate": 2.7799999999999996e-06,
+          "temperature": 70.0,
+          "power": 3703,
           "pool": "visota333.prmxprmx80x180@btc.ru.viabtc.world",
-          "status": "online",
-          "problem_reason": null
-        },
-        {
-          "ip": "192.168.80.99",
-          "type": "whatsminer",
-          "hashrate": 0.00314319,
-          "temperature": 72.0,
-          "power": 3681,
-          "pool": "visota333.prmx80x199@btc.ru.viabtc.world",
           "status": "problematic",
           "problem_reason": "низкий хешрейт"
         },
         {
+          "ip": "192.168.80.99",
+          "type": "whatsminer",
+          "hashrate": 100.98082367,
+          "temperature": 72.19,
+          "power": 3679,
+          "pool": "visota333.prmx80x199@btc.ru.viabtc.world",
+          "status": "online",
+          "problem_reason": null
+        },
+        {
           "ip": "192.168.80.136",
           "type": "whatsminer",
-          "hashrate": 0.00305051,
+          "hashrate": 2e-08,
           "temperature": 69.88,
-          "power": 3710,
+          "power": 3708,
           "pool": "visota333.prmx80x179@btc.ru.viabtc.world",
           "status": "problematic",
           "problem_reason": "низкий хешрейт"
@@ -445,32 +445,32 @@
         {
           "ip": "192.168.80.139",
           "type": "whatsminer",
-          "hashrate": 0.00323811,
-          "temperature": 70.19,
-          "power": 3689,
+          "hashrate": 105.86159173,
+          "temperature": 70.06,
+          "power": 3687,
           "pool": "visota333.prmxprmx80x135@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.141",
           "type": "whatsminer",
-          "hashrate": 0.0027987399999999996,
+          "hashrate": 105.0350646,
           "temperature": 73.88,
-          "power": 3660,
+          "power": 3661,
           "pool": "visota333.prmx80x124@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.132",
           "type": "whatsminer",
-          "hashrate": 2.499e-05,
+          "hashrate": 114.31451648999999,
           "temperature": 69.88,
-          "power": 3677,
+          "power": 3679,
           "pool": "visota333.prmxprmx80x211@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.145",
@@ -485,19 +485,19 @@
         {
           "ip": "192.168.80.143",
           "type": "whatsminer",
-          "hashrate": 0.00289126,
-          "temperature": 69.88,
-          "power": 3694,
+          "hashrate": 105.67216902,
+          "temperature": 70.19,
+          "power": 3693,
           "pool": "visota333.prmxprmx80x132@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.137",
           "type": "whatsminer",
-          "hashrate": 115.26674284,
-          "temperature": 69.81,
-          "power": 3716,
+          "hashrate": 116.15136375999998,
+          "temperature": 70.0,
+          "power": 3715,
           "pool": "visota333.prmx80x137@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -515,8 +515,8 @@
         {
           "ip": "192.168.80.146",
           "type": "whatsminer",
-          "hashrate": 68.72396121,
-          "temperature": 73.94,
+          "hashrate": 112.13403013,
+          "temperature": 74.12,
           "power": 3667,
           "pool": "visota333.prmxprmx80x210@btc.ru.viabtc.world",
           "status": "online",
@@ -525,12 +525,12 @@
         {
           "ip": "192.168.80.150",
           "type": "whatsminer",
-          "hashrate": 0.00288597,
-          "temperature": 70.0,
-          "power": 3720,
+          "hashrate": 106.23081252,
+          "temperature": 69.81,
+          "power": 3715,
           "pool": "visota333.prmxprmx80x184@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.97",
@@ -545,9 +545,9 @@
         {
           "ip": "192.168.80.159",
           "type": "whatsminer",
-          "hashrate": 93.88239970000001,
-          "temperature": 74.12,
-          "power": 3681,
+          "hashrate": 111.31797717,
+          "temperature": 74.19,
+          "power": 3682,
           "pool": "visota333.prmxprmx80x21@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -555,9 +555,9 @@
         {
           "ip": "192.168.80.161",
           "type": "whatsminer",
-          "hashrate": 114.28798609,
-          "temperature": 75.06,
-          "power": 3671,
+          "hashrate": 114.38595131,
+          "temperature": 74.94,
+          "power": 3670,
           "pool": "visota333.prmx80x54@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -565,19 +565,19 @@
         {
           "ip": "192.168.80.156",
           "type": "whatsminer",
-          "hashrate": 0.00280627,
-          "temperature": 69.75,
-          "power": 3677,
+          "hashrate": 103.33619056,
+          "temperature": 70.0,
+          "power": 3679,
           "pool": "visota333.prmx80x17@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.162",
           "type": "whatsminer",
-          "hashrate": 113.11338234,
-          "temperature": 73.75,
-          "power": 3656,
+          "hashrate": 113.13689268,
+          "temperature": 73.88,
+          "power": 3654,
           "pool": "visota333.prmx80x56@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -585,8 +585,8 @@
         {
           "ip": "192.168.80.157",
           "type": "whatsminer",
-          "hashrate": 112.76793787999999,
-          "temperature": 74.06,
+          "hashrate": 111.56932735,
+          "temperature": 73.81,
           "power": 3668,
           "pool": "visota333.prmx80x55@btc.ru.viabtc.world",
           "status": "online",
@@ -595,9 +595,9 @@
         {
           "ip": "192.168.80.160",
           "type": "whatsminer",
-          "hashrate": 81.70696764,
+          "hashrate": 113.5512513,
           "temperature": 69.88,
-          "power": 3661,
+          "power": 3660,
           "pool": "visota333.prmx80x84@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -605,9 +605,9 @@
         {
           "ip": "192.168.80.164",
           "type": "whatsminer",
-          "hashrate": 0.00303673,
-          "temperature": 76.81,
-          "power": 3667,
+          "hashrate": 2e-08,
+          "temperature": 76.44,
+          "power": 3664,
           "pool": "visota333.prmx80x52@btc.ru.viabtc.world",
           "status": "problematic",
           "problem_reason": "низкий хешрейт"
@@ -615,9 +615,9 @@
         {
           "ip": "192.168.80.168",
           "type": "whatsminer",
-          "hashrate": 113.65967893999999,
-          "temperature": 73.88,
-          "power": 3672,
+          "hashrate": 113.21771605,
+          "temperature": 73.94,
+          "power": 3673,
           "pool": "visota333.prmx80x59@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -625,8 +625,8 @@
         {
           "ip": "192.168.80.170",
           "type": "whatsminer",
-          "hashrate": 0.00282736,
-          "temperature": 72.12,
+          "hashrate": 1e-08,
+          "temperature": 72.0,
           "power": 3554,
           "pool": "visota333.prmx80x18@btc.ru.viabtc.world",
           "status": "problematic",
@@ -635,9 +635,9 @@
         {
           "ip": "192.168.80.169",
           "type": "whatsminer",
-          "hashrate": 112.25787695,
-          "temperature": 73.94,
-          "power": 3666,
+          "hashrate": 113.4410844,
+          "temperature": 74.44,
+          "power": 3667,
           "pool": "visota333.prmx80x60@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -645,39 +645,39 @@
         {
           "ip": "192.168.80.167",
           "type": "whatsminer",
-          "hashrate": 0.0029930900000000003,
-          "temperature": 74.19,
+          "hashrate": 105.01346076,
+          "temperature": 73.81,
           "power": 3665,
           "pool": "visota333.prmx80x86@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.171",
           "type": "whatsminer",
-          "hashrate": 0.00255629,
+          "hashrate": 105.04289236000001,
           "temperature": 71.88,
-          "power": 3689,
+          "power": 3688,
           "pool": "visota333.prmx80x66@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.166",
           "type": "whatsminer",
-          "hashrate": 0.00298275,
-          "temperature": 74.12,
-          "power": 3667,
+          "hashrate": 104.93099573,
+          "temperature": 74.06,
+          "power": 3668,
           "pool": "visota333.prmx80x58@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.163",
           "type": "whatsminer",
-          "hashrate": 52.30411501,
-          "temperature": 74.56,
-          "power": 3684,
+          "hashrate": 111.36799909999999,
+          "temperature": 74.25,
+          "power": 3685,
           "pool": "visota333.prmx80x57@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -685,18 +685,18 @@
         {
           "ip": "192.168.80.165",
           "type": "whatsminer",
-          "hashrate": 0.0026796999999999997,
-          "temperature": 69.88,
+          "hashrate": 104.01715684000001,
+          "temperature": 69.94,
           "power": 3663,
           "pool": "visota333.prmx80x53@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.158",
           "type": "whatsminer",
-          "hashrate": 112.85636258,
-          "temperature": 74.38,
+          "hashrate": 112.45936793000001,
+          "temperature": 73.94,
           "power": 3665,
           "pool": "visota333.prmx80x85@btc.ru.viabtc.world",
           "status": "online",
@@ -705,19 +705,19 @@
         {
           "ip": "192.168.80.173",
           "type": "whatsminer",
-          "hashrate": 0.00300038,
+          "hashrate": 102.67091142000001,
           "temperature": 75.88,
           "power": 3654,
           "pool": "visota333.prmx80x116@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.176",
           "type": "whatsminer",
-          "hashrate": 0.0029244099999999997,
-          "temperature": 70.0,
-          "power": 3664,
+          "hashrate": 2e-08,
+          "temperature": 69.81,
+          "power": 3663,
           "pool": "visota333.prmx80x28@btc.ru.viabtc.world",
           "status": "problematic",
           "problem_reason": "низкий хешрейт"
@@ -725,9 +725,9 @@
         {
           "ip": "192.168.80.177",
           "type": "whatsminer",
-          "hashrate": 95.64931012,
+          "hashrate": 96.07311920999999,
           "temperature": 73.94,
-          "power": 3490,
+          "power": 3492,
           "pool": "visota333.prmx80x89@btc.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -735,9 +735,9 @@
         {
           "ip": "192.168.80.178",
           "type": "whatsminer",
-          "hashrate": 113.65568271999999,
-          "temperature": 72.0,
-          "power": 3655,
+          "hashrate": 112.28060034,
+          "temperature": 72.19,
+          "power": 3656,
           "pool": "visota333.prmx80x109@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -745,17 +745,17 @@
         {
           "ip": "192.168.80.175",
           "type": "whatsminer",
-          "hashrate": 0.00242722,
-          "temperature": 74.06,
-          "power": 3651,
+          "hashrate": 101.42465391,
+          "temperature": 73.94,
+          "power": 3650,
           "pool": "visota333.prmx80x88@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.174",
           "type": "whatsminer",
-          "hashrate": 0.00255062,
+          "hashrate": 1e-08,
           "temperature": 77.94,
           "power": 3669,
           "pool": "visota333.prmx80x29@btc.ru.viabtc.world",
@@ -765,8 +765,8 @@
         {
           "ip": "192.168.80.172",
           "type": "whatsminer",
-          "hashrate": 0.0026118200000000004,
-          "temperature": 72.06,
+          "hashrate": 1e-08,
+          "temperature": 72.31,
           "power": 3665,
           "pool": "visota333.prmx80x27@btc.ru.viabtc.world",
           "status": "problematic",
@@ -775,28 +775,28 @@
         {
           "ip": "192.168.80.179",
           "type": "whatsminer",
-          "hashrate": 0.36651914,
-          "temperature": 73.94,
+          "hashrate": 1.91e-06,
+          "temperature": 73.88,
           "power": 3344,
           "pool": "visota333.prmx80x31@btc.ru.viabtc.world",
-          "status": "online",
-          "problem_reason": null
+          "status": "problematic",
+          "problem_reason": "низкий хешрейт"
         },
         {
           "ip": "192.168.80.182",
           "type": "whatsminer",
-          "hashrate": 0.41486101000000003,
-          "temperature": 74.25,
-          "power": 3694,
+          "hashrate": 2.17e-06,
+          "temperature": 74.06,
+          "power": 3693,
           "pool": "visota333.prmx80x90@btc.ru.viabtc.world",
-          "status": "online",
-          "problem_reason": null
+          "status": "problematic",
+          "problem_reason": "низкий хешрейт"
         },
         {
           "ip": "192.168.80.185",
           "type": "whatsminer",
-          "hashrate": 95.41202992000001,
-          "temperature": 80.19,
+          "hashrate": 95.75519442000001,
+          "temperature": 80.06,
           "power": 2904,
           "pool": "visota333.prmx80x72@btc.viabtc.world",
           "status": "problematic",
@@ -805,19 +805,19 @@
         {
           "ip": "192.168.80.184",
           "type": "whatsminer",
-          "hashrate": 0.0023858,
-          "temperature": 73.81,
-          "power": 3676,
+          "hashrate": 103.76958509,
+          "temperature": 73.88,
+          "power": 3677,
           "pool": "visota333.prmx80x64@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.180",
           "type": "whatsminer",
-          "hashrate": 0.00242761,
-          "temperature": 74.19,
-          "power": 3651,
+          "hashrate": 1e-08,
+          "temperature": 74.0,
+          "power": 3650,
           "pool": "visota333.prmx80x30@btc.ru.viabtc.world",
           "status": "problematic",
           "problem_reason": "низкий хешрейт"
@@ -825,29 +825,29 @@
         {
           "ip": "192.168.80.193",
           "type": "whatsminer",
-          "hashrate": 0.00246066,
-          "temperature": 73.75,
-          "power": 3698,
+          "hashrate": 103.46204223000001,
+          "temperature": 73.88,
+          "power": 3699,
           "pool": "visota333.prmx80x41@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.202",
           "type": "whatsminer",
-          "hashrate": 0.00288125,
-          "temperature": 70.0,
-          "power": 3659,
+          "hashrate": 106.30752534,
+          "temperature": 69.75,
+          "power": 3658,
           "pool": "visota333.prmx80x38@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.191",
           "type": "whatsminer",
-          "hashrate": 0.00253044,
-          "temperature": 73.88,
-          "power": 3669,
+          "hashrate": 1e-08,
+          "temperature": 74.06,
+          "power": 3668,
           "pool": "visota333.prmx80x40@btc.ru.viabtc.world",
           "status": "problematic",
           "problem_reason": "низкий хешрейт"
@@ -855,8 +855,8 @@
         {
           "ip": "192.168.80.181",
           "type": "whatsminer",
-          "hashrate": 0.00281159,
-          "temperature": 75.94,
+          "hashrate": 1e-08,
+          "temperature": 76.06,
           "power": 3649,
           "pool": "visota333.prmx80x24@btc.ru.viabtc.world",
           "status": "problematic",
@@ -865,9 +865,9 @@
         {
           "ip": "192.168.80.186",
           "type": "whatsminer",
-          "hashrate": 0.00232386,
-          "temperature": 74.06,
-          "power": 3711,
+          "hashrate": 1e-08,
+          "temperature": 74.0,
+          "power": 3712,
           "pool": "visota333.prmx80x25@btc.ru.viabtc.world",
           "status": "problematic",
           "problem_reason": "низкий хешрейт"
@@ -875,8 +875,8 @@
         {
           "ip": "192.168.80.198",
           "type": "whatsminer",
-          "hashrate": 114.88402944999999,
-          "temperature": 69.81,
+          "hashrate": 115.30345054,
+          "temperature": 70.19,
           "power": 3702,
           "pool": "visota333.prmx80x49@btc.ru.viabtc.world",
           "status": "online",
@@ -885,19 +885,19 @@
         {
           "ip": "192.168.80.204",
           "type": "whatsminer",
-          "hashrate": 0.00278838,
-          "temperature": 70.31,
-          "power": 3651,
+          "hashrate": 107.60443683,
+          "temperature": 69.94,
+          "power": 3652,
           "pool": "visota333.prmx80x48@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.206",
           "type": "whatsminer",
-          "hashrate": 54.772516350000004,
-          "temperature": 72.38,
-          "power": 3665,
+          "hashrate": 112.40890201,
+          "temperature": 71.69,
+          "power": 3667,
           "pool": "visota333.prmx80x113@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -905,8 +905,8 @@
         {
           "ip": "192.168.80.189",
           "type": "whatsminer",
-          "hashrate": 56.08652313,
-          "temperature": 73.75,
+          "hashrate": 56.380186460000004,
+          "temperature": 73.88,
           "power": 2524,
           "pool": "visota333.prmx80x65@btc.viabtc.world",
           "status": "online",
@@ -915,59 +915,59 @@
         {
           "ip": "192.168.80.188",
           "type": "whatsminer",
-          "hashrate": 0.0026075300000000003,
-          "temperature": 73.75,
+          "hashrate": 101.78317441,
+          "temperature": 74.0,
           "power": 3671,
           "pool": "visota333.prmx80x87@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
-        },
-        {
-          "ip": "192.168.80.187",
-          "type": "whatsminer",
-          "hashrate": 0.00311058,
-          "temperature": 76.06,
-          "power": 3673,
-          "pool": "visota333.prmx80x115@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
-        },
-        {
-          "ip": "192.168.80.203",
-          "type": "whatsminer",
-          "hashrate": 0.00241929,
-          "temperature": 70.25,
-          "power": 3641,
-          "pool": "visota333.prmx80x106@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
-        },
-        {
-          "ip": "192.168.80.183",
-          "type": "whatsminer",
-          "hashrate": 0.00286858,
-          "temperature": 70.12,
-          "power": 3653,
-          "pool": "visota333.prmx80x62@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
-        },
-        {
-          "ip": "192.168.80.197",
-          "type": "whatsminer",
-          "hashrate": 0.42946761,
-          "temperature": 70.06,
-          "power": 3682,
-          "pool": "visota333.prmx80x95@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
         },
         {
+          "ip": "192.168.80.187",
+          "type": "whatsminer",
+          "hashrate": 99.60833333,
+          "temperature": 76.06,
+          "power": 3674,
+          "pool": "visota333.prmx80x115@btc.ru.viabtc.world",
+          "status": "online",
+          "problem_reason": null
+        },
+        {
+          "ip": "192.168.80.203",
+          "type": "whatsminer",
+          "hashrate": 104.61638199999999,
+          "temperature": 70.12,
+          "power": 3640,
+          "pool": "visota333.prmx80x106@btc.ru.viabtc.world",
+          "status": "online",
+          "problem_reason": null
+        },
+        {
+          "ip": "192.168.80.183",
+          "type": "whatsminer",
+          "hashrate": 106.64180375,
+          "temperature": 69.94,
+          "power": 3652,
+          "pool": "visota333.prmx80x62@btc.ru.viabtc.world",
+          "status": "online",
+          "problem_reason": null
+        },
+        {
+          "ip": "192.168.80.197",
+          "type": "whatsminer",
+          "hashrate": 2.24e-06,
+          "temperature": 69.88,
+          "power": 3682,
+          "pool": "visota333.prmx80x95@btc.ru.viabtc.world",
+          "status": "problematic",
+          "problem_reason": "низкий хешрейт"
+        },
+        {
           "ip": "192.168.80.192",
           "type": "whatsminer",
-          "hashrate": 0.00243711,
-          "temperature": 69.88,
-          "power": 3659,
+          "hashrate": 1e-08,
+          "temperature": 70.12,
+          "power": 3658,
           "pool": "visota333.prmx80x44@btc.ru.viabtc.world",
           "status": "problematic",
           "problem_reason": "низкий хешрейт"
@@ -975,19 +975,19 @@
         {
           "ip": "192.168.80.208",
           "type": "whatsminer",
-          "hashrate": 0.00240502,
+          "hashrate": 106.74049262,
           "temperature": 70.69,
-          "power": 3657,
+          "power": 3656,
           "pool": "visota333.prmx80x74@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.190",
           "type": "whatsminer",
-          "hashrate": 0.00242984,
-          "temperature": 69.88,
-          "power": 3654,
+          "hashrate": 1e-08,
+          "temperature": 69.56,
+          "power": 3655,
           "pool": "visota333.prmx80x33@btc.ru.viabtc.world",
           "status": "problematic",
           "problem_reason": "низкий хешрейт"
@@ -995,19 +995,19 @@
         {
           "ip": "192.168.80.196",
           "type": "whatsminer",
-          "hashrate": 0.00247964,
-          "temperature": 70.0,
-          "power": 3663,
+          "hashrate": 106.64720008,
+          "temperature": 70.06,
+          "power": 3662,
           "pool": "visota333.prmx80x91@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.200",
           "type": "whatsminer",
-          "hashrate": 0.00250604,
-          "temperature": 70.25,
-          "power": 3675,
+          "hashrate": 1e-08,
+          "temperature": 69.94,
+          "power": 3674,
           "pool": "visota333.prmx80x26@btc.ru.viabtc.world",
           "status": "problematic",
           "problem_reason": "низкий хешрейт"
@@ -1015,9 +1015,9 @@
         {
           "ip": "192.168.80.201",
           "type": "whatsminer",
-          "hashrate": 114.21211206999999,
-          "temperature": 70.44,
-          "power": 3671,
+          "hashrate": 115.45730773000001,
+          "temperature": 70.19,
+          "power": 3672,
           "pool": "visota333.prmx80x99@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -1025,9 +1025,9 @@
         {
           "ip": "192.168.80.195",
           "type": "whatsminer",
-          "hashrate": 108.32923775,
-          "temperature": 74.06,
-          "power": 3659,
+          "hashrate": 107.33507169,
+          "temperature": 74.0,
+          "power": 3660,
           "pool": "visota333.prmx80x23@btc.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -1035,9 +1035,9 @@
         {
           "ip": "192.168.80.199",
           "type": "whatsminer",
-          "hashrate": 65.28634458,
-          "temperature": 69.81,
-          "power": 3687,
+          "hashrate": 115.01527057999999,
+          "temperature": 69.94,
+          "power": 3689,
           "pool": "visota333.prmx80x67@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -1045,29 +1045,29 @@
         {
           "ip": "192.168.80.210",
           "type": "whatsminer",
-          "hashrate": 0.0025311599999999997,
-          "temperature": 69.94,
-          "power": 3646,
+          "hashrate": 106.35878955000001,
+          "temperature": 69.81,
+          "power": 3644,
           "pool": "visota333.prmx80x94@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.194",
           "type": "whatsminer",
-          "hashrate": 0.00240621,
-          "temperature": 70.31,
-          "power": 3652,
+          "hashrate": 107.22324386,
+          "temperature": 69.81,
+          "power": 3653,
           "pool": "visota333.prmx80x114@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.207",
           "type": "whatsminer",
-          "hashrate": 0.00252164,
-          "temperature": 69.94,
-          "power": 3670,
+          "hashrate": 1e-08,
+          "temperature": 70.0,
+          "power": 3672,
           "pool": "visota333.prmx80x37@btc.ru.viabtc.world",
           "status": "problematic",
           "problem_reason": "низкий хешрейт"
@@ -1075,19 +1075,19 @@
         {
           "ip": "192.168.80.205",
           "type": "whatsminer",
-          "hashrate": 0.00235255,
-          "temperature": 70.56,
-          "power": 3691,
+          "hashrate": 105.91332914000002,
+          "temperature": 70.44,
+          "power": 3689,
           "pool": "visota333.prmx80x79@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.215",
           "type": "whatsminer",
-          "hashrate": 72.7109532,
-          "temperature": 70.62,
-          "power": 3659,
+          "hashrate": 112.44187835999999,
+          "temperature": 70.75,
+          "power": 3658,
           "pool": "visota333.prmx80x63@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -1095,8 +1095,8 @@
         {
           "ip": "192.168.80.220",
           "type": "whatsminer",
-          "hashrate": 0.00248115,
-          "temperature": 70.12,
+          "hashrate": 1e-08,
+          "temperature": 70.62,
           "power": 3681,
           "pool": "visota333.prmx80x34@btc.ru.viabtc.world",
           "status": "problematic",
@@ -1105,9 +1105,9 @@
         {
           "ip": "192.168.80.212",
           "type": "whatsminer",
-          "hashrate": 0.00250624,
+          "hashrate": 1e-08,
           "temperature": 69.81,
-          "power": 3663,
+          "power": 3664,
           "pool": "visota333.prmx80x46@btc.ru.viabtc.world",
           "status": "problematic",
           "problem_reason": "низкий хешрейт"
@@ -1115,28 +1115,28 @@
         {
           "ip": "192.168.80.209",
           "type": "whatsminer",
-          "hashrate": 0.0025634499999999997,
+          "hashrate": 106.3497251,
           "temperature": 70.25,
-          "power": 3643,
+          "power": 3644,
           "pool": "visota333.prmx80x93@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
-        },
-        {
-          "ip": "192.168.80.213",
-          "type": "whatsminer",
-          "hashrate": 0.42304471000000005,
-          "temperature": 70.25,
-          "power": 3679,
-          "pool": "visota333.prmx80x36@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
         },
         {
+          "ip": "192.168.80.213",
+          "type": "whatsminer",
+          "hashrate": 2.21e-06,
+          "temperature": 70.25,
+          "power": 3679,
+          "pool": "visota333.prmx80x36@btc.ru.viabtc.world",
+          "status": "problematic",
+          "problem_reason": "низкий хешрейт"
+        },
+        {
           "ip": "192.168.80.221",
           "type": "whatsminer",
-          "hashrate": 0.00240137,
-          "temperature": 69.94,
+          "hashrate": 1e-08,
+          "temperature": 69.81,
           "power": 3658,
           "pool": "visota333.prmx80x32@btc.ru.viabtc.world",
           "status": "problematic",
@@ -1145,9 +1145,9 @@
         {
           "ip": "192.168.80.219",
           "type": "whatsminer",
-          "hashrate": 0.0024898000000000003,
-          "temperature": 70.0,
-          "power": 3662,
+          "hashrate": 1e-08,
+          "temperature": 69.88,
+          "power": 3664,
           "pool": "visota333.prmx80x69@btc.ru.viabtc.world",
           "status": "problematic",
           "problem_reason": "низкий хешрейт"
@@ -1155,9 +1155,9 @@
         {
           "ip": "192.168.80.216",
           "type": "whatsminer",
-          "hashrate": 64.31923771,
-          "temperature": 69.88,
-          "power": 3659,
+          "hashrate": 112.34604196000001,
+          "temperature": 69.81,
+          "power": 3660,
           "pool": "visota333.prmx80x108@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -1165,9 +1165,9 @@
         {
           "ip": "192.168.80.211",
           "type": "whatsminer",
-          "hashrate": 65.17632203,
-          "temperature": 69.88,
-          "power": 3660,
+          "hashrate": 112.73251368000001,
+          "temperature": 69.81,
+          "power": 3657,
           "pool": "visota333.prmx80x103@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -1175,9 +1175,9 @@
         {
           "ip": "192.168.80.228",
           "type": "whatsminer",
-          "hashrate": 63.05223923,
+          "hashrate": 115.09848349,
           "temperature": 69.81,
-          "power": 3685,
+          "power": 3687,
           "pool": "visota333.prmx80x107@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -1185,19 +1185,19 @@
         {
           "ip": "192.168.80.222",
           "type": "whatsminer",
-          "hashrate": 0.43142147999999997,
-          "temperature": 69.94,
+          "hashrate": 2.25e-06,
+          "temperature": 70.06,
           "power": 3671,
           "pool": "visota333.prmx80x47@btc.ru.viabtc.world",
-          "status": "online",
-          "problem_reason": null
+          "status": "problematic",
+          "problem_reason": "низкий хешрейт"
         },
         {
           "ip": "192.168.80.218",
           "type": "whatsminer",
-          "hashrate": 66.16183113,
-          "temperature": 69.88,
-          "power": 3661,
+          "hashrate": 114.47862100999998,
+          "temperature": 69.94,
+          "power": 3660,
           "pool": "visota333.prmx80x76@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -1205,8 +1205,8 @@
         {
           "ip": "192.168.80.217",
           "type": "whatsminer",
-          "hashrate": 65.01765426,
-          "temperature": 70.19,
+          "hashrate": 113.48709629000001,
+          "temperature": 70.12,
           "power": 3645,
           "pool": "visota333.prmx80x100@btc.ru.viabtc.world",
           "status": "online",
@@ -1215,9 +1215,9 @@
         {
           "ip": "192.168.80.234",
           "type": "whatsminer",
-          "hashrate": 0.28785709000000004,
-          "temperature": 74.0,
-          "power": 3221,
+          "hashrate": 87.43291455,
+          "temperature": 74.06,
+          "power": 3222,
           "pool": "visota333.prmx80x104@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -1225,9 +1225,9 @@
         {
           "ip": "192.168.80.237",
           "type": "whatsminer",
-          "hashrate": 110.70141878999999,
-          "temperature": 70.19,
-          "power": 3632,
+          "hashrate": 111.28837171000002,
+          "temperature": 69.88,
+          "power": 3631,
           "pool": "visota333.prmx80x97@btc.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -1235,9 +1235,9 @@
         {
           "ip": "192.168.80.231",
           "type": "whatsminer",
-          "hashrate": 0.0024325700000000002,
-          "temperature": 69.81,
-          "power": 3711,
+          "hashrate": 1e-08,
+          "temperature": 70.0,
+          "power": 3713,
           "pool": "visota333.prmx80x39@btc.ru.viabtc.world",
           "status": "problematic",
           "problem_reason": "низкий хешрейт"
@@ -1245,9 +1245,9 @@
         {
           "ip": "192.168.80.241",
           "type": "whatsminer",
-          "hashrate": 65.41580786,
-          "temperature": 72.12,
-          "power": 3670,
+          "hashrate": 111.93298214999999,
+          "temperature": 71.88,
+          "power": 3671,
           "pool": "visota333.prmx80x112@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -1255,9 +1255,9 @@
         {
           "ip": "192.168.80.227",
           "type": "whatsminer",
-          "hashrate": 0.41377434,
-          "temperature": 70.12,
-          "power": 3686,
+          "hashrate": 114.83899847,
+          "temperature": 69.81,
+          "power": 3688,
           "pool": "visota333.prmx80x71@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -1265,19 +1265,19 @@
         {
           "ip": "192.168.80.247",
           "type": "whatsminer",
-          "hashrate": 103.78428025,
-          "temperature": 79.81,
-          "power": 3405,
+          "hashrate": 104.57168161,
+          "temperature": 80.06,
+          "power": 3406,
           "pool": "visota333.prmx80x68@btc.ru.viabtc.world",
-          "status": "online",
-          "problem_reason": null
+          "status": "problematic",
+          "problem_reason": "высокая температура"
         },
         {
           "ip": "192.168.80.246",
           "type": "whatsminer",
-          "hashrate": 67.67428366,
-          "temperature": 78.12,
-          "power": 3671,
+          "hashrate": 111.20469473,
+          "temperature": 77.88,
+          "power": 3672,
           "pool": "visota333.prmx80x70@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -1285,7 +1285,7 @@
         {
           "ip": "192.168.80.226",
           "type": "whatsminer",
-          "hashrate": 75.13599534999999,
+          "hashrate": 110.54459777,
           "temperature": 70.06,
           "power": 3485,
           "pool": "visota333.prmx80x96@btc.ru.viabtc.world",
@@ -1295,9 +1295,9 @@
         {
           "ip": "192.168.80.230",
           "type": "whatsminer",
-          "hashrate": 64.3717646,
-          "temperature": 70.06,
-          "power": 3660,
+          "hashrate": 114.07403805999999,
+          "temperature": 69.75,
+          "power": 3662,
           "pool": "visota333.prmx80x105@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -1305,9 +1305,9 @@
         {
           "ip": "192.168.80.240",
           "type": "whatsminer",
-          "hashrate": 112.71038892,
-          "temperature": 69.81,
-          "power": 3659,
+          "hashrate": 113.15716444,
+          "temperature": 70.19,
+          "power": 3658,
           "pool": "visota333.prmx80x111@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -1315,9 +1315,9 @@
         {
           "ip": "192.168.80.245",
           "type": "whatsminer",
-          "hashrate": 70.52958274,
-          "temperature": 80.0,
-          "power": 3657,
+          "hashrate": 111.32664389000001,
+          "temperature": 80.06,
+          "power": 3658,
           "pool": "visota333.prmx80x75@btc.ru.viabtc.world",
           "status": "problematic",
           "problem_reason": "высокая температура"
@@ -1325,8 +1325,8 @@
         {
           "ip": "192.168.80.236",
           "type": "whatsminer",
-          "hashrate": 72.64606843,
-          "temperature": 70.38,
+          "hashrate": 113.83422478,
+          "temperature": 69.75,
           "power": 3666,
           "pool": "visota333.prmx80x78@btc.ru.viabtc.world",
           "status": "online",
@@ -1335,8 +1335,8 @@
         {
           "ip": "192.168.80.224",
           "type": "whatsminer",
-          "hashrate": 0.00199768,
-          "temperature": 70.19,
+          "hashrate": 1e-08,
+          "temperature": 69.94,
           "power": 3664,
           "pool": "visota333.prmx80x43@btc.ru.viabtc.world",
           "status": "problematic",
@@ -1345,8 +1345,8 @@
         {
           "ip": "192.168.80.242",
           "type": "whatsminer",
-          "hashrate": 72.13714274,
-          "temperature": 70.0,
+          "hashrate": 112.80213784,
+          "temperature": 69.88,
           "power": 3642,
           "pool": "visota333.prmx80x98@btc.ru.viabtc.world",
           "status": "online",
@@ -1355,8 +1355,8 @@
         {
           "ip": "192.168.80.214",
           "type": "whatsminer",
-          "hashrate": 71.72582183,
-          "temperature": 72.0,
+          "hashrate": 111.79028867,
+          "temperature": 72.06,
           "power": 3658,
           "pool": "visota333.prmx80x77@btc.ru.viabtc.world",
           "status": "online",
@@ -1365,9 +1365,9 @@
         {
           "ip": "192.168.80.233",
           "type": "whatsminer",
-          "hashrate": 115.00554005000001,
-          "temperature": 70.38,
-          "power": 3684,
+          "hashrate": 6.90662815,
+          "temperature": 70.0,
+          "power": 3683,
           "pool": "visota333.prmx80x45@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -1375,8 +1375,8 @@
         {
           "ip": "192.168.80.238",
           "type": "whatsminer",
-          "hashrate": 77.98833811,
-          "temperature": 71.88,
+          "hashrate": 113.13500447,
+          "temperature": 72.12,
           "power": 3666,
           "pool": "visota333.prmx80x80@btc.ru.viabtc.world",
           "status": "online",
@@ -1385,9 +1385,9 @@
         {
           "ip": "192.168.80.223",
           "type": "whatsminer",
-          "hashrate": 113.63752749000001,
-          "temperature": 69.81,
-          "power": 3653,
+          "hashrate": 113.52401313000001,
+          "temperature": 70.19,
+          "power": 3652,
           "pool": "visota333.prmx80x42@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -1395,9 +1395,9 @@
         {
           "ip": "192.168.80.235",
           "type": "whatsminer",
-          "hashrate": 72.62550632,
-          "temperature": 69.81,
-          "power": 3652,
+          "hashrate": 112.99724186,
+          "temperature": 70.25,
+          "power": 3651,
           "pool": "visota333.prmx80x82@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -1405,8 +1405,8 @@
         {
           "ip": "192.168.80.239",
           "type": "whatsminer",
-          "hashrate": 0.00208781,
-          "temperature": 70.38,
+          "hashrate": 1e-08,
+          "temperature": 69.75,
           "power": 3659,
           "pool": "visota333.prmx80x35@btc.ru.viabtc.world",
           "status": "problematic",
@@ -1415,9 +1415,9 @@
         {
           "ip": "192.168.80.244",
           "type": "whatsminer",
-          "hashrate": 0.00231943,
-          "temperature": 80.0,
-          "power": 3646,
+          "hashrate": 1e-08,
+          "temperature": 80.06,
+          "power": 3644,
           "pool": "visota333.prmx80x22@btc.ru.viabtc.world",
           "status": "problematic",
           "problem_reason": "высокая температура, низкий хешрейт"
@@ -1425,9 +1425,9 @@
         {
           "ip": "192.168.80.243",
           "type": "whatsminer",
-          "hashrate": 114.45673267000001,
-          "temperature": 70.25,
-          "power": 3679,
+          "hashrate": 114.05846227999999,
+          "temperature": 70.56,
+          "power": 3681,
           "pool": "visota333.prmx80x102@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -1435,9 +1435,9 @@
         {
           "ip": "192.168.80.229",
           "type": "whatsminer",
-          "hashrate": 71.12707712,
-          "temperature": 70.31,
-          "power": 3654,
+          "hashrate": 111.75275264000001,
+          "temperature": 70.0,
+          "power": 3655,
           "pool": "visota333.prmx80x101@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -1445,9 +1445,9 @@
         {
           "ip": "192.168.80.225",
           "type": "whatsminer",
-          "hashrate": 73.01183102,
-          "temperature": 69.88,
-          "power": 3647,
+          "hashrate": 114.42181742,
+          "temperature": 70.0,
+          "power": 3645,
           "pool": "visota333.prmx80x92@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -1455,18 +1455,18 @@
         {
           "ip": "192.168.80.232",
           "type": "whatsminer",
-          "hashrate": 0.00207157,
-          "temperature": 71.56,
-          "power": 3701,
+          "hashrate": 106.65186865000001,
+          "temperature": 71.94,
+          "power": 3704,
           "pool": "visota333.prmx80x50@btc.ru.viabtc.world",
-          "status": "problematic",
-          "problem_reason": "низкий хешрейт"
+          "status": "online",
+          "problem_reason": null
         },
         {
           "ip": "192.168.80.248",
           "type": "whatsminer",
-          "hashrate": 112.26388521999999,
-          "temperature": 79.81,
+          "hashrate": 111.84437523,
+          "temperature": 79.94,
           "power": 3658,
           "pool": "visota333.prmx80x73@btc.ru.viabtc.world",
           "status": "online",
@@ -1475,8 +1475,8 @@
         {
           "ip": "192.168.80.251",
           "type": "whatsminer",
-          "hashrate": 67.70185997,
-          "temperature": 73.88,
+          "hashrate": 110.83897857,
+          "temperature": 74.06,
           "power": 3675,
           "pool": "visota333.prmx80x51@btc.ru.viabtc.world",
           "status": "online",
@@ -1485,9 +1485,9 @@
         {
           "ip": "192.168.80.250",
           "type": "whatsminer",
-          "hashrate": 72.23512353999999,
-          "temperature": 73.81,
-          "power": 3709,
+          "hashrate": 111.05790041,
+          "temperature": 74.19,
+          "power": 3710,
           "pool": "visota333.prmx80x83@btc.ru.viabtc.world",
           "status": "online",
           "problem_reason": null
@@ -1495,9 +1495,9 @@
         {
           "ip": "192.168.80.249",
           "type": "whatsminer",
-          "hashrate": 78.98458967,
-          "temperature": 80.69,
-          "power": 2471,
+          "hashrate": 79.08030522000001,
+          "temperature": 80.38,
+          "power": 2473,
           "pool": "visota333.prmx80x81@btc.viabtc.world",
           "status": "problematic",
           "problem_reason": "высокая температура"
