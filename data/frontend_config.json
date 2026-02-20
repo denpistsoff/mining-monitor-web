@@ -1,12 +1,25 @@
 {
-  "users": [],
+  "users": [
+    {
+      "id": 839995960,
+      "username": "visota_2026",
+      "name": "visota_2026",
+      "role": "admin",
+      "password_hash": "5ce5d0a02d52d8825e289e24c651fbdeb230700227991b0430b79efe98ae651d",
+      "created_at": "2026-02-20T20:53:23.273458",
+      "default_password": "miner_839995960",
+      "source": "DESKTOP-GO47CCS"
+    }
+  ],
   "farms": [],
-  "user_farm_assignments": {},
+  "user_farm_assignments": {
+    "839995960": []
+  },
   "version": "4.1.0",
-  "last_export": "2026-02-20T20:53:00.380255",
+  "last_export": "2026-02-20T20:53:23.275232",
   "farm_name": "DESKTOP-GO47CCS",
   "source": "DESKTOP-GO47CCS",
-  "local_time": "2026-02-20 20:53:00",
-  "last_merge": "2026-02-20T20:53:00.965207",
+  "local_time": "2026-02-20 20:53:23",
+  "last_merge": "2026-02-20T20:53:23.700955",
   "merged_from": []
 }
