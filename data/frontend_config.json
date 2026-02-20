@@ -12,26 +12,6 @@
   ],
   "farms": [
     {
-      "id": "zhopern",
-      "name": "Ферма zhopern",
-      "display_name": "zhopern",
-      "data_file": "farm_data_zhopa.json",
-      "history_file": "history_zhopern.json",
-      "location": "DESKTOP-TO75OLC",
-      "miners_count": 0,
-      "settings": {
-        "alert_settings": {
-          "temp_warning": 75,
-          "temp_critical": 80,
-          "fan_failure": 2000
-        },
-        "auto_scan_enabled": false,
-        "auto_scan_time": "06:00"
-      },
-      "status": "active",
-      "last_seen": "2026-02-20T18:43:28.734454"
-    },
-    {
       "id": "1q",
       "name": "Ферма 1q",
       "display_name": "1q",
@@ -50,6 +30,26 @@
       },
       "status": "active",
       "last_seen": "2026-02-20T18:42:14.207771"
+    },
+    {
+      "id": "zhopern",
+      "name": "Ферма zhopern",
+      "display_name": "zhopern",
+      "data_file": "farm_data_zhopa.json",
+      "history_file": "history_zhopern.json",
+      "location": "DESKTOP-TO75OLC",
+      "miners_count": 0,
+      "settings": {
+        "alert_settings": {
+          "temp_warning": 75,
+          "temp_critical": 80,
+          "fan_failure": 2000
+        },
+        "auto_scan_enabled": false,
+        "auto_scan_time": "06:00"
+      },
+      "status": "active",
+      "last_seen": "2026-02-20T18:43:28.734454"
     }
   ],
   "user_farm_assignments": {
@@ -59,7 +59,13 @@
     ]
   },
   "version": "4.1.0",
-  "last_export": "2026-02-20T18:43:28.734088",
-  "farm_name": "zhopa",
-  "source": "DESKTOP-TO75OLC"
+  "last_export": "2026-02-20T18:49:27.612806",
+  "farm_name": "DESKTOP-TO75OLC",
+  "source": "DESKTOP-TO75OLC",
+  "local_time": "2026-02-20 18:49:27",
+  "last_merge": "2026-02-20T18:49:27.994400",
+  "merged_from": [
+    "zhopern",
+    "1q"
+  ]
 }
