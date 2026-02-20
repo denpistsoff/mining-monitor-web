@@ -13,15 +13,17 @@
   ],
   "farms": [
     {
-      "id": "DESKTOP-TO75OLC",
-      "name": "Ферма DESKTOP-TO75OLC",
-      "display_name": "DESKTOP-TO75OLC",
-      "data_file": "farm_data_DESKTOP-TO75OLC.json",
-      "history_file": "history_DESKTOP-TO75OLC.json",
+      "id": "home",
+      "name": "Ферма home",
+      "display_name": "home",
+      "data_file": "farm_data_home.json",
+      "history_file": "history_home.json",
       "location": "DESKTOP-TO75OLC",
       "miners_count": 0,
-      "containers_count": 0,
-      "containers": [],
+      "containers_count": 1,
+      "containers": [
+        "1й"
+      ],
       "settings": {
         "alert_settings": {
           "temp_warning": 75,
@@ -32,23 +34,25 @@
         "auto_scan_time": "06:00"
       },
       "status": "inactive",
-      "last_seen": "2026-02-21T02:22:32.857363",
+      "last_seen": "2026-02-21T02:23:19.102227",
       "source": "DESKTOP-TO75OLC"
     }
   ],
   "user_farm_assignments": {
     "342342": [
-      "DESKTOP-TO75OLC"
+      "home"
     ]
   },
   "version": "4.2.0",
-  "last_export": "2026-02-21T02:22:33.260186",
-  "farm_name": "DESKTOP-TO75OLC",
+  "last_export": "2026-02-21T02:23:20.271324",
+  "farm_name": "home",
   "source": "DESKTOP-TO75OLC",
-  "local_time": "2026-02-21 02:22:33",
-  "last_merge": "2026-02-21T02:22:33.260243",
+  "local_time": "2026-02-21 02:23:20",
+  "last_merge": "2026-02-21T02:23:20.271394",
   "merged_from": [
-    "DESKTOP-TO75OLC"
+    "home"
   ],
-  "duplicates_removed": []
+  "duplicates_removed": [
+    "DESKTOP-TO75OLC"
+  ]
 }
