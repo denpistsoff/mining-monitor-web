@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GH_TOKEN }}
-          fetch-depth: 0  # Важно для получения всех файлов
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -65,15 +65,18 @@ jobs:
             https://api.github.com/repos/denpistsoff/mining-monitor-web/contents/data/ | \
             grep -o '"name":"history_[^"]*\.json"' | cut -d'"' -f4)
           
-          echo "$HISTORY_FILES" | while read file; do
-            if [ ! -z "$file" ]; then
-              echo "  📥 Downloading $file..."
-              curl -s -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
-                   -H "Accept: application/vnd.github.v3.raw" \
-                   -o "public/data/history/$file" \
-                   "https://api.github.com/repos/denpistsoff/mining-monitor-web/contents/data/$file"
-            fi
-          done
+          # Исправлено: правильная обработка многострочной переменной
+          if [ ! -z "$HISTORY_FILES" ]; then
+            echo "$HISTORY_FILES" | while IFS= read -r file; do
+              if [ ! -z "$file" ]; then
+                echo "  📥 Downloading $file..."
+                curl -s -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
+                     -H "Accept: application/vnd.github.v3.raw" \
+                     -o "public/data/history/$file" \
+                     "https://api.github.com/repos/denpistsoff/mining-monitor-web/contents/data/$file"
+              fi
+            done
+          fi
           
           echo "✅ History files downloaded: $(ls public/data/history/ | wc -l) files"
 
@@ -131,10 +134,11 @@ deploy:
       id: deployment
       uses: actions/deploy-pages@v4
 
-# Отдельный workflow для авто-обновления истории (можно оставить или объединить)
+# Отдельный workflow для авто-обновления истории
 auto-update-history:
   runs-on: ubuntu-latest
   if: github.ref == 'refs/heads/main'
+  needs: deploy
   
   steps:
     - name: Checkout repository
@@ -162,29 +166,32 @@ auto-update-history:
         
         CHANGES_DETECTED=false
         
-        echo "$HISTORY_FILES" | while read file; do
-          if [ ! -z "$file" ]; then
-            # Скачиваем файл
-            curl -s -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
-                 -o "temp_history/$file" \
-                 "https://raw.githubusercontent.com/denpistsoff/mining-monitor-web/main/data/$file"
+        # Исправлено: правильная обработка многострочной переменной
+        if [ ! -z "$HISTORY_FILES" ]; then
+          echo "$HISTORY_FILES" | while IFS= read -r file; do
+            if [ ! -z "$file" ]; then
+              # Скачиваем файл
+              curl -s -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
+                   -o "temp_history/$file" \
+                   "https://raw.githubusercontent.com/denpistsoff/mining-monitor-web/main/data/$file"
         
-            # Проверяем, есть ли изменения
-            if [ -f "data/$file" ]; then
-              if ! cmp -s "data/$file" "temp_history/$file"; then
-                echo "  📝 Changes detected in $file"
+              # Проверяем, есть ли изменения
+              if [ -f "data/$file" ]; then
+                if ! cmp -s "data/$file" "temp_history/$file"; then
+                  echo "  📝 Changes detected in $file"
+                  cp "temp_history/$file" "data/$file"
+                  git add "data/$file"
+                  CHANGES_DETECTED=true
+                fi
+              else
+                echo "  🆕 New file detected: $file"
                 cp "temp_history/$file" "data/$file"
                 git add "data/$file"
                 CHANGES_DETECTED=true
               fi
-            else
-              echo "  🆕 New file detected: $file"
-              cp "temp_history/$file" "data/$file"
-              git add "data/$file"
-              CHANGES_DETECTED=true
             fi
-          fi
-        done
+          done
+        fi
         
         echo "changes_detected=$CHANGES_DETECTED" >> $GITHUB_ENV
 
@@ -195,10 +202,11 @@ auto-update-history:
         git push
         echo "✅ History changes committed"
 
-# Новый workflow: проверка целостности конфига
+# Проверка целостности конфига
 validate-config:
   runs-on: ubuntu-latest
   needs: deploy
+  if: always()
   
   steps:
     - name: Checkout repository
