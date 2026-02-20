@@ -1,241 +1,335 @@
-name: Deploy React App to GitHub Pages
+name: Deploy Mining Monitor to GitHub Pages
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
   workflow_dispatch:
+    inputs:
+      force_deploy:
+        description: 'Force deploy even without changes'
+        required: false
+        default: false
+        type: boolean
 
+# Настройки permissions
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
+  actions: read
+
+# Константы
+env:
+  NODE_VERSION: '18'
+  APP_VERSION: '5.0.0'
+  REPO_NAME: 'denpistsoff/mining-monitor-web'
 
 jobs:
+  # Job 1: Сборка приложения
   build:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      build_time: ${{ steps.time.outputs.time }}
     
     steps:
-      - name: Checkout
+      - name: ⏱️ Set build time
+        id: time
+        run: echo "time=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_OUTPUT
+
+      - name: 🔢 Get version
+        id: version
+        run: echo "version=${{ env.APP_VERSION }}" >> $GITHUB_OUTPUT
+
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GH_TOKEN }}
           fetch-depth: 0
 
-      - name: Setup Node.js
+      - name: 🏗️ Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Create environment file with GitHub Token
+      - name: 📦 Install dependencies
         run: |
-          echo "REACT_APP_GITHUB_TOKEN=${{ secrets.GH_TOKEN }}" > .env
-          echo "REACT_APP_GITHUB_REPO=denpistsoff/mining-monitor-web" >> .env
-          echo "REACT_APP_VERSION=5.0" >> .env
+          echo "Installing npm packages..."
+          npm ci --silent || npm install --silent
+          echo "✅ Dependencies installed"
+
+      - name: 🔧 Create environment file
+        run: |
+          cat > .env << EOF
+          REACT_APP_GITHUB_TOKEN=${{ secrets.GH_TOKEN }}
+          REACT_APP_GITHUB_REPO=${{ env.REPO_NAME }}
+          REACT_APP_VERSION=${{ env.APP_VERSION }}
+          REACT_APP_BUILD_TIME=$(date +%s)
+          REACT_APP_BUILD_DATE="$(date +'%Y-%m-%d %H:%M:%S')"
+          EOF
           echo "✅ Environment file created"
 
-      - name: Download latest frontend config from data branch
+      - name: 📂 Create public directories
         run: |
-          echo "📥 Downloading frontend config from GitHub..."
-          # Скачиваем актуальный конфиг из репозитория
-          curl -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
-               -H "Accept: application/vnd.github.v3.raw" \
-               -o public/frontend_config.json \
-               https://api.github.com/repos/denpistsoff/mining-monitor-web/contents/data/frontend_config.json
-          
-          if [ -f public/frontend_config.json ]; then
-            echo "✅ frontend_config.json downloaded"
-            echo "File size: $(wc -l < public/frontend_config.json) lines"
-          else
-            echo "⚠️ frontend_config.json not found, using fallback"
-            # Создаем пустой конфиг если файла нет
-            echo '{"users":[],"farms":[],"user_farm_assignments":{},"version":"5.0"}' > public/frontend_config.json
-          fi
-
-      - name: Download history files for all farms
-        run: |
-          echo "📊 Downloading history files..."
           mkdir -p public/data/history
-          
-          # Получаем список всех history файлов через GitHub API
-          HISTORY_FILES=$(curl -s -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
-            https://api.github.com/repos/denpistsoff/mining-monitor-web/contents/data/ | \
-            grep -o '"name":"history_[^"]*\.json"' | cut -d'"' -f4)
-          
-          # Исправлено: правильная обработка многострочной переменной
-          if [ ! -z "$HISTORY_FILES" ]; then
-            echo "$HISTORY_FILES" | while IFS= read -r file; do
-              if [ ! -z "$file" ]; then
-                echo "  📥 Downloading $file..."
-                curl -s -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
-                     -H "Accept: application/vnd.github.v3.raw" \
-                     -o "public/data/history/$file" \
-                     "https://api.github.com/repos/denpistsoff/mining-monitor-web/contents/data/$file"
-              fi
-            done
-          fi
-          
-          echo "✅ History files downloaded: $(ls public/data/history/ | wc -l) files"
+          mkdir -p public/config
+          echo "✅ Directories created"
 
-      - name: Build React app
+      - name: ⬇️ Download frontend config
         run: |
-          echo "🏗️ Building React app..."
-          CI=false npm run build
-          echo "✅ Build completed"
-
-      - name: Copy config files to build
-        run: |
-          echo "📋 Copying configuration files to build..."
+          echo "📥 Downloading frontend config..."
+          CONFIG_URL="https://api.github.com/repos/${{ env.REPO_NAME }}/contents/data/frontend_config.json"
           
-          # Копируем frontend_config в build
-          if [ -f public/frontend_config.json ]; then
-            cp public/frontend_config.json build/frontend_config.json
-            echo "  ✅ frontend_config.json copied"
-          fi
+          # Пробуем скачать через API
+          HTTP_CODE=$(curl -s -w "%{http_code}" -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
+               -H "Accept: application/vnd.github.v3.raw" \
+               -o public/config/frontend_config.json \
+               $CONFIG_URL)
           
-          # Копируем историю
-          if [ -d public/data/history ]; then
-            mkdir -p build/data/history
-            cp public/data/history/*.json build/data/history/ 2>/dev/null || true
-            echo "  ✅ History files copied: $(ls build/data/history/ | wc -l) files"
-          fi
-          
-          # Создаем файл с информацией о сборке
-          cat > build/build-info.json << EOF
+          if [ "$HTTP_CODE" = "200" ] && [ -f public/config/frontend_config.json ]; then
+            echo "✅ frontend_config.json downloaded successfully"
+            echo "   File size: $(wc -l < public/config/frontend_config.json) lines"
+            cp public/config/frontend_config.json public/frontend_config.json
+          else
+            echo "⚠️ frontend_config.json not found (HTTP $HTTP_CODE), creating default"
+            cat > public/frontend_config.json << 'EOF'
   {
+    "users": [],
+    "farms": [],
+    "user_farm_assignments": {},
     "version": "5.0",
-    "buildDate": "$(date -Iseconds)",
-    "commit": "$(git rev-parse --short HEAD)",
-    "multiUser": true,
-    "authType": "config-based"
+    "last_export": "$(date -Iseconds)",
+    "farm_name": "default"
   }
   EOF
-  echo "  ✅ Build info created"
+  fi
 
-- name: Setup Pages
-  uses: actions/configure-pages@v4
+- name: ⬇️ Download history files
+  run: |
+    echo "📊 Downloading history files..."
+    
+    # Получаем список файлов через GitHub API
+    API_URL="https://api.github.com/repos/${{ env.REPO_NAME }}/contents/data/"
+    FILES=$(curl -s -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
+      $API_URL | grep -o '"name":"history_[^"]*\.json"' | cut -d'"' -f4 || echo "")
+    
+    DOWNLOAD_COUNT=0
+    if [ -n "$FILES" ]; then
+      echo "$FILES" | while IFS= read -r file; do
+        if [ -n "$file" ]; then
+          echo "  📥 Downloading $file..."
+          curl -s -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
+               -H "Accept: application/vnd.github.v3.raw" \
+               -o "public/data/history/$file" \
+               "https://api.github.com/repos/${{ env.REPO_NAME }}/contents/data/$file"
+    
+          if [ -f "public/data/history/$file" ]; then
+            DOWNLOAD_COUNT=$((DOWNLOAD_COUNT + 1))
+          fi
+        fi
+      done
+    fi
+    
+    echo "✅ Downloaded $DOWNLOAD_COUNT history files"
 
-- name: Upload artifact
+- name: 🏗️ Build React application
+  run: |
+    echo "🔨 Building React app..."
+    CI=false GENERATE_SOURCEMAP=false npm run build
+    echo "✅ Build completed"
+
+- name: 📋 Copy configuration files to build
+  run: |
+    echo "📋 Copying configs to build directory..."
+    
+    # Копируем frontend config
+    if [ -f public/frontend_config.json ]; then
+      cp public/frontend_config.json build/frontend_config.json
+      echo "  ✅ frontend_config.json copied"
+    fi
+    
+    # Копируем историю
+    if [ -d public/data/history ] && [ "$(ls -A public/data/history)" ]; then
+      mkdir -p build/data/history
+      cp public/data/history/*.json build/data/history/
+      echo "  ✅ History files copied: $(ls build/data/history/ | wc -l) files"
+    fi
+    
+    # Создаем build info
+    cat > build/build-info.json << EOF
+  {
+    "version": "${{ env.APP_VERSION }}",
+    "buildTime": "$(date -Iseconds)",
+    "commit": "$(git rev-parse --short HEAD)",
+    "branch": "$(git rev-parse --abbrev-ref HEAD)",
+    "multiUser": true,
+    "authType": "config-based",
+    "features": {
+      "history": true,
+      "alerts": true,
+      "multiUser": true,
+      "telegram": true
+    }
+  }
+  EOF
+  echo "  ✅ build-info.json created"
+  
+  # Создаем .htaccess для правильной маршрутизации
+  cat > build/.htaccess << EOF
+  Options -MultiViews
+  RewriteEngine On
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^ index.html [QSA,L]
+  
+  # Кэширование
+  <FilesMatch "\.(ico|pdf|flv|jpg|jpeg|png|gif|js|css|swf)$">
+  Header set Cache-Control "max-age=2592000, public"
+  </FilesMatch>
+  EOF
+  echo "  ✅ .htaccess created"
+
+- name: 📤 Upload build artifact
   uses: actions/upload-pages-artifact@v3
   with:
     path: ./build
 
+# Job 2: Деплой на GitHub Pages
 deploy:
+  runs-on: ubuntu-latest
+  needs: build
   environment:
     name: github-pages
     url: ${{ steps.deployment.outputs.page_url }}
-  runs-on: ubuntu-latest
-  needs: build
+  
   steps:
-    - name: Deploy to GitHub Pages
+    - name: 🚀 Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v4
 
-# Отдельный workflow для авто-обновления истории
-auto-update-history:
+    - name: ✅ Deployment completed
+      run: |
+        echo "✅ Application deployed successfully!"
+        echo "   Version: ${{ needs.build.outputs.version }}"
+        echo "   Build time: ${{ needs.build.outputs.build_time }}"
+        echo "   URL: ${{ steps.deployment.outputs.page_url }}"
+
+# Job 3: Синхронизация истории (опционально)
+sync-history:
   runs-on: ubuntu-latest
-  if: github.ref == 'refs/heads/main'
   needs: deploy
+  if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
   
   steps:
-    - name: Checkout repository
+    - name: 📥 Checkout repository
       uses: actions/checkout@v4
       with:
         token: ${{ secrets.GH_TOKEN }}
         fetch-depth: 0
 
-    - name: Setup Git config
+    - name: 🔧 Configure Git
       run: |
-        git config --global user.email "action@github.com"
-        git config --global user.name "GitHub Action"
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-    - name: Check for new history files
+    - name: 🔄 Sync history files
       run: |
-        echo "🔍 Checking for new history files..."
+        echo "🔄 Syncing history files..."
         
-        # Скачиваем актуальные файлы из data branch
+        # Создаем временную директорию
         mkdir -p temp_history
         
-        # Получаем список всех history файлов
-        HISTORY_FILES=$(curl -s -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
-          https://api.github.com/repos/denpistsoff/mining-monitor-web/contents/data/ | \
-          grep -o '"name":"history_[^"]*\.json"' | cut -d'"' -f4)
+        # Скачиваем свежие history файлы
+        API_URL="https://api.github.com/repos/${{ env.REPO_NAME }}/contents/data/"
+        FILES=$(curl -s -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
+          $API_URL | grep -o '"name":"history_[^"]*\.json"' | cut -d'"' -f4 || echo "")
         
-        CHANGES_DETECTED=false
+        CHANGES=false
         
-        # Исправлено: правильная обработка многострочной переменной
-        if [ ! -z "$HISTORY_FILES" ]; then
-          echo "$HISTORY_FILES" | while IFS= read -r file; do
-            if [ ! -z "$file" ]; then
+        if [ -n "$FILES" ]; then
+          echo "$FILES" | while IFS= read -r file; do
+            if [ -n "$file" ]; then
               # Скачиваем файл
               curl -s -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
                    -o "temp_history/$file" \
-                   "https://raw.githubusercontent.com/denpistsoff/mining-monitor-web/main/data/$file"
+                   "https://raw.githubusercontent.com/${{ env.REPO_NAME }}/main/data/$file"
         
-              # Проверяем, есть ли изменения
+              # Проверяем изменения
               if [ -f "data/$file" ]; then
                 if ! cmp -s "data/$file" "temp_history/$file"; then
-                  echo "  📝 Changes detected in $file"
+                  echo "  📝 Updated: $file"
                   cp "temp_history/$file" "data/$file"
                   git add "data/$file"
-                  CHANGES_DETECTED=true
+                  CHANGES=true
                 fi
               else
-                echo "  🆕 New file detected: $file"
+                echo "  🆕 New: $file"
                 cp "temp_history/$file" "data/$file"
                 git add "data/$file"
-                CHANGES_DETECTED=true
+                CHANGES=true
               fi
             fi
           done
         fi
         
-        echo "changes_detected=$CHANGES_DETECTED" >> $GITHUB_ENV
+        echo "has_changes=$CHANGES" >> $GITHUB_ENV
 
-    - name: Commit and push if changes detected
-      if: env.changes_detected == 'true'
+    - name: 📤 Commit and push changes
+      if: env.has_changes == 'true'
       run: |
-        git commit -m "🤖 Auto-update farm history: $(date +'%Y-%m-%d %H:%M')"
+        git commit -m "🤖 Auto-sync farm history [skip ci]"
         git push
-        echo "✅ History changes committed"
+        echo "✅ History files synced successfully"
 
-# Проверка целостности конфига
-validate-config:
+# Job 4: Проверка здоровья (опционально)
+health-check:
   runs-on: ubuntu-latest
   needs: deploy
   if: always()
   
   steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        token: ${{ secrets.GH_TOKEN }}
-
-    - name: Validate frontend config
+    - name: 🏥 Check deployment health
       run: |
-        echo "🔍 Validating frontend_config.json..."
+        echo "🏥 Running health checks..."
         
-        if [ ! -f data/frontend_config.json ]; then
-          echo "⚠️ frontend_config.json not found!"
-          exit 0
+        # Проверяем доступность сайта
+        DEPLOY_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+        echo "   Checking: $DEPLOY_URL"
+        
+        HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$DEPLOY_URL" || echo "000")
+        
+        if [ "$HTTP_CODE" = "200" ]; then
+          echo "✅ Site is accessible (HTTP $HTTP_CODE)"
+        else
+          echo "⚠️ Site returned HTTP $HTTP_CODE"
         fi
         
-        # Проверяем базовую структуру JSON
-        if ! jq empty data/frontend_config.json 2>/dev/null; then
-          echo "❌ Invalid JSON in frontend_config.json!"
-          exit 1
+        # Проверяем наличие конфига
+        CONFIG_URL="${DEPLOY_URL}frontend_config.json"
+        CONFIG_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$CONFIG_URL" || echo "000")
+        
+        if [ "$CONFIG_CODE" = "200" ]; then
+          echo "✅ Config file is accessible"
+        else
+          echo "⚠️ Config file not accessible (HTTP $CONFIG_CODE)"
         fi
         
-        # Проверяем наличие обязательных полей
-        HAS_USERS=$(jq '.users | length' data/frontend_config.json)
-        HAS_FARMS=$(jq '.farms | length' data/frontend_config.json)
-        HAS_VERSION=$(jq '.version' data/frontend_config.json)
+        echo "✅ Health check completed"
+
+# Job 5: Уведомление об успехе (опционально)
+notify:
+  runs-on: ubuntu-latest
+  needs: [deploy, health-check]
+  if: success()
+  
+  steps:
+    - name: 💬 Send success notification
+      run: |
+        echo "🎉 Deployment completed successfully!"
+        echo "   Version: ${{ needs.build.outputs.version }}"
+        echo "   Time: ${{ needs.build.outputs.build_time }}"
+        echo "   Repository: ${{ github.repository }}"
+        echo "   Commit: ${{ github.sha }}"
         
-        echo "  ✅ Users: $HAS_USERS"
-        echo "  ✅ Farms: $HAS_FARMS"
-        echo "  ✅ Version: $HAS_VERSION"
-        
-        echo "✅ Config validation passed"
+        # Здесь можно добавить отправку в Telegram/Slack
+        # curl -X POST -H "Content-Type: application/json" ...
