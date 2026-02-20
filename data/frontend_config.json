@@ -52,25 +52,48 @@
       "status": "active",
       "last_seen": "2026-02-20T21:01:28.657856",
       "source": "DESKTOP-GO47CCS"
+    },
+    {
+      "id": "DESKTOP-GO47CCS",
+      "name": "Ферма DESKTOP-GO47CCS",
+      "display_name": "DESKTOP-GO47CCS",
+      "data_file": "farm_data_DESKTOP-GO47CCS.json",
+      "history_file": "history_DESKTOP-GO47CCS.json",
+      "location": "DESKTOP-GO47CCS",
+      "miners_count": 0,
+      "containers_count": 0,
+      "containers": [],
+      "settings": {
+        "alert_settings": {
+          "temp_warning": 75,
+          "temp_critical": 80,
+          "fan_failure": 2000
+        },
+        "auto_scan_enabled": false,
+        "auto_scan_time": "06:00"
+      },
+      "status": "inactive",
+      "last_seen": "2026-02-20T21:12:44.584912",
+      "source": "DESKTOP-GO47CCS"
     }
   ],
   "user_farm_assignments": {
+    "217646215": [
+      "1й"
+    ],
     "5315859429": [
       "1й"
     ],
     "839995960": [
       "1й"
-    ],
-    "217646215": [
-      "1й"
     ]
   },
   "version": "4.1.0",
-  "last_export": "2026-02-20T21:01:28.656270",
-  "farm_name": "VISOKOVKA",
+  "last_export": "2026-02-20T21:12:44.572733",
+  "farm_name": "DESKTOP-GO47CCS",
   "source": "DESKTOP-GO47CCS",
-  "local_time": "2026-02-20 21:01:28",
-  "last_merge": "2026-02-20T21:01:29.247526",
+  "local_time": "2026-02-20 21:12:44",
+  "last_merge": "2026-02-20T21:12:45.171201",
   "merged_from": [
     "1й"
   ]
