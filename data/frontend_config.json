@@ -1,6 +1,16 @@
 {
   "users": [
     {
+      "id": 1213,
+      "username": "12",
+      "name": "12",
+      "role": "admin",
+      "password_hash": "3b89706a4fd0503da15771d1a8e600ae264956d129ddd884beb700c53434ab4f",
+      "created_at": "2026-02-20T18:52:24.977469",
+      "default_password": "miner_1213",
+      "source": "DESKTOP-TO75OLC"
+    },
+    {
       "id": 839995960,
       "username": "denis",
       "name": "denis",
@@ -50,21 +60,25 @@
         "auto_scan_time": "06:00"
       },
       "status": "active",
-      "last_seen": "2026-02-20T18:43:28.734454"
+      "last_seen": "2026-02-20T18:52:24.979404",
+      "source": "DESKTOP-TO75OLC"
     }
   ],
   "user_farm_assignments": {
+    "1213": [
+      "zhopern"
+    ],
     "839995960": [
       "1q",
       "zhopern"
     ]
   },
   "version": "4.1.0",
-  "last_export": "2026-02-20T18:49:49.265570",
-  "farm_name": "DESKTOP-TO75OLC",
+  "last_export": "2026-02-20T18:52:24.978764",
+  "farm_name": "zhopa",
   "source": "DESKTOP-TO75OLC",
-  "local_time": "2026-02-20 18:49:49",
-  "last_merge": "2026-02-20T18:49:49.860474",
+  "local_time": "2026-02-20 18:52:24",
+  "last_merge": "2026-02-20T18:52:25.387885",
   "merged_from": [
     "1q",
     "zhopern"
