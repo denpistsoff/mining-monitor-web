@@ -722,3 +722,64 @@
 .debug-panel div {
     margin-bottom: 4px;
 }
+
+/* Добавить в конец файла FarmSelection.css */
+
+.user-role {
+    font-size: 16px;
+    margin-left: 10px;
+    color: #ff8c00;
+}
+
+.no-farms-message {
+    text-align: center;
+    padding: 60px 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    margin: 40px auto;
+    max-width: 500px;
+    border: 1px solid #333;
+}
+
+.no-farms-message h2 {
+    color: #ff8c00;
+    margin-bottom: 15px;
+    font-size: 24px;
+}
+
+.no-farms-message p {
+    color: #999;
+    font-size: 16px;
+}
+
+.logout-button-nav {
+    background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    margin-left: 10px;
+}
+
+.logout-button-nav:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 68, 68, 0.3);
+}
+
+@media (max-width: 768px) {
+    .logout-button-nav {
+        padding: 8px 15px;
+        font-size: 12px;
+        margin-left: 5px;
+    }
+
+    .user-role {
+        display: block;
+        margin-left: 0;
+        margin-top: 5px;
+    }
+}

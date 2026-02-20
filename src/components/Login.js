@@ -1,104 +1,67 @@
+// src/components/Login.js
 import React, { useState, useEffect } from 'react';
+import authManager from '../utils/auth';
 import '../styles/components/Login.css';
 
 const Login = ({ onLogin }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const [rememberMe, setRememberMe] = useState(false);
+    const [warning, setWarning] = useState('');
+    const [rememberMe, setRememberMe] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
-
-    // Правильный путь к credentials.json
-    const getCredentialsPath = () => {
-        // Для GitHub Pages
-        if (window.location.hostname.includes('github.io')) {
-            return '/mining-monitor-web/data/auth/credentials.json';
-        }
-        // Для локальной разработки
-        return '/data/auth/credentials.json';
-    };
+    const [configLoading, setConfigLoading] = useState(true);
 
     useEffect(() => {
-        const savedAuth = localStorage.getItem('miningAuth');
-        if (savedAuth) {
-            try {
-                const authData = JSON.parse(savedAuth);
-                if (Date.now() - authData.timestamp < 30 * 24 * 60 * 60 * 1000) {
-                    handleAutoLogin(authData.username, authData.password);
-                } else {
-                    localStorage.removeItem('miningAuth');
-                }
-            } catch (e) {
-                localStorage.removeItem('miningAuth');
+        // Предзагружаем конфиг при монтировании
+        const preloadConfig = async () => {
+            await authManager.loadConfig();
+            setConfigLoading(false);
+
+            // Проверяем, есть ли сохраненная авторизация
+            const user = await authManager.checkAuth();
+            if (user) {
+                onLogin(true, user);
             }
-        }
-    }, []);
+        };
 
-    const handleAutoLogin = async (savedUser, savedPass) => {
-        setIsLoading(true);
-        try {
-            const credentialsPath = getCredentialsPath();
-            const response = await fetch(credentialsPath);
-            if (!response.ok) throw new Error('Auth file not found');
-
-            const authData = await response.json();
-            const validUser = authData.users.find(u =>
-                u.username === savedUser && u.password === savedPass
-            );
-
-            if (validUser) {
-                onLogin(true);
-            } else {
-                localStorage.removeItem('miningAuth');
-            }
-        } catch (error) {
-            console.error('Auto-login failed:', error);
-            localStorage.removeItem('miningAuth');
-        }
-        setIsLoading(false);
-    };
+        preloadConfig();
+    }, [onLogin]);
 
     const handleLogin = async (e) => {
         e.preventDefault();
         setError('');
+        setWarning('');
         setIsLoading(true);
 
         try {
-            const credentialsPath = getCredentialsPath();
-            const response = await fetch(credentialsPath);
-            if (!response.ok) throw new Error('Auth file not found');
+            const result = await authManager.login(username, password);
 
-            const authData = await response.json();
-            const validUser = authData.users.find(u =>
-                u.username === username && u.password === password
-            );
-
-            if (validUser) {
-                if (rememberMe) {
-                    localStorage.setItem('miningAuth', JSON.stringify({
-                        username: username,
-                        password: password,
-                        timestamp: Date.now()
-                    }));
+            if (result.success) {
+                if (result.isTemporary) {
+                    setWarning(result.message);
                 }
-                onLogin(true);
+                onLogin(true, result.user);
             } else {
-                setError('Неверный логин или пароль');
+                setError(result.error);
             }
         } catch (error) {
-            setError('Ошибка авторизации. Проверьте подключение.');
+            setError('Ошибка подключения к серверу');
             console.error('Login error:', error);
+        } finally {
+            setIsLoading(false);
         }
-        setIsLoading(false);
     };
 
-    if (isLoading) {
+    if (configLoading) {
         return (
             <div className="login-container">
                 <div className="login-form">
                     <div className="loading">
                         <div className="loading-spinner"></div>
-                        <p style={{ color: '#ff8c00', marginTop: '16px' }}>Проверка авторизации...</p>
+                        <p style={{ color: '#ff8c00', marginTop: '16px' }}>
+                            Загрузка конфигурации...
+                        </p>
                     </div>
                 </div>
             </div>
@@ -110,7 +73,7 @@ const Login = ({ onLogin }) => {
             <div className="login-form">
                 <div className="login-header">
                     <h1 className="login-title">MINING MONITOR</h1>
-                    <p className="login-subtitle">Система мониторинга майнинг ферм</p>
+                    <p className="login-subtitle">Многопользовательская система мониторинга</p>
                 </div>
 
                 <form onSubmit={handleLogin}>
@@ -151,6 +114,7 @@ const Login = ({ onLogin }) => {
                     </div>
 
                     {error && <div className="error-message">{error}</div>}
+                    {warning && <div className="warning-message">{warning}</div>}
 
                     <button
                         type="submit"
@@ -160,6 +124,10 @@ const Login = ({ onLogin }) => {
                         {isLoading ? 'ВХОД...' : 'ВОЙТИ В СИСТЕМУ'}
                     </button>
                 </form>
+
+                <div className="login-footer">
+                    <p>Версия 5.0 | Многопользовательский режим</p>
+                </div>
             </div>
         </div>
     );

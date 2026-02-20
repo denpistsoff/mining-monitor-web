@@ -1,3 +1,4 @@
+// src/components/Dashboard.js
 import React, { useState, useEffect, useRef } from 'react';
 import { useFarmData } from '../hooks/useFarmData';
 import StatsGrid from './StatsGrid';
@@ -14,9 +15,11 @@ const Dashboard = ({ farmNameProp }) => {
 
     useEffect(() => {
         const loadHistory = async () => {
+            if (!farmNameProp) return;
+
             setHistoryLoading(true);
             try {
-                const history = await historyManager.initHistory();
+                const history = await historyManager.loadFarmHistory(farmNameProp);
                 setHistoryData(history);
             } catch (error) {
                 console.error('❌ Ошибка загрузки истории:', error);
@@ -26,40 +29,7 @@ const Dashboard = ({ farmNameProp }) => {
         };
 
         loadHistory();
-    }, []);
-
-    useEffect(() => {
-        const updateHistory = async () => {
-            if (farmData && !loading) {
-                try {
-                    const updatedHistory = await historyManager.saveCurrentData(farmData);
-                    setHistoryData(updatedHistory);
-                } catch (error) {
-                    console.error('❌ Ошибка обновления истории:', error);
-                }
-            }
-        };
-
-        updateHistory();
-    }, [farmData, loading]);
-
-    const handleClearHistory = () => {
-        if (window.confirm('Очистить всю историю? Данные будут удалены из GitHub.')) {
-            const clearHistory = async () => {
-                const clearedHistory = await historyManager.clearHistory();
-                setHistoryData(clearedHistory);
-            };
-            clearHistory();
-        }
-    };
-
-    const handleExportHistory = () => {
-        historyManager.exportHistory();
-    };
-
-    const handleExportQueue = () => {
-        historyManager.exportLocalQueue();
-    };
+    }, [farmNameProp]);
 
     if (loading) {
         return (
@@ -114,15 +84,13 @@ const Dashboard = ({ farmNameProp }) => {
             <StatsGrid summary={farmData.summary} dataStatus={farmData._dataStatus} />
 
             <ChartTabsSection
+                farmName={farmNameProp}
                 historyData={historyData}
                 activeTab={activeTab}
                 onTabChange={setActiveTab}
                 timeRange={chartTimeRange}
                 onTimeRangeChange={setChartTimeRange}
                 currentData={farmData.summary}
-                onClearHistory={handleClearHistory}
-                onExportHistory={handleExportHistory}
-                onExportQueue={handleExportQueue}
                 dataStatus={farmData._dataStatus}
                 historyLoading={historyLoading}
             />
@@ -149,17 +117,15 @@ const Dashboard = ({ farmNameProp }) => {
     );
 };
 
-// Компонент с табами для графиков
+// Компонент с табами для графиков (обновлен)
 const ChartTabsSection = ({
+                              farmName,
                               historyData,
                               activeTab,
                               onTabChange,
                               timeRange,
                               onTimeRangeChange,
                               currentData,
-                              onClearHistory,
-                              onExportHistory,
-                              onExportQueue,
                               dataStatus,
                               historyLoading
                           }) => {
@@ -167,20 +133,19 @@ const ChartTabsSection = ({
     const [stats, setStats] = useState({
         total_entries: 0,
         offline_entries: 0,
-        online_entries: 0,
-        queue_size: 0
+        online_entries: 0
     });
 
     useEffect(() => {
         const loadChartData = async () => {
-            if (historyLoading) return;
+            if (historyLoading || !farmName) return;
 
             try {
                 const hours = timeRange === '24h' ? 24 : timeRange === '48h' ? 48 : 168;
-                const filteredData = await historyManager.getLastNHours(hours);
+                const filteredData = await historyManager.getLastNHours(farmName, hours);
                 setHourlyData(filteredData);
 
-                const historyStats = await historyManager.getHistoryStats();
+                const historyStats = await historyManager.getHistoryStats(farmName);
                 setStats(historyStats);
             } catch (error) {
                 console.error('❌ Ошибка загрузки данных графиков:', error);
@@ -188,7 +153,7 @@ const ChartTabsSection = ({
         };
 
         loadChartData();
-    }, [historyData, timeRange, historyLoading]);
+    }, [farmName, historyData, timeRange, historyLoading]);
 
     return (
         <div className="chart-tabs-section">
@@ -199,11 +164,6 @@ const ChartTabsSection = ({
                         <span className="stat-badge">Записей: {stats.total_entries}</span>
                         <span className="stat-badge">Онлайн: {stats.online_entries}</span>
                         <span className="stat-badge">Оффлайн: {stats.offline_entries}</span>
-                        {stats.queue_size > 0 && (
-                            <span className="stat-badge queue" title="Записей в очереди">
-                                ⏳ {stats.queue_size}
-                            </span>
-                        )}
                         <span className="stat-badge github-sync" title="Данные из GitHub">🔗 GitHub</span>
                         {dataStatus === 'offline' && (
                             <span className="stat-badge offline">OFFLINE</span>
@@ -245,20 +205,6 @@ const ChartTabsSection = ({
                             onClick={() => onTimeRangeChange('7d')}
                         >
                             7ДН
-                        </button>
-                    </div>
-
-                    <div className="history-actions">
-                        <button className="action-btn export-btn" onClick={onExportHistory} title="Экспорт данных">
-                            📥 Экспорт
-                        </button>
-                        {stats.queue_size > 0 && (
-                            <button className="action-btn queue-btn" onClick={onExportQueue} title="Экспорт очереди">
-                                ⏳ Очередь ({stats.queue_size})
-                            </button>
-                        )}
-                        <button className="action-btn clear-btn" onClick={onClearHistory} title="Очистить историю">
-                            🗑️ Очистить
                         </button>
                     </div>
                 </div>
@@ -311,12 +257,11 @@ const ChartTabsSection = ({
                     </div>
                 ) : dataStatus === 'offline' ? (
                     <div className="info-message offline-message">
-                        <strong>🔴 ФЕРМА OFFLINE</strong> - Данные не обновляются более 30 минут. {stats.queue_size > 0 && `В очереди: ${stats.queue_size} записей`}
+                        <strong>🔴 ФЕРМА OFFLINE</strong> - Данные не обновляются более 30 минут.
                     </div>
                 ) : (
                     <div className="info-message real-message">
                         <strong>✅ ДАННЫЕ СОБИРАЮТСЯ</strong> - История сохраняется в GitHub. Записей: {stats.total_entries}
-                        {stats.queue_size > 0 && ` | В очереди: ${stats.queue_size}`}
                     </div>
                 )}
             </div>
@@ -324,7 +269,7 @@ const ChartTabsSection = ({
     );
 };
 
-// График хешрейта
+// График хешрейта (без изменений)
 const HashrateChart = ({ data, currentData, dataStatus }) => {
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
@@ -362,7 +307,6 @@ const HashrateChart = ({ data, currentData, dataStatus }) => {
 
             const ctx = chartRef.current.getContext('2d');
 
-            // Разные цвета для offline состояния
             const borderColor = dataStatus === 'offline' ? '#ff4444' : '#ff8c00';
             const gradient = ctx.createLinearGradient(0, 0, 0, isMobile ? 200 : 300);
 
@@ -374,7 +318,6 @@ const HashrateChart = ({ data, currentData, dataStatus }) => {
                 gradient.addColorStop(1, 'rgba(255, 140, 0, 0.1)');
             }
 
-            // Настройки для мобильных
             const mobileOptions = {
                 pointRadius: 2,
                 pointHoverRadius: 4,
@@ -496,7 +439,7 @@ const HashrateChart = ({ data, currentData, dataStatus }) => {
     );
 };
 
-// График потребления
+// График потребления (без изменений)
 const PowerChart = ({ data, currentData, dataStatus }) => {
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
@@ -534,7 +477,6 @@ const PowerChart = ({ data, currentData, dataStatus }) => {
 
             const ctx = chartRef.current.getContext('2d');
 
-            // Разные цвета для offline состояния
             const borderColor = dataStatus === 'offline' ? '#ff4444' : '#00aaff';
             const gradient = ctx.createLinearGradient(0, 0, 0, isMobile ? 200 : 300);
 
@@ -546,7 +488,6 @@ const PowerChart = ({ data, currentData, dataStatus }) => {
                 gradient.addColorStop(1, 'rgba(0, 170, 255, 0.1)');
             }
 
-            // Настройки для мобильных
             const mobileOptions = {
                 pointRadius: 2,
                 pointHoverRadius: 4,

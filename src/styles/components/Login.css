@@ -339,3 +339,37 @@
         line-height: 1.4;
     }
 }
+/* Добавить в конец файла Login.css */
+
+.warning-message {
+    background: rgba(255, 193, 7, 0.1);
+    border: 1px solid #ffc107;
+    color: #ffc107;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 14px;
+    animation: pulse 2s infinite;
+}
+
+.login-footer {
+    margin-top: 30px;
+    text-align: center;
+    color: #666;
+    font-size: 12px;
+    border-top: 1px solid #333;
+    padding-top: 20px;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+    100% {
+        opacity: 1;
+    }
+}

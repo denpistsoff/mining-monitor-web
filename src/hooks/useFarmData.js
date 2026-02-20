@@ -1,4 +1,6 @@
+// src/hooks/useFarmData.js
 import { useState, useEffect, useRef } from 'react';
+import authManager from '../utils/auth';
 
 export const useFarmData = (farmNameProp) => {
     const [farmData, setFarmData] = useState(null);
@@ -7,6 +9,14 @@ export const useFarmData = (farmNameProp) => {
     const [dataStatus, setDataStatus] = useState('fresh');
     const lastUpdateRef = useRef(null);
     const lastKnownDataRef = useRef(null);
+
+    // Проверяем доступ к ферме
+    useEffect(() => {
+        if (farmNameProp && !authManager.hasFarmAccess(farmNameProp)) {
+            setError('Нет доступа к этой ферме');
+            setLoading(false);
+        }
+    }, [farmNameProp]);
 
     const checkDataFreshness = (data) => {
         if (!data || (!data.timestamp && !data.last_update)) {
@@ -24,8 +34,6 @@ export const useFarmData = (farmNameProp) => {
 
         const now = new Date();
         const diffMinutes = (now - dataTime) / (1000 * 60);
-
-        console.log(`🕒 Проверка свежести: ${dataTime}, разница: ${diffMinutes.toFixed(1)} мин`);
 
         if (diffMinutes > 60) {
             return 'offline';
@@ -97,6 +105,13 @@ export const useFarmData = (farmNameProp) => {
 
     const loadData = async (force = false) => {
         if (!farmNameProp) {
+            setLoading(false);
+            return;
+        }
+
+        // Проверяем доступ
+        if (!authManager.hasFarmAccess(farmNameProp)) {
+            setError('Нет доступа к этой ферме');
             setLoading(false);
             return;
         }
@@ -190,7 +205,7 @@ export const useFarmData = (farmNameProp) => {
                     problematic_miners: container.problematic_miners,
                     offline_miners: container.offline_miners
                 },
-                miners: container.miners || container.miners_data || {}
+                miners: container.miners || container.miners_data || []
             };
         });
 
@@ -204,6 +219,7 @@ export const useFarmData = (farmNameProp) => {
 
     useEffect(() => {
         if (!farmNameProp) return;
+        if (!authManager.hasFarmAccess(farmNameProp)) return;
 
         loadData(true);
 
