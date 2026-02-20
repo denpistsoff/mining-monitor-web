@@ -1,5 +1,16 @@
 {
-  "users": [],
+  "users": [
+    {
+      "id": 342342,
+      "username": "34",
+      "name": "34",
+      "role": "admin",
+      "password_hash": "bdd0bcdeb654897c7750cddb4cdfcb7d6923432b62bb1935e9c32060732dbfbc",
+      "created_at": "2026-02-21T02:22:32.855907",
+      "default_password": "miner_342342",
+      "source": "DESKTOP-TO75OLC"
+    }
+  ],
   "farms": [
     {
       "id": "DESKTOP-TO75OLC",
@@ -21,17 +32,21 @@
         "auto_scan_time": "06:00"
       },
       "status": "inactive",
-      "last_seen": "2026-02-21T02:22:26.915397",
+      "last_seen": "2026-02-21T02:22:32.857363",
       "source": "DESKTOP-TO75OLC"
     }
   ],
-  "user_farm_assignments": {},
+  "user_farm_assignments": {
+    "342342": [
+      "DESKTOP-TO75OLC"
+    ]
+  },
   "version": "4.2.0",
-  "last_export": "2026-02-21T02:22:27.318236",
+  "last_export": "2026-02-21T02:22:33.260186",
   "farm_name": "DESKTOP-TO75OLC",
   "source": "DESKTOP-TO75OLC",
-  "local_time": "2026-02-21 02:22:27",
-  "last_merge": "2026-02-21T02:22:27.318299",
+  "local_time": "2026-02-21 02:22:33",
+  "last_merge": "2026-02-21T02:22:33.260243",
   "merged_from": [
     "DESKTOP-TO75OLC"
   ],
