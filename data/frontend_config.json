@@ -1,0 +1,38 @@
+{
+  "users": [],
+  "farms": [
+    {
+      "id": "DESKTOP-TO75OLC",
+      "name": "Ферма DESKTOP-TO75OLC",
+      "display_name": "DESKTOP-TO75OLC",
+      "data_file": "farm_data_DESKTOP-TO75OLC.json",
+      "history_file": "history_DESKTOP-TO75OLC.json",
+      "location": "DESKTOP-TO75OLC",
+      "miners_count": 0,
+      "containers_count": 0,
+      "containers": [],
+      "settings": {
+        "alert_settings": {
+          "temp_warning": 75,
+          "temp_critical": 80,
+          "fan_failure": 2000
+        },
+        "auto_scan_enabled": false,
+        "auto_scan_time": "06:00"
+      },
+      "status": "inactive",
+      "last_seen": "2026-02-21T01:54:32.015118",
+      "source": "DESKTOP-TO75OLC"
+    }
+  ],
+  "user_farm_assignments": {},
+  "version": "4.1.0",
+  "last_export": "2026-02-21T01:54:32.439940",
+  "farm_name": "DESKTOP-TO75OLC",
+  "source": "DESKTOP-TO75OLC",
+  "local_time": "2026-02-21 01:54:32",
+  "last_merge": "2026-02-21T01:54:32.439986",
+  "merged_from": [
+    "DESKTOP-TO75OLC"
+  ]
+}
