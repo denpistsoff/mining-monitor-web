@@ -10,11 +10,33 @@
       "default_password": "miner_839995960"
     }
   ],
-  "farms": [],
+  "farms": [
+    {
+      "id": "1q",
+      "name": "Ферма 1q",
+      "display_name": "1q",
+      "data_file": "farm_data_home.json",
+      "history_file": "history_1q.json",
+      "location": "Не указано",
+      "miners_count": 0,
+      "settings": {
+        "alert_settings": {
+          "temp_warning": 75,
+          "temp_critical": 80,
+          "fan_failure": 2000
+        },
+        "auto_scan_enabled": false,
+        "auto_scan_time": "06:00"
+      },
+      "status": "active"
+    }
+  ],
   "user_farm_assignments": {
-    "839995960": []
+    "839995960": [
+      "1q"
+    ]
   },
   "version": "4.1.0",
-  "last_export": "2026-02-20T17:22:22.612307",
+  "last_export": "2026-02-20T17:37:06.164419",
   "farm_name": "home"
 }
