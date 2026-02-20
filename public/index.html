@@ -1,22 +1,49 @@
 <!DOCTYPE html>
 <html lang="ru">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta name="description" content="Mining Monitor - система мониторинга майнинг ферм" />
-      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Telegram Web App -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
-    <title>Mining Monitor 🏭</title>
-    
-    <!-- Preload fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-  </body>
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#ff8c00" />
+  <meta name="description" content="Мониторинг майнинг ферм" />
+  <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+
+  <!-- Добавляем базовый URL для GitHub Pages -->
+  <base href="/mining-monitor-web/" />
+
+  <title>Mining Monitor</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background-color: #1a0f0a;
+    }
+  </style>
+</head>
+<body>
+<noscript>Включите JavaScript для работы приложения</noscript>
+<div id="root"></div>
+
+<!-- Скрипт для обработки редиректов после 404 -->
+<script>
+  (function() {
+    // Восстанавливаем путь после редиректа с 404
+    const redirect = sessionStorage.redirect;
+    delete sessionStorage.redirect;
+
+    if (redirect && redirect !== location.href) {
+      const path = redirect.replace(location.origin + '/mining-monitor-web/', '');
+      if (path && path !== '') {
+        history.replaceState(null, null, path);
+      }
+    }
+  })();
+</script>
+</body>
 </html>

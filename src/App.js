@@ -1,12 +1,27 @@
 // src/App.js
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import FarmSelection from './components/FarmSelection';
 import FarmLayout from './components/FarmLayout';
 import Login from './components/Login';
 import authManager from './utils/auth';
 import './styles/dark-theme.css';
 import './App.css';
+
+// Компонент для отслеживания и восстановления пути
+function RouteTracker({ children }) {
+    const location = useLocation();
+
+    useEffect(() => {
+        // Сохраняем текущий путь в sessionStorage при каждом изменении
+        const currentPath = location.pathname.replace('/mining-monitor-web', '');
+        if (currentPath && currentPath !== '/') {
+            sessionStorage.setItem('lastPath', currentPath);
+        }
+    }, [location]);
+
+    return children;
+}
 
 function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -19,6 +34,12 @@ function App() {
             if (user) {
                 setIsAuthenticated(true);
                 setCurrentUser(user);
+
+                // Восстанавливаем последний путь после авторизации
+                const lastPath = sessionStorage.getItem('lastPath');
+                if (lastPath && lastPath !== '/') {
+                    window.history.replaceState(null, null, lastPath);
+                }
             }
             setIsLoading(false);
         };
@@ -42,6 +63,8 @@ function App() {
         authManager.logout();
         setIsAuthenticated(false);
         setCurrentUser(null);
+        // Очищаем сохраненный путь при выходе
+        sessionStorage.removeItem('lastPath');
     };
 
     if (isLoading) {
@@ -58,47 +81,50 @@ function App() {
     }
 
     return (
-        <Router>
-            <div className="app">
-                <Routes>
-                    <Route
-                        path="/login"
-                        element={
-                            !isAuthenticated ? (
-                                <Login onLogin={handleLogin} />
-                            ) : (
-                                <Navigate to="/" replace />
-                            )
-                        }
-                    />
-                    <Route
-                        path="/"
-                        element={
-                            isAuthenticated ? (
-                                <FarmSelection
-                                    currentUser={currentUser}
-                                    onLogout={handleLogout}
-                                />
-                            ) : (
-                                <Navigate to="/login" replace />
-                            )
-                        }
-                    />
-                    <Route
-                        path="/farm/:farmName/*"
-                        element={
-                            isAuthenticated ? (
-                                <FarmLayout
-                                    currentUser={currentUser}
-                                />
-                            ) : (
-                                <Navigate to="/login" replace />
-                            )
-                        }
-                    />
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
-            </div>
+        <Router basename="/mining-monitor-web">
+            <RouteTracker>
+                <div className="app">
+                    <Routes>
+                        <Route
+                            path="/login"
+                            element={
+                                !isAuthenticated ? (
+                                    <Login onLogin={handleLogin} />
+                                ) : (
+                                    <Navigate to="/" replace />
+                                )
+                            }
+                        />
+                        <Route
+                            path="/"
+                            element={
+                                isAuthenticated ? (
+                                    <FarmSelection
+                                        currentUser={currentUser}
+                                        onLogout={handleLogout}
+                                    />
+                                ) : (
+                                    <Navigate to="/login" replace />
+                                )
+                            }
+                        />
+                        <Route
+                            path="/farm/:farmName/*"
+                            element={
+                                isAuthenticated ? (
+                                    <FarmLayout
+                                        currentUser={currentUser}
+                                    />
+                                ) : (
+                                    <Navigate to="/login" replace />
+                                )
+                            }
+                        />
+                        {/* Добавляем обработку всех остальных путей */}
+                        <Route path="*" element={<Navigate to="/" replace />} />
+                    </Routes>
+                </div>
+            </RouteTracker>
         </Router>
     );
 }

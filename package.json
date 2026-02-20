@@ -1,32 +1,20 @@
 {
   "name": "mining-monitor-web",
   "version": "5.0.0",
-  "description": "Многопользовательский веб-интерфейс для мониторинга майнинг ферм",
   "homepage": "https://denpistsoff.github.io/mining-monitor-web",
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
-    "react-router-dom": "^6.8.0",
-    "firebase": "^10.5.0",
-    "chart.js": "^4.4.0",
-    "date-fns": "^2.30.0",
-    "axios": "^1.6.0",
-    "react-helmet-async": "^2.0.4"
+    "react-router-dom": "^6.8.0"
   },
   "scripts": {
     "start": "react-scripts start",
-    "start:https": "HTTPS=true react-scripts start",
     "build": "react-scripts build",
-    "build:analyze": "source-map-explorer 'build/static/js/*.js'",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build",
-    "deploy:clean": "gh-pages-clean && npm run deploy",
-    "preview": "serve -s build",
-    "lint": "eslint src/**/*.js",
-    "format": "prettier --write 'src/**/*.js'"
+    "deploy": "gh-pages -d build"
   },
   "browserslist": {
     "production": [
@@ -41,28 +29,6 @@
     ]
   },
   "devDependencies": {
-    "gh-pages": "^6.0.0",
-    "source-map-explorer": "^2.5.3",
-    "eslint": "^8.56.0",
-    "eslint-plugin-react": "^7.33.2",
-    "prettier": "^3.1.0",
-    "serve": "^14.2.1"
-  },
-  "keywords": [
-    "mining",
-    "monitor",
-    "crypto",
-    "bitcoin",
-    "antminer",
-    "whatsminer",
-    "multiuser"
-  ],
-  "author": "Mining Monitor Team",
-  "license": "MIT",
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=8.0.0"
-  },
-  "proxy": "http://localhost:3001",
-  "private": true
+    "gh-pages": "^6.0.0"
+  }
 }
