@@ -15,9 +15,9 @@
       "id": "1q",
       "name": "Ферма 1q",
       "display_name": "1q",
-      "data_file": "farm_data_home.json",
+      "data_file": "farm_data_homer.json",
       "history_file": "history_1q.json",
-      "location": "Не указано",
+      "location": "DESKTOP-TO75OLC",
       "miners_count": 0,
       "settings": {
         "alert_settings": {
@@ -28,7 +28,8 @@
         "auto_scan_enabled": false,
         "auto_scan_time": "06:00"
       },
-      "status": "active"
+      "status": "active",
+      "last_seen": "2026-02-20T18:34:11.526159"
     }
   ],
   "user_farm_assignments": {
@@ -37,7 +38,7 @@
     ]
   },
   "version": "4.1.0",
-  "last_export": "2026-02-20T18:33:23.369265",
-  "farm_name": "DESKTOP-TO75OLC",
+  "last_export": "2026-02-20T18:34:11.525868",
+  "farm_name": "homer",
   "source": "DESKTOP-TO75OLC"
 }
