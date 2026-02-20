@@ -1,0 +1,34 @@
+{
+  "users": [],
+  "farms": [
+    {
+      "id": "DESKTOP-GO47CCS",
+      "name": "Ферма DESKTOP-GO47CCS",
+      "display_name": "DESKTOP-GO47CCS",
+      "data_file": "farm_data_DESKTOP-GO47CCS.json",
+      "history_file": "history_DESKTOP-GO47CCS.json",
+      "location": "DESKTOP-GO47CCS",
+      "miners_count": 0,
+      "containers_count": 0,
+      "containers": [],
+      "settings": {
+        "alert_settings": {
+          "temp_warning": 75,
+          "temp_critical": 80,
+          "fan_failure": 2000
+        },
+        "auto_scan_enabled": false,
+        "auto_scan_time": "06:00"
+      },
+      "status": "inactive",
+      "last_seen": "2026-02-20T21:26:02.620444",
+      "source": "DESKTOP-GO47CCS"
+    }
+  ],
+  "user_farm_assignments": {},
+  "version": "4.1.0",
+  "last_export": "2026-02-20T21:26:02.619217",
+  "farm_name": "DESKTOP-GO47CCS",
+  "source": "DESKTOP-GO47CCS",
+  "local_time": "2026-02-20 21:26:02"
+}
