@@ -1,5 +1,5 @@
 // src/components/Dashboard.js
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useFarmData } from '../hooks/useFarmData';
 import StatsGrid from './StatsGrid';
 import ContainerCard from './ContainerCard';
@@ -12,17 +12,28 @@ const Dashboard = ({ farmNameProp }) => {
     const [activeTab, setActiveTab] = useState('hashrate');
     const [chartTimeRange, setChartTimeRange] = useState('24h');
     const [historyLoading, setHistoryLoading] = useState(true);
+    const [autoRefresh, setAutoRefresh] = useState(true);
+    const [lastUpdate, setLastUpdate] = useState(null);
+    const autoRefreshTimer = useRef(null);
 
+    // Загрузка истории при монтировании и при изменении фермы
     useEffect(() => {
         const loadHistory = async () => {
             if (!farmNameProp) return;
 
             setHistoryLoading(true);
             try {
+                console.log(`📊 Loading history for ${farmNameProp}...`);
                 const history = await historyManager.loadFarmHistory(farmNameProp);
                 setHistoryData(history);
+                setLastUpdate(new Date());
+
+                // Добавляем текущие данные в историю если они свежие
+                if (farmData && !loading && dataStatus === 'fresh') {
+                    await historyManager.addHistoryEntry(farmNameProp, farmData);
+                }
             } catch (error) {
-                console.error('❌ Ошибка загрузки истории:', error);
+                console.error('❌ Error loading history:', error);
             } finally {
                 setHistoryLoading(false);
             }
@@ -31,7 +42,90 @@ const Dashboard = ({ farmNameProp }) => {
         loadHistory();
     }, [farmNameProp]);
 
-    if (loading) {
+    // Автоматическое обновление истории
+    useEffect(() => {
+        if (!autoRefresh || !farmNameProp) return;
+
+        const updateHistory = async () => {
+            if (farmData && !loading) {
+                try {
+                    const updatedHistory = await historyManager.addHistoryEntry(farmNameProp, farmData);
+                    setHistoryData(updatedHistory);
+                    setLastUpdate(new Date());
+                } catch (error) {
+                    console.error('❌ Error updating history:', error);
+                }
+            }
+        };
+
+        // Обновляем каждые 5 минут
+        autoRefreshTimer.current = setInterval(updateHistory, 5 * 60 * 1000);
+
+        return () => {
+            if (autoRefreshTimer.current) {
+                clearInterval(autoRefreshTimer.current);
+            }
+        };
+    }, [farmNameProp, farmData, loading, autoRefresh]);
+
+    // Подписка на реальные обновления
+    useEffect(() => {
+        let stopRealtime;
+
+        const setupRealtime = async () => {
+            stopRealtime = await historyManager.getRealtimeData(
+                farmNameProp,
+                (updatedHistory) => {
+                    setHistoryData(updatedHistory);
+                    setLastUpdate(new Date());
+                },
+                60000 // Каждую минуту
+            );
+        };
+
+        if (farmNameProp) {
+            setupRealtime();
+        }
+
+        return () => {
+            if (stopRealtime) {
+                stopRealtime();
+            }
+        };
+    }, [farmNameProp]);
+
+    const handleClearHistory = () => {
+        if (window.confirm('Очистить всю историю? Данные будут удалены из GitHub.')) {
+            // TODO: Implement clear history
+            console.log('🗑️ Clear history');
+        }
+    };
+
+    const handleExportHistory = () => {
+        // TODO: Implement export
+        console.log('📥 Export history');
+    };
+
+    const handleRefreshHistory = async () => {
+        setHistoryLoading(true);
+        try {
+            const history = await historyManager.loadFarmHistory(farmNameProp, true);
+            setHistoryData(history);
+            setLastUpdate(new Date());
+        } catch (error) {
+            console.error('❌ Error refreshing history:', error);
+        } finally {
+            setHistoryLoading(false);
+        }
+    };
+
+    const handleTimeRangeChange = (range) => {
+        setChartTimeRange(range);
+        // Принудительно обновляем данные при смене диапазона
+        handleRefreshHistory();
+    };
+
+    if (loading && !farmData) {
         return (
             <div className="dashboard-loading">
                 <div className="loading-spinner large"></div>
@@ -40,7 +134,7 @@ const Dashboard = ({ farmNameProp }) => {
         );
     }
 
-    if (error) {
+    if (error && !farmData) {
         return (
             <div className="dashboard-error">
                 <div className="error-title">ОШИБКА</div>
@@ -77,6 +171,11 @@ const Dashboard = ({ farmNameProp }) => {
                         {farmData._dataStatus === 'fresh' && (
                             <span className="status-badge fresh"> 🟢 ONLINE</span>
                         )}
+                        {lastUpdate && (
+                            <span className="history-update">
+                                📊 История: {lastUpdate.toLocaleTimeString()}
+                            </span>
+                        )}
                     </div>
                 </div>
             </div>
@@ -89,10 +188,13 @@ const Dashboard = ({ farmNameProp }) => {
                 activeTab={activeTab}
                 onTabChange={setActiveTab}
                 timeRange={chartTimeRange}
-                onTimeRangeChange={setChartTimeRange}
+                onTimeRangeChange={handleTimeRangeChange}
                 currentData={farmData.summary}
                 dataStatus={farmData._dataStatus}
                 historyLoading={historyLoading}
+                onRefresh={handleRefreshHistory}
+                autoRefresh={autoRefresh}
+                onAutoRefreshChange={setAutoRefresh}
             />
 
             <div className="containers-section">
@@ -117,7 +219,7 @@ const Dashboard = ({ farmNameProp }) => {
     );
 };
 
-// Компонент с табами для графиков (обновлен)
+// Компонент с табами для графиков
 const ChartTabsSection = ({
                               farmName,
                               historyData,
@@ -127,18 +229,23 @@ const ChartTabsSection = ({
                               onTimeRangeChange,
                               currentData,
                               dataStatus,
-                              historyLoading
+                              historyLoading,
+                              onRefresh,
+                              autoRefresh,
+                              onAutoRefreshChange
                           }) => {
     const [hourlyData, setHourlyData] = useState([]);
     const [stats, setStats] = useState({
         total_entries: 0,
         offline_entries: 0,
-        online_entries: 0
+        online_entries: 0,
+        avg_hashrate_24h: 0,
+        avg_power_24h: 0
     });
 
     useEffect(() => {
         const loadChartData = async () => {
-            if (historyLoading || !farmName) return;
+            if (!farmName) return;
 
             try {
                 const hours = timeRange === '24h' ? 24 : timeRange === '48h' ? 48 : 168;
@@ -148,12 +255,12 @@ const ChartTabsSection = ({
                 const historyStats = await historyManager.getHistoryStats(farmName);
                 setStats(historyStats);
             } catch (error) {
-                console.error('❌ Ошибка загрузки данных графиков:', error);
+                console.error('❌ Error loading chart data:', error);
             }
         };
 
         loadChartData();
-    }, [farmName, historyData, timeRange, historyLoading]);
+    }, [farmName, historyData, timeRange]);
 
     return (
         <div className="chart-tabs-section">
@@ -164,6 +271,12 @@ const ChartTabsSection = ({
                         <span className="stat-badge">Записей: {stats.total_entries}</span>
                         <span className="stat-badge">Онлайн: {stats.online_entries}</span>
                         <span className="stat-badge">Оффлайн: {stats.offline_entries}</span>
+                        <span className="stat-badge" title="Средний хешрейт за 24ч">
+                            📊 {stats.avg_hashrate_24h.toFixed(1)} TH/s
+                        </span>
+                        <span className="stat-badge" title="Среднее потребление за 24ч">
+                            ⚡ {stats.avg_power_24h.toFixed(1)} кВт
+                        </span>
                         <span className="stat-badge github-sync" title="Данные из GitHub">🔗 GitHub</span>
                         {dataStatus === 'offline' && (
                             <span className="stat-badge offline">OFFLINE</span>
@@ -185,6 +298,12 @@ const ChartTabsSection = ({
                         >
                             ⚡ ПОТРЕБЛЕНИЕ
                         </button>
+                        <button
+                            className={`tab-btn ${activeTab === 'efficiency' ? 'active' : ''}`}
+                            onClick={() => onTabChange('efficiency')}
+                        >
+                            📊 ЭФФЕКТИВНОСТЬ
+                        </button>
                     </div>
 
                     <div className="time-range-selector">
@@ -205,6 +324,23 @@ const ChartTabsSection = ({
                             onClick={() => onTimeRangeChange('7d')}
                         >
                             7ДН
+                        </button>
+                    </div>
+
+                    <div className="chart-actions">
+                        <button
+                            className={`auto-refresh-btn ${autoRefresh ? 'active' : ''}`}
+                            onClick={() => onAutoRefreshChange(!autoRefresh)}
+                            title="Автоматическое обновление"
+                        >
+                            🔄
+                        </button>
+                        <button
+                            className="refresh-btn"
+                            onClick={onRefresh}
+                            title="Обновить данные"
+                        >
+                            ↻
                         </button>
                     </div>
                 </div>
@@ -232,6 +368,13 @@ const ChartTabsSection = ({
                                 dataStatus={dataStatus}
                             />
                         )}
+                        {activeTab === 'efficiency' && (
+                            <EfficiencyChart
+                                data={hourlyData}
+                                currentData={currentData}
+                                dataStatus={dataStatus}
+                            />
+                        )}
 
                         {hourlyData.length === 0 && (
                             <div className="chart-empty">
@@ -253,15 +396,21 @@ const ChartTabsSection = ({
                     </div>
                 ) : stats.total_entries === 0 ? (
                     <div className="info-message waiting-message">
-                        <strong>⏳ ОЖИДАНИЕ ДАННЫХ</strong> - История будет сохраняться автоматически в GitHub.
+                        <strong>⏳ ОЖИДАНИЕ ДАННЫХ</strong> - История будет сохраняться автоматически.
+                        <br />
+                        <small>Следующее обновление через 5 минут</small>
                     </div>
                 ) : dataStatus === 'offline' ? (
                     <div className="info-message offline-message">
                         <strong>🔴 ФЕРМА OFFLINE</strong> - Данные не обновляются более 30 минут.
+                        <br />
+                        <small>Последняя запись: {new Date(stats.last_update).toLocaleString()}</small>
                     </div>
                 ) : (
                     <div className="info-message real-message">
-                        <strong>✅ ДАННЫЕ СОБИРАЮТСЯ</strong> - История сохраняется в GitHub. Записей: {stats.total_entries}
+                        <strong>✅ ДАННЫЕ СОБИРАЮТСЯ</strong> - История сохраняется автоматически.
+                        <br />
+                        <small>Записей: {stats.total_entries} | Средний хешрейт за 24ч: {stats.avg_hashrate_24h.toFixed(1)} TH/s</small>
                     </div>
                 )}
             </div>
@@ -269,7 +418,7 @@ const ChartTabsSection = ({
     );
 };
 
-// График хешрейта (без изменений)
+// График хешрейта
 const HashrateChart = ({ data, currentData, dataStatus }) => {
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
@@ -354,6 +503,9 @@ const HashrateChart = ({ data, currentData, dataStatus }) => {
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: {
+                        duration: 0 // Отключаем анимацию для производительности
+                    },
                     plugins: {
                         legend: { display: false },
                         tooltip: {
@@ -439,7 +591,7 @@ const HashrateChart = ({ data, currentData, dataStatus }) => {
     );
 };
 
-// График потребления (без изменений)
+// График потребления
 const PowerChart = ({ data, currentData, dataStatus }) => {
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
@@ -524,6 +676,9 @@ const PowerChart = ({ data, currentData, dataStatus }) => {
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: {
+                        duration: 0
+                    },
                     plugins: {
                         legend: { display: false },
                         tooltip: {
@@ -595,6 +750,189 @@ const PowerChart = ({ data, currentData, dataStatus }) => {
                 <h4>⚡ ГРАФИК ПОТРЕБЛЕНИЯ</h4>
                 <div className={`current-value power-value ${dataStatus === 'offline' ? 'offline' : ''}`}>
                     Текущее: <strong>{(currentData?.total_power / 1000)?.toFixed(1)} кВт</strong>
+                    {dataStatus === 'offline' && ' 🔴'}
+                </div>
+            </div>
+            <canvas
+                ref={chartRef}
+                style={{
+                    maxHeight: isMobile ? '250px' : '350px',
+                    minHeight: isMobile ? '200px' : '300px'
+                }}
+            />
+        </div>
+    );
+};
+
+// График эффективности
+const EfficiencyChart = ({ data, currentData, dataStatus }) => {
+    const chartRef = useRef(null);
+    const chartInstance = useRef(null);
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    useEffect(() => {
+        if (!window.Chart) {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+            script.onload = renderChart;
+            document.head.appendChild(script);
+        } else {
+            renderChart();
+        }
+
+        function renderChart() {
+            if (chartInstance.current) {
+                chartInstance.current.destroy();
+            }
+
+            if (!data || data.length === 0 || !chartRef.current) {
+                return;
+            }
+
+            const efficiencyData = data.map(item => {
+                if (item.total_hashrate && item.total_power) {
+                    return item.total_hashrate / (item.total_power / 1000);
+                }
+                return 0;
+            });
+
+            const ctx = chartRef.current.getContext('2d');
+
+            const borderColor = dataStatus === 'offline' ? '#ff4444' : '#10b981';
+            const gradient = ctx.createLinearGradient(0, 0, 0, isMobile ? 200 : 300);
+
+            if (dataStatus === 'offline') {
+                gradient.addColorStop(0, 'rgba(255, 68, 68, 0.6)');
+                gradient.addColorStop(1, 'rgba(255, 68, 68, 0.1)');
+            } else {
+                gradient.addColorStop(0, 'rgba(16, 185, 129, 0.6)');
+                gradient.addColorStop(1, 'rgba(16, 185, 129, 0.1)');
+            }
+
+            const mobileOptions = {
+                pointRadius: 2,
+                pointHoverRadius: 4,
+                borderWidth: 2,
+            };
+
+            const desktopOptions = {
+                pointRadius: 3,
+                pointHoverRadius: 5,
+                borderWidth: 3,
+            };
+
+            const chartOptions = isMobile ? mobileOptions : desktopOptions;
+
+            chartInstance.current = new window.Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(item => item.time_label),
+                    datasets: [{
+                        label: 'Эффективность (TH/кВт)',
+                        data: efficiencyData,
+                        borderColor: borderColor,
+                        backgroundColor: gradient,
+                        borderWidth: chartOptions.borderWidth,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: borderColor,
+                        pointBorderColor: '#000',
+                        pointBorderWidth: 1,
+                        pointRadius: chartOptions.pointRadius,
+                        pointHoverRadius: chartOptions.pointHoverRadius,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 0
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(26, 15, 10, 0.95)',
+                            titleColor: borderColor,
+                            bodyColor: '#ffffff',
+                            borderColor: borderColor,
+                            titleFont: {
+                                size: isMobile ? 12 : 14
+                            },
+                            bodyFont: {
+                                size: isMobile ? 12 : 14
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    return `Эффективность: ${context.parsed.y.toFixed(2)} TH/кВт`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: `rgba(${dataStatus === 'offline' ? '255,68,68' : '16,185,129'}, 0.1)` },
+                            ticks: {
+                                color: '#a0a0a0',
+                                maxTicksLimit: isMobile ? 6 : 12,
+                                font: {
+                                    size: isMobile ? 10 : 12
+                                }
+                            }
+                        },
+                        y: {
+                            grid: { color: `rgba(${dataStatus === 'offline' ? '255,68,68' : '16,185,129'}, 0.1)` },
+                            ticks: {
+                                color: borderColor,
+                                callback: function(value) { return value.toFixed(1) + ' TH/кВт'; },
+                                font: {
+                                    size: isMobile ? 10 : 12
+                                }
+                            },
+                            title: {
+                                display: !isMobile,
+                                text: 'Эффективность (TH/кВт)',
+                                color: borderColor,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
+        }
+
+        return () => {
+            if (chartInstance.current) {
+                chartInstance.current.destroy();
+            }
+        };
+    }, [data, isMobile, dataStatus]);
+
+    const currentEfficiency = currentData?.total_hashrate && currentData?.total_power ?
+        (currentData.total_hashrate / (currentData.total_power / 1000)).toFixed(2) : '0.00';
+
+    return (
+        <div className="chart-wrapper">
+            <div className="chart-header">
+                <h4>📊 ГРАФИК ЭФФЕКТИВНОСТИ</h4>
+                <div className={`current-value efficiency-value ${dataStatus === 'offline' ? 'offline' : ''}`}>
+                    Текущая: <strong>{currentEfficiency} TH/кВт</strong>
                     {dataStatus === 'offline' && ' 🔴'}
                 </div>
             </div>
