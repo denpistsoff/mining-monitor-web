@@ -8,11 +8,18 @@ class HistoryManager {
         this.cacheTime = 5 * 60 * 1000; // 5 минут
         this.updateInterval = 5 * 60 * 1000; // 5 минут
         this.autoUpdateTimers = new Map();
+        this.useMockData = false; // Флаг для использования мок-данных (можно включить если нет реальных)
 
         // Запускаем автообновление при создании
         this.initAutoUpdate();
 
         console.log('🔄 HistoryManager инициализирован');
+    }
+
+    // Метод для переключения между реальными и мок-данными
+    setUseMockData(useMock) {
+        this.useMockData = useMock;
+        console.log(`🎲 Использование мок-данных: ${useMock ? 'ВКЛ' : 'ВЫКЛ'}`);
     }
 
     initAutoUpdate() {
@@ -92,13 +99,30 @@ class HistoryManager {
         try {
             console.log(`📥 Загрузка истории для ${farmName}...`);
 
-            // Сначала пробуем загрузить с GitHub
+            // Если включены мок-данные, сразу возвращаем их
+            if (this.useMockData) {
+                console.log(`🎲 Используем мок-данные для ${farmName}`);
+                const mockHistory = getMockHistoryForFarm(farmName);
+                this.cache.set(cacheKey, {
+                    data: mockHistory,
+                    timestamp: Date.now()
+                });
+                this.saveToLocalStorage(cacheKey, mockHistory);
+                return mockHistory;
+            }
+
+            // Пробуем загрузить с GitHub (реальные данные)
             const url = `${this.baseUrl}history_${farmName}.json?t=${Date.now()}`;
             const response = await fetch(url);
 
             if (response.ok) {
                 const history = await response.json();
-                console.log(`✅ История загружена с GitHub для ${farmName}: ${history.farm_history?.length || 0} записей`);
+                console.log(`✅ Реальная история загружена с GitHub для ${farmName}: ${history.farm_history?.length || 0} записей`);
+
+                // Проверяем, что данные в правильном формате
+                if (!history.farm_history) {
+                    history.farm_history = [];
+                }
 
                 this.cache.set(cacheKey, {
                     data: history,
@@ -108,18 +132,25 @@ class HistoryManager {
                 this.saveToLocalStorage(cacheKey, history);
                 return history;
             } else {
-                // Если файла нет на GitHub, создаем МОК-ДАННЫЕ
-                console.log(`📁 Файл истории для ${farmName} не найден, создаем тестовые данные...`);
-                const mockHistory = getMockHistoryForFarm(farmName);
+                // Если файла нет на GitHub, пробуем загрузить из localStorage
+                console.log(`📁 Файл истории для ${farmName} не найден на GitHub`);
+                const localData = this.loadFromLocalStorage(cacheKey);
+                if (localData) {
+                    console.log(`📦 Используем localStorage для ${farmName}`);
+                    return localData;
+                }
 
-                this.cache.set(cacheKey, {
-                    data: mockHistory,
-                    timestamp: Date.now()
-                });
-
-                this.saveToLocalStorage(cacheKey, mockHistory);
-
-                return mockHistory;
+                // Если ничего нет, возвращаем пустую историю (не мок!)
+                console.log(`📂 Создаем пустую историю для ${farmName}`);
+                const emptyHistory = {
+                    farm_history: [],
+                    last_update: new Date().toISOString(),
+                    total_entries: 0,
+                    farm_name: farmName,
+                    version: "2.0"
+                };
+                this.saveToLocalStorage(cacheKey, emptyHistory);
+                return emptyHistory;
             }
         } catch (error) {
             console.error(`❌ Ошибка загрузки истории для ${farmName}:`, error);
@@ -131,11 +162,14 @@ class HistoryManager {
                 return localData;
             }
 
-            // Если ничего нет, создаем мок-данные
-            console.log(`🎲 Создаем тестовые данные для ${farmName}`);
-            const mockHistory = getMockHistoryForFarm(farmName);
-            this.saveToLocalStorage(cacheKey, mockHistory);
-            return mockHistory;
+            // Если ничего нет, возвращаем пустую историю
+            return {
+                farm_history: [],
+                last_update: new Date().toISOString(),
+                total_entries: 0,
+                farm_name: farmName,
+                version: "2.0"
+            };
         }
     }
 
@@ -211,6 +245,14 @@ class HistoryManager {
             const avgHashrate = last24h.length > 0 ? totalHashrate / last24h.length : 0;
             const avgPower = last24h.length > 0 ? totalPower / last24h.length : 0;
 
+            // Определяем источник данных
+            let source = 'unknown';
+            if (history.is_mock) {
+                source = 'mock';
+            } else if (history.farm_history?.length > 0) {
+                source = 'github';
+            }
+
             return {
                 total_entries: totalEntries,
                 offline_entries: offlineEntries,
@@ -223,7 +265,7 @@ class HistoryManager {
                     end: history.farm_history[history.farm_history.length - 1]?.timestamp
                 } : null,
                 is_mock: history.is_mock || false,
-                source: history.is_mock ? 'mock' : 'github'
+                source: source
             };
         } catch (error) {
             console.error('❌ Ошибка получения статистики:', error);
@@ -241,7 +283,7 @@ class HistoryManager {
         }
     }
 
-    // Метод для принудительного создания мок-данных
+    // Метод для принудительного использования мок-данных (для тестирования)
     forceMockData(farmName) {
         const mockHistory = getMockHistoryForFarm(farmName);
         this.cache.set(`history_${farmName}`, {
@@ -250,6 +292,13 @@ class HistoryManager {
         });
         this.saveToLocalStorage(`history_${farmName}`, mockHistory);
         return mockHistory;
+    }
+
+    // Метод для очистки и принудительной загрузки реальных данных
+    async forceRealData(farmName) {
+        this.cache.delete(`history_${farmName}`);
+        localStorage.removeItem(`history_${farmName}`);
+        return await this.loadFarmHistory(farmName, true);
     }
 
     clearCache() {
@@ -263,6 +312,17 @@ class HistoryManager {
         }
         keysToRemove.forEach(key => localStorage.removeItem(key));
         console.log('🧹 Кэш истории очищен');
+    }
+
+    // Метод для проверки доступности реальных данных
+    async checkRealDataAvailable(farmName) {
+        try {
+            const url = `${this.baseUrl}history_${farmName}.json?t=${Date.now()}`;
+            const response = await fetch(url, { method: 'HEAD' });
+            return response.ok;
+        } catch {
+            return false;
+        }
     }
 }
 

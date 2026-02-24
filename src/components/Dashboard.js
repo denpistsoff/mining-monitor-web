@@ -15,6 +15,7 @@ const Dashboard = ({ farmNameProp }) => {
     const [autoRefresh, setAutoRefresh] = useState(true);
     const [lastUpdate, setLastUpdate] = useState(null);
     const [showDebug, setShowDebug] = useState(false);
+    const [dataSource, setDataSource] = useState('unknown'); // 'real', 'mock', 'empty'
     const autoRefreshTimer = useRef(null);
 
     // Загрузка истории при монтировании и при изменении фермы
@@ -28,9 +29,21 @@ const Dashboard = ({ farmNameProp }) => {
                 const history = await historyManager.loadFarmHistory(farmNameProp);
                 setHistoryData(history);
                 setLastUpdate(new Date());
-                console.log(`✅ История загружена: ${history.farm_history?.length || 0} записей`);
+
+                // Определяем источник данных
+                if (history.is_mock) {
+                    setDataSource('mock');
+                    console.log(`🎲 Используются тестовые данные для ${farmNameProp}`);
+                } else if (history.farm_history?.length > 0) {
+                    setDataSource('real');
+                    console.log(`✅ Используются реальные данные для ${farmNameProp}: ${history.farm_history.length} записей`);
+                } else {
+                    setDataSource('empty');
+                    console.log(`📂 История для ${farmNameProp} пуста`);
+                }
             } catch (error) {
                 console.error('❌ Ошибка загрузки истории:', error);
+                setDataSource('error');
             } finally {
                 setHistoryLoading(false);
             }
@@ -44,14 +57,18 @@ const Dashboard = ({ farmNameProp }) => {
         if (!autoRefresh || !farmNameProp) return;
 
         const updateHistory = async () => {
-            if (farmData && !loading) {
-                try {
-                    const updatedHistory = await historyManager.addHistoryEntry(farmNameProp, farmData);
-                    setHistoryData(updatedHistory);
-                    setLastUpdate(new Date());
-                } catch (error) {
-                    console.error('❌ Ошибка обновления истории:', error);
+            try {
+                // Просто обновляем историю с сервера, не добавляем новую запись
+                // (бэкенд сам добавляет записи каждые 5 минут)
+                const history = await historyManager.loadFarmHistory(farmNameProp, true);
+                setHistoryData(history);
+                setLastUpdate(new Date());
+
+                if (history.farm_history?.length > 0) {
+                    setDataSource('real');
                 }
+            } catch (error) {
+                console.error('❌ Ошибка обновления истории:', error);
             }
         };
 
@@ -63,7 +80,7 @@ const Dashboard = ({ farmNameProp }) => {
                 clearInterval(autoRefreshTimer.current);
             }
         };
-    }, [farmNameProp, farmData, loading, autoRefresh]);
+    }, [farmNameProp, autoRefresh]);
 
     // Слушаем события обновления истории
     useEffect(() => {
@@ -84,6 +101,14 @@ const Dashboard = ({ farmNameProp }) => {
             const history = await historyManager.loadFarmHistory(farmNameProp, true);
             setHistoryData(history);
             setLastUpdate(new Date());
+
+            if (history.is_mock) {
+                setDataSource('mock');
+            } else if (history.farm_history?.length > 0) {
+                setDataSource('real');
+            } else {
+                setDataSource('empty');
+            }
         } catch (error) {
             console.error('❌ Ошибка обновления истории:', error);
         } finally {
@@ -96,12 +121,25 @@ const Dashboard = ({ farmNameProp }) => {
         handleRefreshHistory();
     };
 
-    const handleForceMockData = async () => {
-        if (window.confirm('Создать тестовые данные для графика?')) {
-            historyManager.forceMockData(farmNameProp);
-            handleRefreshHistory();
-            alert('✅ Тестовые данные созданы!');
-        }
+    const handleUseMockData = () => {
+        historyManager.setUseMockData(true);
+        historyManager.forceMockData(farmNameProp);
+        setDataSource('mock');
+        handleRefreshHistory();
+    };
+
+    const handleUseRealData = async () => {
+        historyManager.setUseMockData(false);
+        await historyManager.forceRealData(farmNameProp);
+        handleRefreshHistory();
+    };
+
+    const handleCheckAvailability = async () => {
+        const available = await historyManager.checkRealDataAvailable(farmNameProp);
+        alert(available ?
+            '✅ Реальные данные доступны на GitHub' :
+            '❌ Реальных данных нет на GitHub. Будут использованы тестовые данные.'
+        );
     };
 
     const handleClearCache = () => {
@@ -117,7 +155,11 @@ const Dashboard = ({ farmNameProp }) => {
         const stats = await historyManager.getHistoryStats(farmNameProp);
         console.log('📊 История:', history);
         console.log('📈 Статистика:', stats);
-        alert(`📊 Записей в истории: ${history.farm_history?.length || 0}\n📈 Средний хешрейт: ${stats.avg_hashrate_24h?.toFixed(1)} TH/s`);
+
+        const sourceText = stats.is_mock ? 'ТЕСТОВЫЕ' : (stats.total_entries > 0 ? 'РЕАЛЬНЫЕ' : 'ПУСТО');
+        alert(`📊 Записей в истории: ${history.farm_history?.length || 0}\n` +
+            `📈 Средний хешрейт: ${stats.avg_hashrate_24h?.toFixed(1)} TH/s\n` +
+            `🔍 Источник: ${sourceText}`);
     };
 
     if (loading && !farmData) {
@@ -171,6 +213,15 @@ const Dashboard = ({ farmNameProp }) => {
                                 📊 История: {lastUpdate.toLocaleTimeString()}
                             </span>
                         )}
+                        {dataSource === 'real' && (
+                            <span className="data-source real" title="Реальные данные с бэкенда">📡 РЕАЛ</span>
+                        )}
+                        {dataSource === 'mock' && (
+                            <span className="data-source mock" title="Тестовые данные">🎲 ТЕСТ</span>
+                        )}
+                        {dataSource === 'empty' && (
+                            <span className="data-source empty" title="Нет данных">📭 ПУСТО</span>
+                        )}
                     </div>
                 </div>
                 <button
@@ -197,33 +248,32 @@ const Dashboard = ({ farmNameProp }) => {
                 onRefresh={handleRefreshHistory}
                 autoRefresh={autoRefresh}
                 onAutoRefreshChange={setAutoRefresh}
+                dataSource={dataSource}
             />
 
             {showDebug && (
                 <DebugPanel
                     farmName={farmNameProp}
-                    onForceMock={handleForceMockData}
+                    onUseMock={handleUseMockData}
+                    onUseReal={handleUseRealData}
+                    onCheckAvailability={handleCheckAvailability}
                     onClearCache={handleClearCache}
                     onCheckHistory={handleCheckHistory}
                     onRefresh={handleRefreshHistory}
                     onClose={() => setShowDebug(false)}
+                    dataSource={dataSource}
                 />
             )}
 
-            {/* Кнопки для быстрого доступа к отладке */}
+            {/* Кнопки для быстрого доступа к отладке (видимые всегда) */}
             <div style={{
                 display: 'flex',
                 justifyContent: 'center',
                 gap: '10px',
                 margin: '20px 0',
-                padding: '10px'
+                padding: '10px',
+                flexWrap: 'wrap'
             }}>
-                <button
-                    onClick={handleForceMockData}
-                    style={debugButtonStyle}
-                >
-                    🎲 ТЕСТОВЫЕ ДАННЫЕ
-                </button>
                 <button
                     onClick={handleCheckHistory}
                     style={debugButtonStyle}
@@ -235,6 +285,12 @@ const Dashboard = ({ farmNameProp }) => {
                     style={debugButtonStyle}
                 >
                     🔄 ОБНОВИТЬ
+                </button>
+                <button
+                    onClick={handleCheckAvailability}
+                    style={debugButtonStyle}
+                >
+                    📡 ПРОВЕРИТЬ ДАННЫЕ
                 </button>
             </div>
 
@@ -273,7 +329,8 @@ const ChartTabsSection = ({
                               historyLoading,
                               onRefresh,
                               autoRefresh,
-                              onAutoRefreshChange
+                              onAutoRefreshChange,
+                              dataSource
                           }) => {
     const [hourlyData, setHourlyData] = useState([]);
     const [stats, setStats] = useState({
@@ -318,7 +375,10 @@ const ChartTabsSection = ({
                         <span className="stat-badge" title="Среднее потребление за 24ч">
                             ⚡ {stats.avg_power_24h.toFixed(1)} кВт
                         </span>
-                        {stats.is_mock && (
+                        {dataSource === 'real' && (
+                            <span className="stat-badge real" title="Реальные данные">📡 РЕАЛ</span>
+                        )}
+                        {dataSource === 'mock' && (
                             <span className="stat-badge mock" title="Тестовые данные">🎲 ТЕСТ</span>
                         )}
                     </div>
@@ -420,7 +480,12 @@ const ChartTabsSection = ({
                             <div className="chart-empty">
                                 <div className="empty-message">
                                     <p>📊 Нет исторических данных</p>
-                                    <span>Нажми кнопку &quot;ТЕСТОВЫЕ ДАННЫЕ&quot; для создания</span>
+                                    <span>
+                                        {dataSource === 'real'
+                                            ? 'Бэкенд еще не собрал данные. Подождите 5-10 минут.'
+                                            : 'Нажми "ТЕСТОВЫЕ ДАННЫЕ" в панели отладки для демо'
+                                        }
+                                    </span>
                                 </div>
                             </div>
                         )}
@@ -436,19 +501,29 @@ const ChartTabsSection = ({
                     </div>
                 ) : stats.total_entries === 0 ? (
                     <div className="info-message waiting-message">
-                        <strong>⏳ НЕТ ДАННЫХ</strong> - Нажми кнопку &quot;ТЕСТОВЫЕ ДАННЫЕ&quot; внизу страницы
+                        <strong>⏳ НЕТ ДАННЫХ</strong> -
+                        {dataSource === 'real'
+                            ? 'Бэкенд еще не создал файл истории. Подождите 5-10 минут.'
+                            : 'Используй панель отладки для создания тестовых данных'
+                        }
                     </div>
-                ) : stats.is_mock ? (
+                ) : dataSource === 'mock' ? (
                     <div className="info-message mock-message">
-                        <strong>🎲 ТЕСТОВЫЕ ДАННЫЕ</strong> - Показываем демонстрационную историю
+                        <strong>🎲 ТЕСТОВЫЕ ДАННЫЕ</strong> - Демонстрационная история
+                        <br />
+                        <small>Реальные данные появятся когда бэкенд создаст history_{farmName}.json</small>
                     </div>
                 ) : dataStatus === 'offline' ? (
                     <div className="info-message offline-message">
                         <strong>🔴 ФЕРМА OFFLINE</strong> - Данные не обновляются
+                        <br />
+                        <small>Последняя запись: {stats.last_update ? new Date(stats.last_update).toLocaleString() : 'никогда'}</small>
                     </div>
                 ) : (
                     <div className="info-message real-message">
                         <strong>✅ РЕАЛЬНЫЕ ДАННЫЕ</strong> - Записей: {stats.total_entries}
+                        <br />
+                        <small>Последнее обновление: {stats.last_update ? new Date(stats.last_update).toLocaleString() : 'никогда'}</small>
                     </div>
                 )}
             </div>
@@ -986,7 +1061,17 @@ const EfficiencyChart = ({ data, currentData, dataStatus }) => {
 };
 
 // Панель отладки
-const DebugPanel = ({ farmName, onForceMock, onClearCache, onCheckHistory, onRefresh, onClose }) => {
+const DebugPanel = ({
+                        farmName,
+                        onUseMock,
+                        onUseReal,
+                        onCheckAvailability,
+                        onClearCache,
+                        onCheckHistory,
+                        onRefresh,
+                        onClose,
+                        dataSource
+                    }) => {
     const [stats, setStats] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -1049,12 +1134,31 @@ const DebugPanel = ({ farmName, onForceMock, onClearCache, onCheckHistory, onRef
                 </button>
             </div>
 
+            <div style={{ marginBottom: '15px', padding: '10px', background: '#1a0f0a', borderRadius: '8px' }}>
+                <p style={{ margin: 0, fontSize: '12px' }}>
+                    <strong>Текущий источник:</strong>{' '}
+                    <span style={{
+                        color: dataSource === 'real' ? '#10b981' :
+                            dataSource === 'mock' ? '#ff8c00' : '#ff4444'
+                    }}>
+                        {dataSource === 'real' ? '📡 РЕАЛЬНЫЕ' :
+                            dataSource === 'mock' ? '🎲 ТЕСТОВЫЕ' : '📭 ПУСТО'}
+                    </span>
+                </p>
+            </div>
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <button onClick={checkHistory} style={debugButtonStyle} disabled={isLoading}>
                     {isLoading ? '🔄 ПРОВЕРКА...' : '📊 ПРОВЕРИТЬ ИСТОРИЮ'}
                 </button>
-                <button onClick={onForceMock} style={debugButtonStyle}>
-                    🎲 СОЗДАТЬ ТЕСТОВЫЕ ДАННЫЕ
+                <button onClick={onUseMock} style={debugButtonStyle}>
+                    🎲 ВКЛЮЧИТЬ ТЕСТОВЫЕ ДАННЫЕ
+                </button>
+                <button onClick={onUseReal} style={debugButtonStyle}>
+                    📡 ВКЛЮЧИТЬ РЕАЛЬНЫЕ ДАННЫЕ
+                </button>
+                <button onClick={onCheckAvailability} style={debugButtonStyle}>
+                    🔍 ПРОВЕРИТЬ ДОСТУПНОСТЬ
                 </button>
                 <button onClick={onClearCache} style={debugButtonStyle}>
                     🗑️ ОЧИСТИТЬ КЭШ
@@ -1084,7 +1188,8 @@ const DebugPanel = ({ farmName, onForceMock, onClearCache, onCheckHistory, onRef
                         <tr><td style={{ padding: '3px 0' }}>Оффлайн:</td><td style={{ textAlign: 'right', fontWeight: 'bold', color: '#ff4444' }}>{stats.offline_entries}</td></tr>
                         <tr><td style={{ padding: '3px 0' }}>Ср. хешрейт:</td><td style={{ textAlign: 'right', fontWeight: 'bold' }}>{stats.avg_hashrate_24h?.toFixed(1)} TH/s</td></tr>
                         <tr><td style={{ padding: '3px 0' }}>Ср. потребление:</td><td style={{ textAlign: 'right', fontWeight: 'bold' }}>{stats.avg_power_24h?.toFixed(1)} кВт</td></tr>
-                        <tr><td style={{ padding: '3px 0' }}>Тип данных:</td><td style={{ textAlign: 'right', fontWeight: 'bold', color: stats.is_mock ? '#ff8c00' : '#10b981' }}>{stats.is_mock ? '🎲 ТЕСТ' : '📊 РЕАЛ'}</td></tr>
+                        <tr><td style={{ padding: '3px 0' }}>Тип данных:</td><td style={{ textAlign: 'right', fontWeight: 'bold', color: stats.is_mock ? '#ff8c00' : '#10b981' }}>{stats.is_mock ? '🎲 ТЕСТ' : '📡 РЕАЛ'}</td></tr>
+                        <tr><td style={{ padding: '3px 0' }}>Посл. обновление:</td><td style={{ textAlign: 'right', fontSize: '10px' }}>{stats.last_update ? new Date(stats.last_update).toLocaleString() : 'никогда'}</td></tr>
                         </tbody>
                     </table>
                 </div>
