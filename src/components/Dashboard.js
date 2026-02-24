@@ -14,6 +14,7 @@ const Dashboard = ({ farmNameProp }) => {
     const [historyLoading, setHistoryLoading] = useState(true);
     const [autoRefresh, setAutoRefresh] = useState(true);
     const [lastUpdate, setLastUpdate] = useState(null);
+    const [showDebug, setShowDebug] = useState(false);
     const autoRefreshTimer = useRef(null);
 
     // Загрузка истории при монтировании и при изменении фермы
@@ -94,16 +95,41 @@ const Dashboard = ({ farmNameProp }) => {
         };
     }, [farmNameProp]);
 
+    // Слушаем события обновления истории
+    useEffect(() => {
+        const handleHistoryUpdate = (event) => {
+            if (event.detail.farmName === farmNameProp) {
+                setHistoryData(event.detail.history);
+                setLastUpdate(new Date());
+            }
+        };
+
+        window.addEventListener('historyUpdated', handleHistoryUpdate);
+        return () => window.removeEventListener('historyUpdated', handleHistoryUpdate);
+    }, [farmNameProp]);
+
     const handleClearHistory = () => {
-        if (window.confirm('Очистить всю историю? Данные будут удалены из GitHub.')) {
-            // TODO: Implement clear history
-            console.log('🗑️ Clear history');
+        if (window.confirm('Очистить всю историю? Данные будут удалены из localStorage.')) {
+            historyManager.clearCache();
+            historyManager.loadFarmHistory(farmNameProp, true).then(history => {
+                setHistoryData(history);
+                setLastUpdate(new Date());
+            });
         }
     };
 
     const handleExportHistory = () => {
-        // TODO: Implement export
-        console.log('📥 Export history');
+        const history = historyData;
+        const dataStr = JSON.stringify(history, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `history_${farmNameProp}_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     };
 
     const handleRefreshHistory = async () => {
@@ -121,8 +147,19 @@ const Dashboard = ({ farmNameProp }) => {
 
     const handleTimeRangeChange = (range) => {
         setChartTimeRange(range);
-        // Принудительно обновляем данные при смене диапазона
         handleRefreshHistory();
+    };
+
+    const handleAddTestPoint = async () => {
+        await historyManager.addTestEntry(farmNameProp);
+        handleRefreshHistory();
+    };
+
+    const handleResetEmulated = async () => {
+        if (window.confirm('Сбросить историю и создать эмулированные данные?')) {
+            historyManager.resetToEmulated(farmNameProp);
+            handleRefreshHistory();
+        }
     };
 
     if (loading && !farmData) {
@@ -178,6 +215,13 @@ const Dashboard = ({ farmNameProp }) => {
                         )}
                     </div>
                 </div>
+                <button
+                    className="debug-toggle"
+                    onClick={() => setShowDebug(!showDebug)}
+                    title="Панель отладки"
+                >
+                    🛠️
+                </button>
             </div>
 
             <StatsGrid summary={farmData.summary} dataStatus={farmData._dataStatus} />
@@ -193,9 +237,21 @@ const Dashboard = ({ farmNameProp }) => {
                 dataStatus={farmData._dataStatus}
                 historyLoading={historyLoading}
                 onRefresh={handleRefreshHistory}
+                onClear={handleClearHistory}
+                onExport={handleExportHistory}
                 autoRefresh={autoRefresh}
                 onAutoRefreshChange={setAutoRefresh}
             />
+
+            {showDebug && (
+                <DebugPanel
+                    farmName={farmNameProp}
+                    onAddTestPoint={handleAddTestPoint}
+                    onResetEmulated={handleResetEmulated}
+                    onRefresh={handleRefreshHistory}
+                    onClose={() => setShowDebug(false)}
+                />
+            )}
 
             <div className="containers-section">
                 <h3 className="section-title">⚡ КОНТЕЙНЕРЫ</h3>
@@ -231,6 +287,8 @@ const ChartTabsSection = ({
                               dataStatus,
                               historyLoading,
                               onRefresh,
+                              onClear,
+                              onExport,
                               autoRefresh,
                               onAutoRefreshChange
                           }) => {
@@ -277,9 +335,8 @@ const ChartTabsSection = ({
                         <span className="stat-badge" title="Среднее потребление за 24ч">
                             ⚡ {stats.avg_power_24h.toFixed(1)} кВт
                         </span>
-                        <span className="stat-badge github-sync" title="Данные из GitHub">🔗 GitHub</span>
-                        {dataStatus === 'offline' && (
-                            <span className="stat-badge offline">OFFLINE</span>
+                        {stats.is_emulated && (
+                            <span className="stat-badge emulated" title="Эмулированные данные">🎲 ЭМУЛЯЦИЯ</span>
                         )}
                     </div>
                 </div>
@@ -342,6 +399,20 @@ const ChartTabsSection = ({
                         >
                             ↻
                         </button>
+                        <button
+                            className="export-btn"
+                            onClick={onExport}
+                            title="Экспорт истории"
+                        >
+                            📥
+                        </button>
+                        <button
+                            className="clear-btn"
+                            onClick={onClear}
+                            title="Очистить историю"
+                        >
+                            🗑️
+                        </button>
                     </div>
                 </div>
             </div>
@@ -350,7 +421,7 @@ const ChartTabsSection = ({
                 {historyLoading ? (
                     <div className="chart-loading">
                         <div className="loading-spinner"></div>
-                        <p>Загрузка истории из GitHub...</p>
+                        <p>Загрузка истории...</p>
                     </div>
                 ) : (
                     <>
@@ -392,7 +463,7 @@ const ChartTabsSection = ({
             <div className="data-info">
                 {historyLoading ? (
                     <div className="info-message loading-message">
-                        <strong>🔄 ЗАГРУЗКА ИСТОРИИ</strong> - Загружаем данные из GitHub...
+                        <strong>🔄 ЗАГРУЗКА ИСТОРИИ</strong> - Загружаем данные...
                     </div>
                 ) : stats.total_entries === 0 ? (
                     <div className="info-message waiting-message">
@@ -400,11 +471,17 @@ const ChartTabsSection = ({
                         <br />
                         <small>Следующее обновление через 5 минут</small>
                     </div>
+                ) : stats.is_emulated ? (
+                    <div className="info-message emulated-message">
+                        <strong>🎲 ЭМУЛИРОВАННЫЕ ДАННЫЕ</strong> - Показываем тестовую историю.
+                        <br />
+                        <small>Реальные данные начнут собираться при работе фермы</small>
+                    </div>
                 ) : dataStatus === 'offline' ? (
                     <div className="info-message offline-message">
                         <strong>🔴 ФЕРМА OFFLINE</strong> - Данные не обновляются более 30 минут.
                         <br />
-                        <small>Последняя запись: {new Date(stats.last_update).toLocaleString()}</small>
+                        <small>Последняя запись: {stats.last_update ? new Date(stats.last_update).toLocaleString() : 'никогда'}</small>
                     </div>
                 ) : (
                     <div className="info-message real-message">
@@ -504,7 +581,7 @@ const HashrateChart = ({ data, currentData, dataStatus }) => {
                     responsive: true,
                     maintainAspectRatio: false,
                     animation: {
-                        duration: 0 // Отключаем анимацию для производительности
+                        duration: 0
                     },
                     plugins: {
                         legend: { display: false },
@@ -945,6 +1022,128 @@ const EfficiencyChart = ({ data, currentData, dataStatus }) => {
             />
         </div>
     );
+};
+
+// Панель отладки
+const DebugPanel = ({ farmName, onAddTestPoint, onResetEmulated, onRefresh, onClose }) => {
+    const [stats, setStats] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const checkHistory = async () => {
+        setIsLoading(true);
+        try {
+            const historyStats = await historyManager.getHistoryStats(farmName);
+            setStats(historyStats);
+            console.log('📊 History stats:', historyStats);
+
+            const history = await historyManager.loadFarmHistory(farmName, true);
+            console.log('📜 Full history:', history);
+
+            alert(`📊 История загружена. Записей: ${historyStats.total_entries}`);
+        } catch (error) {
+            console.error('❌ Error checking history:', error);
+            alert('❌ Ошибка при проверке истории');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const viewLocalStorage = () => {
+        const keys = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith('history_')) {
+                keys.push(key);
+            }
+        }
+        console.log('📦 LocalStorage keys:', keys);
+        keys.forEach(key => {
+            const data = localStorage.getItem(key);
+            console.log(`🔑 ${key}:`, JSON.parse(data));
+        });
+        alert(`📦 Данные в localStorage: ${keys.length} ключей. Смотри консоль.`);
+    };
+
+    return (
+        <div className="debug-panel" style={{
+            position: 'fixed',
+            bottom: '20px',
+            right: '20px',
+            background: '#2a1a0f',
+            border: '2px solid #ff8c00',
+            borderRadius: '12px',
+            padding: '20px',
+            maxWidth: '320px',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+            zIndex: 1000,
+            color: '#fff'
+        }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
+                <h4 style={{ color: '#ff8c00', margin: 0 }}>🛠️ ПАНЕЛЬ ОТЛАДКИ</h4>
+                <button
+                    onClick={onClose}
+                    style={{ background: 'none', border: 'none', color: '#ff8c00', fontSize: '20px', cursor: 'pointer' }}
+                >
+                    ✖
+                </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <button onClick={checkHistory} style={debugButtonStyle} disabled={isLoading}>
+                    {isLoading ? '🔄 ПРОВЕРКА...' : '📊 ПРОВЕРИТЬ ИСТОРИЮ'}
+                </button>
+                <button onClick={onAddTestPoint} style={debugButtonStyle}>
+                    ➕ ДОБАВИТЬ ТЕСТОВУЮ ТОЧКУ
+                </button>
+                <button onClick={onResetEmulated} style={debugButtonStyle}>
+                    🔄 СБРОСИТЬ К ЭМУЛЯЦИИ
+                </button>
+                <button onClick={onRefresh} style={debugButtonStyle}>
+                    ↻ ПРИНУДИТЕЛЬНО ОБНОВИТЬ
+                </button>
+                <button onClick={viewLocalStorage} style={debugButtonStyle}>
+                    📦 ПРОВЕРИТЬ LOCALSTORAGE
+                </button>
+            </div>
+
+            {stats && (
+                <div style={{
+                    marginTop: '15px',
+                    padding: '15px',
+                    background: '#1a0f0a',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                    border: '1px solid #ff8c20'
+                }}>
+                    <p style={{ color: '#ff8c00', fontWeight: 'bold', margin: '0 0 10px 0' }}>📊 ТЕКУЩАЯ СТАТИСТИКА:</p>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <tbody>
+                        <tr><td style={{ padding: '3px 0' }}>Записей:</td><td style={{ textAlign: 'right', fontWeight: 'bold' }}>{stats.total_entries}</td></tr>
+                        <tr><td style={{ padding: '3px 0' }}>Онлайн:</td><td style={{ textAlign: 'right', fontWeight: 'bold', color: '#10b981' }}>{stats.online_entries}</td></tr>
+                        <tr><td style={{ padding: '3px 0' }}>Оффлайн:</td><td style={{ textAlign: 'right', fontWeight: 'bold', color: '#ff4444' }}>{stats.offline_entries}</td></tr>
+                        <tr><td style={{ padding: '3px 0' }}>Ср. хешрейт:</td><td style={{ textAlign: 'right', fontWeight: 'bold' }}>{stats.avg_hashrate_24h?.toFixed(1)} TH/s</td></tr>
+                        <tr><td style={{ padding: '3px 0' }}>Ср. потребление:</td><td style={{ textAlign: 'right', fontWeight: 'bold' }}>{stats.avg_power_24h?.toFixed(1)} кВт</td></tr>
+                        <tr><td style={{ padding: '3px 0' }}>Эмуляция:</td><td style={{ textAlign: 'right', fontWeight: 'bold', color: stats.is_emulated ? '#ff8c00' : '#10b981' }}>{stats.is_emulated ? '✅ ДА' : '❌ НЕТ'}</td></tr>
+                        <tr><td style={{ padding: '3px 0' }}>Посл. обновление:</td><td style={{ textAlign: 'right', fontSize: '10px' }}>{stats.last_update ? new Date(stats.last_update).toLocaleString() : 'никогда'}</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            )}
+        </div>
+    );
+};
+
+const debugButtonStyle = {
+    background: '#ff8c00',
+    color: '#000',
+    border: 'none',
+    padding: '10px',
+    borderRadius: '6px',
+    fontSize: '12px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    width: '100%',
+    transition: 'all 0.2s'
 };
 
 export default Dashboard;
