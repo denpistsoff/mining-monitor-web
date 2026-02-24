@@ -1,49 +1,133 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#ff8c00" />
-  <meta name="description" content="Мониторинг майнинг ферм" />
-  <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#ff8c00" />
+    <meta name="description" content="Мониторинг майнинг ферм" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
 
-  <!-- Добавляем базовый URL для GitHub Pages -->
-  <base href="/mining-monitor-web/" />
+    <!-- Базовый URL для GitHub Pages -->
+    <base href="/mining-monitor-web/" />
 
-  <title>Mining Monitor</title>
+    <title>Mining Monitor</title>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-      sans-serif;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      background-color: #1a0f0a;
-    }
-  </style>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+            'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+            sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-color: #1a0f0a;
+        }
+        code {
+            font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+            monospace;
+        }
+        .initial-loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #1a0f0a;
+            z-index: 9999;
+            transition: opacity 0.3s ease;
+        }
+        .initial-spinner {
+            border: 4px solid rgba(255, 140, 0, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #ff8c00;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        .initial-text {
+            color: #ff8c00;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+        .initial-subtext {
+            color: #666;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+
+    <script>
+        (function() {
+            // Функция для восстановления пути после редиректа
+            function restorePath() {
+                var redirectPath = sessionStorage.getItem('redirectPath');
+                if (redirectPath && redirectPath !== '/' && !window.location.pathname.includes(redirectPath)) {
+                    console.log('🔄 Restoring path from redirect:', redirectPath);
+                    sessionStorage.removeItem('redirectPath');
+
+                    // Используем history API для смены URL без перезагрузки
+                    var newUrl = '/mining-monitor-web' + redirectPath;
+                    window.history.replaceState(null, null, newUrl);
+                    return true;
+                }
+                return false;
+            }
+
+            // Восстанавливаем путь
+            restorePath();
+
+            // Показываем индикатор загрузки пока React не запустится
+            var loadingDiv = document.createElement('div');
+            loadingDiv.className = 'initial-loading';
+            loadingDiv.id = 'initial-loading';
+            loadingDiv.innerHTML = '<div class="initial-spinner"></div>' +
+                '<div class="initial-text">Загрузка приложения...</div>' +
+                '<div class="initial-subtext">Mining Monitor v5.0</div>';
+            document.body.appendChild(loadingDiv);
+
+            // Уберем индикатор после загрузки React
+            window.addEventListener('load', function() {
+                setTimeout(function() {
+                    var loading = document.getElementById('initial-loading');
+                    if (loading) {
+                        loading.style.opacity = '0';
+                        setTimeout(function() {
+                            loading.style.display = 'none';
+                        }, 300);
+                    }
+                }, 500);
+            });
+
+            // Обработка ошибок загрузки
+            window.addEventListener('error', function(e) {
+                console.error('❌ Loading error:', e.error);
+                var loading = document.getElementById('initial-loading');
+                if (loading) {
+                    loading.innerHTML = '<div style="color: #ff4444; font-size: 48px;">⚠️</div>' +
+                        '<div class="initial-text" style="color: #ff4444;">Ошибка загрузки</div>' +
+                        '<div class="initial-subtext">Попробуйте обновить страницу</div>';
+                }
+            });
+        })();
+    </script>
 </head>
 <body>
-<noscript>Включите JavaScript для работы приложения</noscript>
+<noscript>
+    <div style="padding: 20px; text-align: center; background-color: #1a0f0a; color: #ff8c00;">
+        <h1>⚠️ JavaScript отключен</h1>
+        <p>Для работы приложения необходимо включить JavaScript</p>
+    </div>
+</noscript>
 <div id="root"></div>
-
-<!-- Скрипт для обработки редиректов после 404 -->
-<script>
-  (function() {
-    // Восстанавливаем путь после редиректа с 404
-    const redirect = sessionStorage.redirect;
-    delete sessionStorage.redirect;
-
-    if (redirect && redirect !== location.href) {
-      const path = redirect.replace(location.origin + '/mining-monitor-web/', '');
-      if (path && path !== '') {
-        history.replaceState(null, null, path);
-      }
-    }
-  })();
-</script>
 </body>
 </html>

@@ -7,7 +7,6 @@ import '../styles/components/FarmSelection.css';
 const FarmSelection = ({ currentUser, onLogout }) => {
     const [farms, setFarms] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [config, setConfig] = useState(null);
     const navigate = useNavigate();
 
     const FARM_FILES = {
@@ -67,6 +66,7 @@ const FarmSelection = ({ currentUser, onLogout }) => {
         }
 
         setLoading(true);
+        console.log('📥 Loading farms for user:', currentUser);
 
         const farmsList = [];
 
@@ -128,6 +128,7 @@ const FarmSelection = ({ currentUser, onLogout }) => {
             }
         }
 
+        console.log('✅ Farms loaded:', farmsList);
         setFarms(farmsList);
         setLoading(false);
     };
@@ -139,7 +140,16 @@ const FarmSelection = ({ currentUser, onLogout }) => {
     }, [currentUser]);
 
     const handleFarmClick = (farmName) => {
+        console.log('➡️ Navigating to farm:', farmName);
+        // Используем navigate для перехода
         navigate(`/farm/${farmName}/dashboard`);
+    };
+
+    const handleLogoutClick = () => {
+        console.log('🚪 Logging out');
+        onLogout();
+        // Перенаправляем на логин
+        navigate('/login');
     };
 
     const getStatusInfo = (status, freshness) => {
@@ -376,7 +386,7 @@ const FarmSelection = ({ currentUser, onLogout }) => {
 
                     <button
                         className="logout-button-nav"
-                        onClick={onLogout}
+                        onClick={handleLogoutClick}
                     >
                         🚪 ВЫЙТИ
                     </button>

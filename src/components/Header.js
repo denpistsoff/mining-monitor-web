@@ -1,14 +1,18 @@
+// src/components/Header.js
 import React from 'react';
 import '../styles/components/Header.css';
 
-const Header = ({ activeTab, onTabChange, farmName, onLogout, unreadAlertsCount = 0 }) => {
+const Header = ({ activeTab, onTabChange, farmName, onLogout, onBack, unreadAlertsCount = 0 }) => {
     const tabs = [
         { id: 'dashboard', label: 'ДАШБОРД' },
         { id: 'miners', label: 'АСИКИ' }
     ];
 
     const handleBack = () => {
-        window.location.href = 'https://denpistsoff.github.io/mining-monitor-web/';
+        console.log('🔙 Back button clicked');
+        if (onBack) {
+            onBack();
+        }
     };
 
     const handleAction = (action) => {

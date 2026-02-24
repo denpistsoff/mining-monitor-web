@@ -14,13 +14,34 @@ function RouteTracker({ children }) {
 
     useEffect(() => {
         // Сохраняем текущий путь в sessionStorage при каждом изменении
-        const currentPath = location.pathname.replace('/mining-monitor-web', '');
-        if (currentPath && currentPath !== '/') {
-            sessionStorage.setItem('lastPath', currentPath);
+        // Убираем basename из пути для хранения
+        const path = location.pathname.replace('/mining-monitor-web', '') || '/';
+        if (path !== '/') {
+            sessionStorage.setItem('lastPath', path);
+            console.log('📍 Path saved:', path);
         }
     }, [location]);
 
     return children;
+}
+
+// Компонент для обработки редиректов
+function RedirectHandler() {
+    const location = useLocation();
+
+    useEffect(() => {
+        // Проверяем, есть ли сохраненный путь после редиректа с 404
+        const redirectPath = sessionStorage.getItem('redirectPath');
+        if (redirectPath && redirectPath !== location.pathname) {
+            console.log('🔄 Restoring path from redirect:', redirectPath);
+            sessionStorage.removeItem('redirectPath');
+            // Используем replace, чтобы не плодить записи в истории
+            window.history.replaceState(null, null,
+                `/mining-monitor-web${redirectPath}`);
+        }
+    }, [location]);
+
+    return null;
 }
 
 function App() {
@@ -30,20 +51,35 @@ function App() {
 
     useEffect(() => {
         const checkAuth = async () => {
-            const user = await authManager.checkAuth();
-            if (user) {
-                setIsAuthenticated(true);
-                setCurrentUser(user);
+            try {
+                console.log('🔍 Checking authentication...');
+                const user = await authManager.checkAuth();
+                if (user) {
+                    console.log('✅ User authenticated:', user);
+                    setIsAuthenticated(true);
+                    setCurrentUser(user);
 
-                // Восстанавливаем последний путь после авторизации
-                const lastPath = sessionStorage.getItem('lastPath');
-                if (lastPath && lastPath !== '/') {
-                    window.history.replaceState(null, null, lastPath);
+                    // Восстанавливаем последний путь после авторизации
+                    const lastPath = sessionStorage.getItem('lastPath');
+                    if (lastPath && lastPath !== '/') {
+                        console.log('🔄 Restoring last path:', lastPath);
+                        // Даем время на загрузку приложения
+                        setTimeout(() => {
+                            window.history.replaceState(null, null,
+                                `/mining-monitor-web${lastPath}`);
+                        }, 100);
+                    }
+                } else {
+                    console.log('❌ No authenticated user');
                 }
+            } catch (error) {
+                console.error('❌ Auth check error:', error);
+            } finally {
+                setIsLoading(false);
             }
-            setIsLoading(false);
         };
 
+        // Настройка Telegram WebApp если есть
         if (window.Telegram?.WebApp) {
             const tgApp = window.Telegram.WebApp;
             tgApp.ready();
@@ -55,16 +91,29 @@ function App() {
     }, []);
 
     const handleLogin = (success, user) => {
+        console.log('🔑 Login handler:', success ? 'success' : 'failed');
         setIsAuthenticated(success);
         setCurrentUser(user);
+
+        if (success) {
+            // После успешного логина, проверяем есть ли сохраненный путь
+            const lastPath = sessionStorage.getItem('lastPath');
+            if (lastPath && lastPath !== '/') {
+                console.log('➡️ Redirecting to saved path:', lastPath);
+                // Используем window.location для полной перезагрузки
+                window.location.href = `/mining-monitor-web${lastPath}`;
+            }
+        }
     };
 
     const handleLogout = () => {
+        console.log('🚪 Logging out');
         authManager.logout();
         setIsAuthenticated(false);
         setCurrentUser(null);
-        // Очищаем сохраненный путь при выходе
+        // Очищаем сохраненные пути при выходе
         sessionStorage.removeItem('lastPath');
+        sessionStorage.removeItem('redirectPath');
     };
 
     if (isLoading) {
@@ -82,6 +131,7 @@ function App() {
 
     return (
         <Router basename="/mining-monitor-web">
+            <RedirectHandler />
             <RouteTracker>
                 <div className="app">
                     <Routes>

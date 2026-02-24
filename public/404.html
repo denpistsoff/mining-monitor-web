@@ -1,15 +1,91 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <title>Mining Monitor</title>
-  <script>
-    // Перенаправление на главную с сохранением пути
-    sessionStorage.redirect = location.href;
-    location.href = '/mining-monitor-web/';
-  </script>
+    <meta charset="utf-8">
+    <title>Mining Monitor - Redirecting...</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1a0f0a;
+            color: #ff8c00;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+        .container {
+            padding: 20px;
+            max-width: 500px;
+        }
+        .spinner {
+            border: 4px solid rgba(255, 140, 0, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #ff8c00;
+            width: 50px;
+            height: 50px;
+            margin: 20px auto;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        h1 {
+            color: #ff8c00;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        p {
+            color: #ccc;
+            line-height: 1.6;
+        }
+        .error-code {
+            font-size: 72px;
+            font-weight: bold;
+            color: rgba(255, 140, 0, 0.2);
+            margin-bottom: -20px;
+        }
+    </style>
+    <script>
+        (function() {
+            // Получаем текущий путь из URL
+            var fullPath = window.location.pathname;
+            var path = fullPath.replace('/mining-monitor-web', '');
+
+            console.log('🔀 404.html: Redirecting from', fullPath, '->', path);
+
+            // Сохраняем путь в sessionStorage для восстановления
+            sessionStorage.setItem('redirectPath', path);
+
+            // Показываем сообщение пользователю
+            document.addEventListener('DOMContentLoaded', function() {
+                var pathElement = document.getElementById('redirect-path');
+                if (pathElement) {
+                    pathElement.textContent = path;
+                }
+            });
+
+            // Перенаправляем на главную после небольшой задержки
+            setTimeout(function() {
+                window.location.href = '/mining-monitor-web/';
+            }, 1500);
+        })();
+    </script>
 </head>
 <body>
-<h1>Перенаправление...</h1>
+<div class="container">
+    <div class="error-code">404</div>
+    <h1>🔄 Перенаправление...</h1>
+    <div class="spinner"></div>
+    <p>Страница <strong id="redirect-path"></strong> не найдена</p>
+    <p>Перенаправляем на главную страницу</p>
+    <p style="font-size: 12px; margin-top: 30px; color: #666;">
+        Если перенаправление не происходит,
+        <a href="/mining-monitor-web/" style="color: #ff8c00;">нажмите здесь</a>
+    </p>
+</div>
 </body>
 </html>
