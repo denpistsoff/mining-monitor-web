@@ -420,7 +420,7 @@ const ChartTabsSection = ({
                             <div className="chart-empty">
                                 <div className="empty-message">
                                     <p>📊 Нет исторических данных</p>
-                                    <span>Нажми кнопку "ТЕСТОВЫЕ ДАННЫЕ" для создания</span>
+                                    <span>Нажми кнопку &quot;ТЕСТОВЫЕ ДАННЫЕ&quot; для создания</span>
                                 </div>
                             </div>
                         )}
@@ -436,7 +436,7 @@ const ChartTabsSection = ({
                     </div>
                 ) : stats.total_entries === 0 ? (
                     <div className="info-message waiting-message">
-                        <strong>⏳ НЕТ ДАННЫХ</strong> - Нажми кнопку "ТЕСТОВЫЕ ДАННЫЕ" внизу страницы
+                        <strong>⏳ НЕТ ДАННЫХ</strong> - Нажми кнопку &quot;ТЕСТОВЫЕ ДАННЫЕ&quot; внизу страницы
                     </div>
                 ) : stats.is_mock ? (
                     <div className="info-message mock-message">
