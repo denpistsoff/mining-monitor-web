@@ -210,7 +210,7 @@ const MinerCard = ({ miner, showContainer = false, size = 'medium' }) => {
                         <div className="detail-grid">
                             <div className="detail-item">
                                 <span>IP АДРЕС:</span>
-                                <strong className="full-ip">{ip}</strong>
+                                <strong>{ip}</strong>
                             </div>
                             <div className="detail-item">
                                 <span>ТИП:</span>
