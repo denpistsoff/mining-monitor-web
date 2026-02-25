@@ -357,3 +357,54 @@
         align-self: flex-end;
     }
 }
+
+/* Добавь в конец файла MinerCard.css */
+
+/* Полный IP в деталях */
+.miner-details .full-ip {
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    background: rgba(255, 140, 0, 0.1);
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: #ff8c00;
+    word-break: break-all;
+}
+
+/* Полный пул в деталях */
+.miner-details .pool-full {
+    font-size: 12px;
+    word-break: break-all;
+    background: rgba(255, 140, 0, 0.05);
+    padding: 4px 8px;
+    border-radius: 4px;
+    max-width: 100%;
+}
+
+/* Улучшаем отображение IP в заголовке */
+.miner-ip {
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    cursor: help;
+    border-bottom: 1px dashed #ff8c00;
+    display: inline-block;
+}
+
+/* Для мобильных устройств */
+@media (max-width: 768px) {
+    .miner-details .full-ip {
+        font-size: 12px;
+        padding: 6px;
+    }
+
+    .miner-details .pool-full {
+        font-size: 11px;
+    }
+}
+
+/* Для очень маленьких экранов */
+@media (max-width: 480px) {
+    .miner-details .full-ip {
+        font-size: 11px;
+    }
+}

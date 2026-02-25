@@ -1,3 +1,4 @@
+// src/components/MinerCard.js
 import React, { useState } from 'react';
 import '../styles/components/MinerCard.css';
 
@@ -157,7 +158,7 @@ const MinerCard = ({ miner, showContainer = false, size = 'medium' }) => {
                                 type === 'avalon' ? 'V' : 'M'}
                     </div>
                     <div className="miner-info">
-                        <div className="miner-ip">{ip}</div>
+                        <div className="miner-ip" title={ip}>{ip}</div>
                         {size !== 'small' && (
                             <div className="miner-meta">
                                 <span className="miner-type">{type || 'UNKNOWN'}</span>
@@ -209,7 +210,7 @@ const MinerCard = ({ miner, showContainer = false, size = 'medium' }) => {
                         <div className="detail-grid">
                             <div className="detail-item">
                                 <span>IP АДРЕС:</span>
-                                <strong>{ip}</strong>
+                                <strong className="full-ip">{ip}</strong>
                             </div>
                             <div className="detail-item">
                                 <span>ТИП:</span>
@@ -236,7 +237,7 @@ const MinerCard = ({ miner, showContainer = false, size = 'medium' }) => {
                             {pool && (
                                 <div className="detail-item full-width">
                                     <span>ПУЛ:</span>
-                                    <strong>{pool}</strong>
+                                    <strong className="pool-full">{pool}</strong>
                                 </div>
                             )}
                             {uptime && (
