@@ -51,6 +51,7 @@
     border-radius: var(--radius-lg);
     margin-bottom: 20px;
     border: 1px solid #252525;
+    overflow: visible !important;
 }
 
 .container-filter {
@@ -228,12 +229,64 @@
     transform: translateY(-2px);
 }
 
+/* ========== ВАЖНО: СТИЛИ ДЛЯ КАРТОЧЕК АСИКОВ ========== */
 .miners-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     gap: 20px;
+    overflow: visible !important;
 }
 
+/* КАРТОЧКА АСИКА - убираем все обрезания */
+.miner-card {
+    overflow: visible !important;
+}
+
+/* IP АДРЕС - ПОЛНЫЙ, НЕ ОБРЕЗАЕМ! */
+.miner-ip {
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    word-break: break-all !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    max-width: 100% !important;
+    display: inline-block !important;
+    border-bottom: 1px dashed #ff8c00;
+    line-height: 1.4;
+}
+
+/* Для маленьких карточек */
+.miner-card.size-small .miner-ip {
+    font-size: 0.9rem;
+}
+
+/* Для средних карточек */
+.miner-card.size-medium .miner-ip {
+    font-size: 1rem;
+}
+
+/* Для больших карточек */
+.miner-card.size-large .miner-ip {
+    font-size: 1.1rem;
+}
+
+/* Убираем возможные ограничения в родителях */
+.miner-info {
+    overflow: visible !important;
+}
+
+.miner-identity {
+    overflow: visible !important;
+}
+
+.miner-header {
+    overflow: visible !important;
+}
+
+/* Нет асиков */
 .no-miners-message {
     grid-column: 1 / -1;
     text-align: center;
@@ -252,6 +305,7 @@
     color: var(--text-muted);
 }
 
+/* Адаптивность */
 @media (max-width: 768px) {
     .miners-stats {
         flex-direction: column;
@@ -284,6 +338,10 @@
         padding: 10px 12px;
         font-size: 0.8rem;
     }
+
+    .miner-ip {
+        font-size: 0.95rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -315,20 +373,8 @@
         gap: 4px;
         padding: 8px;
     }
-}
-/* Добавь в конец файла MinerView.css */
 
-.miners-grid {
-    overflow: visible !important;
-}
-
-.miner-card {
-    overflow: visible !important;
-}
-
-/* Убираем возможные ограничения в родителях */
-.filters-panel,
-.actions-panel,
-.miners-view {
-    overflow: visible !important;
+    .miner-ip {
+        font-size: 0.9rem;
+    }
 }
