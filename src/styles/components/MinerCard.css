@@ -4,7 +4,7 @@
     border: 1px solid #252525;
     transition: var(--transition-normal);
     position: relative;
-    overflow: visible !important; /* Важно для отображения полного IP */
+    overflow: visible !important;
 }
 
 .miner-card::before {
@@ -84,8 +84,8 @@
     overflow: visible !important;
 }
 
-/* ОСНОВНОЕ ПРАВИЛО ДЛЯ IP - ПОЛНЫЙ АДРЕС */
-.miner-ip {
+/* ===== ВАЖНО: ПОЛНЫЙ IP АДРЕС ===== */
+.miner-ip-full {
     font-family: 'Courier New', monospace;
     font-size: 1rem;
     font-weight: 700;
@@ -96,14 +96,22 @@
     overflow: visible !important;
     text-overflow: clip !important;
     max-width: 100% !important;
-    display: inline-block !important;
-    cursor: help;
-    border-bottom: 1px dashed #ff8c00;
+    display: block !important;
     line-height: 1.4;
+    border-bottom: 1px dashed #ff8c00;
+    padding: 2px 0;
 }
 
-.size-small .miner-ip {
+.size-small .miner-ip-full {
     font-size: 0.9rem;
+}
+
+.size-medium .miner-ip-full {
+    font-size: 1rem;
+}
+
+.size-large .miner-ip-full {
+    font-size: 1.1rem;
 }
 
 .miner-meta {
@@ -335,6 +343,7 @@
     color: var(--text-primary);
     font-weight: 700;
     text-align: right;
+    word-break: break-all;
 }
 
 .detail-item strong.status-online { color: var(--accent-success); }
@@ -342,10 +351,10 @@
 .detail-item strong.status-problematic { color: var(--accent-warning); }
 .detail-item strong.problem { color: var(--accent-warning); }
 
-/* ========== ПОЛНЫЙ IP В ДЕТАЛЯХ ========== */
+/* ===== ПОЛНЫЙ IP В ДЕТАЛЯХ ===== */
 .miner-details .full-ip {
     font-family: 'Courier New', monospace;
-    font-size: 14px !important;
+    font-size: 14px;
     background: rgba(255, 140, 0, 0.15);
     padding: 6px 10px;
     border-radius: 6px;
@@ -353,8 +362,8 @@
     word-break: break-all !important;
     white-space: normal !important;
     overflow: visible !important;
-    max-width: 100% !important;
-    display: block !important;
+    max-width: 100%;
+    display: inline-block;
     border: 1px solid rgba(255, 140, 0, 0.3);
     font-weight: 600;
     line-height: 1.5;
@@ -368,49 +377,8 @@
     padding: 6px 10px;
     border-radius: 6px;
     max-width: 100%;
-    display: block;
-    line-height: 1.4;
-}
-
-/* Улучшаем отображение IP в заголовке */
-.miner-ip {
-    font-family: 'Courier New', monospace;
-    font-weight: 700;
-    cursor: help;
-    border-bottom: 1px dashed #ff8c00;
     display: inline-block;
-    word-break: break-all;
-    white-space: normal;
-    overflow: visible;
-    max-width: 100%;
-    padding: 2px 0;
-}
-
-/* Для мобильных устройств */
-@media (max-width: 768px) {
-    .miner-details .full-ip {
-        font-size: 13px !important;
-        padding: 6px;
-    }
-
-    .miner-details .pool-full {
-        font-size: 11px;
-    }
-
-    .miner-ip {
-        font-size: 0.95rem;
-    }
-}
-
-/* Для очень маленьких экранов */
-@media (max-width: 480px) {
-    .miner-details .full-ip {
-        font-size: 12px !important;
-    }
-
-    .miner-ip {
-        font-size: 0.9rem;
-    }
+    line-height: 1.4;
 }
 
 /* Адаптивность */
@@ -428,6 +396,14 @@
     .detail-grid {
         grid-template-columns: 1fr;
     }
+
+    .miner-ip-full {
+        font-size: 0.95rem;
+    }
+
+    .miner-details .full-ip {
+        font-size: 13px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -439,5 +415,13 @@
 
     .miner-status {
         align-self: flex-end;
+    }
+
+    .miner-ip-full {
+        font-size: 0.9rem;
+    }
+
+    .miner-details .full-ip {
+        font-size: 12px;
     }
 }

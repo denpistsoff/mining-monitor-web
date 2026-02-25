@@ -2,6 +2,7 @@
     padding: 20px;
     max-width: 1200px;
     margin: 0 auto;
+    overflow: visible !important;
 }
 
 .miners-header {
@@ -229,7 +230,7 @@
     transform: translateY(-2px);
 }
 
-/* ========== ВАЖНО: СТИЛИ ДЛЯ КАРТОЧЕК АСИКОВ ========== */
+/* ===== СЕТКА ДЛЯ КАРТОЧЕК ===== */
 .miners-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -237,52 +238,40 @@
     overflow: visible !important;
 }
 
-/* КАРТОЧКА АСИКА - убираем все обрезания */
-.miner-card {
-    overflow: visible !important;
-}
-
-/* IP АДРЕС - ПОЛНЫЙ, НЕ ОБРЕЗАЕМ! */
-.miner-ip {
+/* ===== СТИЛИ ДЛЯ IP ВО ВКЛАДКЕ АСИКИ ===== */
+.miners-view .miner-ip-full {
     font-family: 'Courier New', monospace;
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--text-primary);
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    color: var(--text-primary) !important;
     word-break: break-all !important;
     white-space: normal !important;
     overflow: visible !important;
     text-overflow: clip !important;
     max-width: 100% !important;
-    display: inline-block !important;
-    border-bottom: 1px dashed #ff8c00;
+    display: block !important;
     line-height: 1.4;
+    border-bottom: 1px dashed #ff8c00;
+    padding: 2px 0;
 }
 
-/* Для маленьких карточек */
-.miner-card.size-small .miner-ip {
-    font-size: 0.9rem;
+.miners-view .miner-card.size-small .miner-ip-full {
+    font-size: 0.9rem !important;
 }
 
-/* Для средних карточек */
-.miner-card.size-medium .miner-ip {
-    font-size: 1rem;
+.miners-view .miner-card.size-medium .miner-ip-full {
+    font-size: 1rem !important;
 }
 
-/* Для больших карточек */
-.miner-card.size-large .miner-ip {
-    font-size: 1.1rem;
+.miners-view .miner-card.size-large .miner-ip-full {
+    font-size: 1.1rem !important;
 }
 
-/* Убираем возможные ограничения в родителях */
-.miner-info {
-    overflow: visible !important;
-}
-
-.miner-identity {
-    overflow: visible !important;
-}
-
-.miner-header {
+/* Убираем все ограничения */
+.miners-view .miner-info,
+.miners-view .miner-identity,
+.miners-view .miner-header,
+.miners-view .miner-card {
     overflow: visible !important;
 }
 
@@ -339,8 +328,8 @@
         font-size: 0.8rem;
     }
 
-    .miner-ip {
-        font-size: 0.95rem;
+    .miners-view .miner-ip-full {
+        font-size: 0.95rem !important;
     }
 }
 
@@ -374,58 +363,7 @@
         padding: 8px;
     }
 
-    .miner-ip {
-        font-size: 0.9rem;
-    }
-}
-/* В КОНЕЦ ФАЙЛА */
-
-/* ПЕРЕБИВАЕМ ВСЕ СТИЛИ ДЛЯ IP ВО ВКЛАДКЕ АСИКИ */
-.miners-view .miner-ip {
-    white-space: normal !important;
-    word-break: break-all !important;
-    overflow: visible !important;
-    text-overflow: clip !important;
-    max-width: 100% !important;
-    display: inline-block !important;
-    font-family: 'Courier New', monospace;
-    font-size: 1rem !important;
-    font-weight: 700 !important;
-    color: var(--text-primary) !important;
-}
-
-/* Для маленького размера */
-.miners-view .miner-card.size-small .miner-ip {
-    font-size: 0.9rem !important;
-}
-
-/* Для среднего размера */
-.miners-view .miner-card.size-medium .miner-ip {
-    font-size: 1rem !important;
-}
-
-/* Для большого размера */
-.miners-view .miner-card.size-large .miner-ip {
-    font-size: 1.1rem !important;
-}
-
-/* Убираем все ограничения в родителях */
-.miners-view .miner-info,
-.miners-view .miner-identity,
-.miners-view .miner-header,
-.miners-view .miner-card {
-    overflow: visible !important;
-}
-
-/* Для мобилок */
-@media (max-width: 768px) {
-    .miners-view .miner-ip {
-        font-size: 0.95rem !important;
-    }
-}
-
-@media (max-width: 480px) {
-    .miners-view .miner-ip {
+    .miners-view .miner-ip-full {
         font-size: 0.9rem !important;
     }
 }

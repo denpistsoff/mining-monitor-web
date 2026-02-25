@@ -7,7 +7,7 @@ const MinersView = ({ farmNameProp }) => {
     const { farmData, loading, error } = useFarmData(farmNameProp);
     const [selectedContainer, setSelectedContainer] = useState('all');
     const [selectedStatus, setSelectedStatus] = useState('all');
-    const [cardSize, setCardSize] = useState('medium'); // 'small', 'medium', 'large'
+    const [cardSize, setCardSize] = useState('medium');
 
     // Сбор всех майнеров из всех контейнеров
     const allMiners = useMemo(() => {
@@ -15,13 +15,27 @@ const MinersView = ({ farmNameProp }) => {
 
         const miners = [];
         Object.entries(farmData.containers).forEach(([containerId, container]) => {
-            Object.entries(container.miners || {}).forEach(([minerIp, miner]) => {
-                miners.push({
-                    ...miner,
-                    containerId,
-                    ip: minerIp
+            // Проверяем разные форматы данных
+            const minersList = container.miners || container.miners_data || [];
+
+            if (Array.isArray(minersList)) {
+                minersList.forEach(miner => {
+                    miners.push({
+                        ...miner,
+                        containerId,
+                        ip: miner.ip || 'N/A' // Сохраняем полный IP
+                    });
                 });
-            });
+            } else if (typeof minersList === 'object') {
+                // Если miners это объект с ключами-IP
+                Object.entries(minersList).forEach(([ip, miner]) => {
+                    miners.push({
+                        ...miner,
+                        containerId,
+                        ip: ip // IP из ключа объекта
+                    });
+                });
+            }
         });
         return miners;
     }, [farmData]);
@@ -37,7 +51,7 @@ const MinersView = ({ farmNameProp }) => {
 
     // Статистика для отображения
     const stats = useMemo(() => {
-        const online = allMiners.filter(m => m.status === 'online' || m.status === 'problematic' ).length;
+        const online = allMiners.filter(m => m.status === 'online' || m.status === 'problematic').length;
         const problematic = allMiners.filter(m => m.status === 'problematic').length;
         const offline = allMiners.filter(m => m.status === 'offline').length;
         const total = allMiners.length;
@@ -113,7 +127,7 @@ const MinersView = ({ farmNameProp }) => {
                     >
                         {containers.map(container => (
                             <option key={container} value={container}>
-                                {container === 'all' ? 'ВСЕ КОНТЕЙНЕРЫ' : container}
+                                {container === 'all' ? 'ВСЕ КОНТЕЙНЕРЫ' : `КОНТЕЙНЕР ${container}`}
                             </option>
                         ))}
                     </select>
