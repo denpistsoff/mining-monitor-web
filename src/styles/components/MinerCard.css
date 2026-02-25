@@ -408,3 +408,80 @@
         font-size: 11px;
     }
 }
+/* Добавь это в MinerCard.css */
+
+/* Убираем обрезание IP в карточке */
+.miner-ip {
+    white-space: nowrap; /* Запрещаем перенос */
+    overflow: visible; /* Показываем полностью */
+    text-overflow: clip; /* Не обрезаем */
+    max-width: none; /* Убираем ограничение ширины */
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+}
+
+/* Для мобильных устройств - разрешаем перенос если надо */
+@media (max-width: 768px) {
+    .miner-ip {
+        white-space: normal; /* Разрешаем перенос на мобилках */
+        word-break: break-all; /* Разбиваем длинные IP */
+        font-size: 12px;
+    }
+}
+
+/* Полный IP в деталях - всегда показываем полностью */
+.miner-details .full-ip {
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    background: rgba(255, 140, 0, 0.1);
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: #ff8c00;
+    word-break: break-all; /* Разрешаем перенос если очень длинный */
+    white-space: normal; /* Обычный перенос */
+    overflow: visible; /* Видимая область */
+    max-width: 100%; /* На всю ширину */
+}
+
+/* Для очень маленьких экранов */
+@media (max-width: 480px) {
+    .miner-details .full-ip {
+        font-size: 11px;
+        padding: 6px;
+        word-break: break-all;
+    }
+}
+
+/* Контейнер для IP в карточке - убираем ограничения */
+.miner-info {
+    flex: 1;
+    min-width: 0; /* Важно для flex-контейнера */
+    overflow: visible; /* Показываем всё */
+}
+
+/* Если есть родительский контейнер с ограничением */
+.miner-identity {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow: visible; /* Важно! */
+    width: 100%; /* На всю ширину */
+}
+
+/* Убираем возможные ограничения в родительских элементах */
+.miner-header {
+    overflow: visible !important;
+}
+
+.miner-card {
+    overflow: visible !important; /* Чтобы ничего не обрезалось */
+}
+
+/* Если IP все еще обрезается - добавляем перенос */
+.miner-ip {
+    white-space: normal !important; /* Принудительно разрешаем перенос */
+    word-break: break-all; /* Разбиваем длинные IP */
+    overflow: visible;
+    text-overflow: clip;
+    max-width: 100%;
+}
