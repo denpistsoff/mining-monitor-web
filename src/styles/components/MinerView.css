@@ -378,3 +378,54 @@
         font-size: 0.9rem;
     }
 }
+/* В КОНЕЦ ФАЙЛА */
+
+/* ПЕРЕБИВАЕМ ВСЕ СТИЛИ ДЛЯ IP ВО ВКЛАДКЕ АСИКИ */
+.miners-view .miner-ip {
+    white-space: normal !important;
+    word-break: break-all !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    max-width: 100% !important;
+    display: inline-block !important;
+    font-family: 'Courier New', monospace;
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    color: var(--text-primary) !important;
+}
+
+/* Для маленького размера */
+.miners-view .miner-card.size-small .miner-ip {
+    font-size: 0.9rem !important;
+}
+
+/* Для среднего размера */
+.miners-view .miner-card.size-medium .miner-ip {
+    font-size: 1rem !important;
+}
+
+/* Для большого размера */
+.miners-view .miner-card.size-large .miner-ip {
+    font-size: 1.1rem !important;
+}
+
+/* Убираем все ограничения в родителях */
+.miners-view .miner-info,
+.miners-view .miner-identity,
+.miners-view .miner-header,
+.miners-view .miner-card {
+    overflow: visible !important;
+}
+
+/* Для мобилок */
+@media (max-width: 768px) {
+    .miners-view .miner-ip {
+        font-size: 0.95rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .miners-view .miner-ip {
+        font-size: 0.9rem !important;
+    }
+}
