@@ -316,3 +316,19 @@
         padding: 8px;
     }
 }
+/* Добавь в конец файла MinerView.css */
+
+.miners-grid {
+    overflow: visible !important;
+}
+
+.miner-card {
+    overflow: visible !important;
+}
+
+/* Убираем возможные ограничения в родителях */
+.filters-panel,
+.actions-panel,
+.miners-view {
+    overflow: visible !important;
+}

@@ -513,3 +513,29 @@
         font-size: 0.8rem;
     }
 }
+
+/* Добавь в конец файла FarmLayout.css */
+
+/* Убираем скрытие переполнения в карточках */
+.farm-card {
+    overflow: visible !important;
+}
+
+.farm-content {
+    overflow: visible !important;
+}
+
+.miner-card {
+    overflow: visible !important;
+}
+
+/* Для всех контейнеров с IP */
+[class*="miner-ip"],
+[class*="full-ip"],
+[class*="MinerCard"] .miner-ip,
+[class*="MinerCard"] .full-ip {
+    overflow: visible !important;
+    white-space: normal !important;
+    word-break: break-all !important;
+    max-width: 100% !important;
+}
