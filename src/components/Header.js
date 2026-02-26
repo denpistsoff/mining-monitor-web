@@ -1,12 +1,25 @@
 // src/components/Header.js
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import '../styles/components/Header.css';
 
-const Header = ({ activeTab, onTabChange, farmName, onLogout, onBack, unreadAlertsCount = 0 }) => {
+const Header = ({
+                    activeTab,
+                    onTabChange,
+                    farmName,
+                    onLogout,
+                    onBack,
+                    unreadAlertsCount = 0,
+                    onAlertsClick
+                }) => {
+    const [showAlertBadge, setShowAlertBadge] = useState(unreadAlertsCount > 0);
     const tabs = [
         { id: 'dashboard', label: 'ДАШБОРД' },
         { id: 'miners', label: 'АСИКИ' }
     ];
+
+    useEffect(() => {
+        setShowAlertBadge(unreadAlertsCount > 0);
+    }, [unreadAlertsCount]);
 
     const handleBack = () => {
         console.log('🔙 Back button clicked');
@@ -20,7 +33,13 @@ const Header = ({ activeTab, onTabChange, farmName, onLogout, onBack, unreadAler
     };
 
     const handleAlertsClick = () => {
-        onTabChange('alerts');
+        // Если есть обработчик алертов, вызываем его
+        if (onAlertsClick) {
+            onAlertsClick();
+        } else {
+            // Иначе просто переключаем вкладку
+            onTabChange('alerts');
+        }
     };
 
     return (
@@ -39,12 +58,12 @@ const Header = ({ activeTab, onTabChange, farmName, onLogout, onBack, unreadAler
                 <div className="header-controls">
                     <div className="action-buttons">
                         <button
-                            className={`alerts-button ${unreadAlertsCount > 0 ? 'has-alerts' : ''}`}
+                            className={`alerts-button ${showAlertBadge ? 'has-alerts' : ''}`}
                             onClick={handleAlertsClick}
                             title="Оповещения"
                         >
                             🔔
-                            {unreadAlertsCount > 0 && (
+                            {showAlertBadge && (
                                 <span className="alerts-badge">{unreadAlertsCount}</span>
                             )}
                         </button>
