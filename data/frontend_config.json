@@ -13,11 +13,11 @@
   ],
   "farms": [
     {
-      "id": "VISOKOVKA",
-      "name": "Ферма VISOKOVKA",
-      "display_name": "VISOKOVKA",
-      "data_file": "farm_data_VISOKOVKA.json",
-      "history_file": "history_VISOKOVKA.json",
+      "id": "DESKTOP-GO47CCS",
+      "name": "Ферма DESKTOP-GO47CCS",
+      "display_name": "DESKTOP-GO47CCS",
+      "data_file": "farm_data_DESKTOP-GO47CCS.json",
+      "history_file": "history_DESKTOP-GO47CCS.json",
       "location": "DESKTOP-GO47CCS",
       "miners_count": 0,
       "containers_count": 0,
@@ -32,23 +32,21 @@
         "auto_scan_time": "06:00"
       },
       "status": "inactive",
-      "last_seen": "2026-02-21T03:32:03.989467",
+      "last_seen": "2026-02-26T21:54:47.226425",
       "source": "DESKTOP-GO47CCS"
     }
   ],
-  "user_farm_assignments": {
-    "839995960": [
-      "VISOKOVKA"
-    ]
-  },
+  "user_farm_assignments": {},
   "version": "4.2.0",
-  "last_export": "2026-02-21T03:32:04.486559",
-  "farm_name": "VISOKOVKA",
+  "last_export": "2026-02-26T21:54:50.298491",
+  "farm_name": "DESKTOP-GO47CCS",
   "source": "DESKTOP-GO47CCS",
-  "local_time": "2026-02-21 03:32:04",
-  "last_merge": "2026-02-21T03:32:04.486662",
+  "local_time": "2026-02-26 21:54:50",
+  "last_merge": "2026-02-26T21:54:50.298597",
   "merged_from": [
-    "VISOKOVKA"
+    "DESKTOP-GO47CCS"
   ],
-  "duplicates_removed": []
+  "duplicates_removed": [
+    "VISOKOVKA"
+  ]
 }
