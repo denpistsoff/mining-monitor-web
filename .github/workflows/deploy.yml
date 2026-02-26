@@ -128,7 +128,7 @@ jobs:
           echo "📅 Time: $(date)"
           echo "🔗 URL: ${{ steps.deployment.outputs.page_url }}"
           echo "📦 Version: ${{ env.APP_VERSION }}"
-          
+      
       # Добавь этот шаг после build
       - name: Copy 404.html for SPA routing
         run: |
