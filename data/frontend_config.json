@@ -13,15 +13,17 @@
   ],
   "farms": [
     {
-      "id": "DESKTOP-GO47CCS",
-      "name": "Ферма DESKTOP-GO47CCS",
-      "display_name": "DESKTOP-GO47CCS",
-      "data_file": "farm_data_DESKTOP-GO47CCS.json",
-      "history_file": "history_DESKTOP-GO47CCS.json",
+      "id": "box-111",
+      "name": "Ферма box-111",
+      "display_name": "box-111",
+      "data_file": "farm_data_box-111.json",
+      "history_file": "history_box-111.json",
       "location": "DESKTOP-GO47CCS",
-      "miners_count": 0,
-      "containers_count": 0,
-      "containers": [],
+      "miners_count": 192,
+      "containers_count": 1,
+      "containers": [
+        "1й"
+      ],
       "settings": {
         "alert_settings": {
           "temp_warning": 75,
@@ -31,22 +33,26 @@
         "auto_scan_enabled": false,
         "auto_scan_time": "06:00"
       },
-      "status": "inactive",
-      "last_seen": "2026-02-26T21:54:47.226425",
+      "status": "active",
+      "last_seen": "2026-02-26T21:55:52.482966",
       "source": "DESKTOP-GO47CCS"
     }
   ],
-  "user_farm_assignments": {},
+  "user_farm_assignments": {
+    "839995960": [
+      "box-111"
+    ]
+  },
   "version": "4.2.0",
-  "last_export": "2026-02-26T21:54:50.298491",
-  "farm_name": "DESKTOP-GO47CCS",
+  "last_export": "2026-02-26T21:55:53.786016",
+  "farm_name": "box-111",
   "source": "DESKTOP-GO47CCS",
-  "local_time": "2026-02-26 21:54:50",
-  "last_merge": "2026-02-26T21:54:50.298597",
+  "local_time": "2026-02-26 21:55:53",
+  "last_merge": "2026-02-26T21:55:53.786162",
   "merged_from": [
-    "DESKTOP-GO47CCS"
+    "box-111"
   ],
   "duplicates_removed": [
-    "VISOKOVKA"
+    "DESKTOP-GO47CCS"
   ]
 }
