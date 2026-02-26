@@ -425,3 +425,37 @@
         font-size: 12px;
     }
 }
+/* Добавь в конец файла */
+
+.miner-ip.clickable {
+    cursor: pointer;
+    color: #ff8c00;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.miner-ip.clickable:hover {
+    color: #ffa333;
+    text-decoration: underline;
+    transform: translateY(-1px);
+}
+
+.detail-item strong.clickable {
+    cursor: pointer;
+    color: #ff8c00;
+    transition: all 0.2s;
+}
+
+.detail-item strong.clickable:hover {
+    color: #ffa333;
+    text-decoration: underline;
+}
+
+/* Для мобильных устройств */
+@media (max-width: 768px) {
+    .miner-ip.clickable {
+        padding: 5px 0; /* Увеличиваем область нажатия на мобильных */
+    }
+}

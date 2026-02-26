@@ -1,3 +1,4 @@
+// src/components/MinerCard.js
 import React, { useState } from 'react';
 import '../styles/components/MinerCard.css';
 
@@ -18,6 +19,13 @@ const MinerCard = ({ miner, showContainer = false, size = 'medium' }) => {
         fans,
         uptime
     } = miner;
+
+    // Функция для открытия IP в новой вкладке
+    const openIpInBrowser = (e, ipAddress) => {
+        e.stopPropagation(); // Предотвращаем всплытие события
+        const url = `http://${ipAddress}`;
+        window.open(url, '_blank', 'noopener,noreferrer');
+    };
 
     const getStatusInfo = () => {
         switch (status) {
@@ -157,7 +165,14 @@ const MinerCard = ({ miner, showContainer = false, size = 'medium' }) => {
                                 type === 'avalon' ? 'V' : 'M'}
                     </div>
                     <div className="miner-info">
-                        <div className="miner-ip-full" title={ip}>{ip}</div>
+                        {/* IP теперь кликабельный */}
+                        <div
+                            className="miner-ip clickable"
+                            onClick={(e) => openIpInBrowser(e, ip)}
+                            title={`Открыть http://${ip} в новой вкладке`}
+                        >
+                            {ip} 🔗
+                        </div>
                         {size !== 'small' && (
                             <div className="miner-meta">
                                 <span className="miner-type">{type || 'UNKNOWN'}</span>
@@ -209,7 +224,12 @@ const MinerCard = ({ miner, showContainer = false, size = 'medium' }) => {
                         <div className="detail-grid">
                             <div className="detail-item">
                                 <span>IP АДРЕС:</span>
-                                <strong className="full-ip">{ip}</strong>
+                                <strong
+                                    className="clickable"
+                                    onClick={(e) => openIpInBrowser(e, ip)}
+                                >
+                                    {ip} 🔗
+                                </strong>
                             </div>
                             <div className="detail-item">
                                 <span>ТИП:</span>
@@ -236,7 +256,7 @@ const MinerCard = ({ miner, showContainer = false, size = 'medium' }) => {
                             {pool && (
                                 <div className="detail-item full-width">
                                     <span>ПУЛ:</span>
-                                    <strong className="pool-full">{pool}</strong>
+                                    <strong>{pool}</strong>
                                 </div>
                             )}
                             {uptime && (
