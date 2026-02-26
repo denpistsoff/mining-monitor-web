@@ -4,9 +4,8 @@ on:
   push:
     branches: [ main, master ]
   workflow_dispatch:
-  schedule:
-    - cron: '*/30 * * * *'
 
+# Важно! Даем права на запись
 permissions:
   contents: write
   pages: write
@@ -23,10 +22,11 @@ jobs:
     environment: github-pages
     
     steps:
+      # Важно! Используем GITHUB_TOKEN для аутентификации
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}  # Используем стандартный токен, а не GH_TOKEN
           persist-credentials: true
           fetch-depth: 1
 
@@ -47,145 +47,68 @@ jobs:
           mkdir -p public/config
           echo "✅ Directories created"
 
-      - name: Purge GitHub cache
-        run: |
-          echo "🧹 Очистка кэша GitHub..."
-          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-               -X GET "https://api.github.com/repos/${{ github.repository }}/git/refs/heads/main" > /dev/null
-          curl -s "https://raw.githubusercontent.com/${{ github.repository }}/main/data/frontend_config.json?cache_bust=$(date +%s)" > /dev/null
-          echo "✅ Кэш очищен"
-
-      - name: Check files existence
-        run: |
-          echo "🔍 Проверка наличия файлов в data/..."
-          FILES=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-                      "https://api.github.com/repos/${{ github.repository }}/contents/data/" | \
-                      grep -o '"name":"[^"]*"' | cut -d'"' -f4)
-          echo "📋 Найдены файлы:"
-          echo "$FILES" | while read file; do
-            echo "   - $file"
-          done
-          echo "$FILES" > public/available_files.txt
-
       - name: Download frontend config
         run: |
           echo "📥 Downloading frontend config..."
-          CACHE_BUSTER=$(date +%s)_$RANDOM
-          
-          # Вариант 1: GitHub API
-          if curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          # Используем GITHUB_TOKEN для API запросов
+          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                -H "Accept: application/vnd.github.v3.raw" \
                -o public/frontend_config.json \
-               "https://api.github.com/repos/${{ github.repository }}/contents/data/frontend_config.json?ref=main&cache=$CACHE_BUSTER"; then
-            echo "✅ Config downloaded via API"
-          else
-            # Вариант 2: Raw GitHub
-            if curl -s -H "Cache-Control: no-cache" \
-                 -o public/frontend_config.json \
-                 "https://raw.githubusercontent.com/${{ github.repository }}/main/data/frontend_config.json?nocache=$CACHE_BUSTER"; then
-              echo "✅ Config downloaded via raw"
-            else
-              # Вариант 3: jsDelivr
-              if curl -s -o public/frontend_config.json \
-                   "https://cdn.jsdelivr.net/gh/${{ github.repository }}@main/data/frontend_config.json?t=$CACHE_BUSTER"; then
-                echo "✅ Config downloaded via jsDelivr"
-              else
-                echo '{"users":[],"farms":[],"user_farm_assignments":{},"version":"5.0"}' > public/frontend_config.json
-                echo "⚠️ Using empty config"
-              fi
-            fi
-          fi
+               https://api.github.com/repos/${{ github.repository }}/contents/data/frontend_config.json || \
+          echo '{"users":[],"farms":[],"user_farm_assignments":{},"version":"5.0"}' > public/frontend_config.json
           
-          echo "✅ Config ready: $(wc -l < public/frontend_config.json) lines"
+          if [ -f public/frontend_config.json ]; then
+            echo "✅ Config downloaded: $(wc -l < public/frontend_config.json) lines"
+          fi
 
       - name: Download history files
         run: |
           echo "📊 Downloading history files..."
-          CACHE_BUSTER=$(date +%s)_$RANDOM
-          DOWNLOADED=0
           
+          # Создаем временный файл для списка
           TEMP_LIST=$(mktemp)
+          
+          # Получаем список файлов через API
           curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                "https://api.github.com/repos/${{ github.repository }}/contents/data/" > $TEMP_LIST
           
+          # Парсим JSON и скачиваем каждый history файл
           grep -o '"name":"history_[^"]*\.json"' $TEMP_LIST | cut -d'"' -f4 | while read file; do
             if [ ! -z "$file" ]; then
               echo "  📥 Downloading $file..."
-          
-              if curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-                    -H "Accept: application/vnd.github.v3.raw" \
-                    -o "public/data/history/$file" \
-                    "https://api.github.com/repos/${{ github.repository }}/contents/data/$file?ref=main&cache=$CACHE_BUSTER"; then
-                DOWNLOADED=$((DOWNLOADED + 1))
-                echo "    ✅ Success"
-              else
-                if curl -s -H "Cache-Control: no-cache" \
-                      -o "public/data/history/$file" \
-                      "https://raw.githubusercontent.com/${{ github.repository }}/main/data/$file?nocache=$CACHE_BUSTER"; then
-                  DOWNLOADED=$((DOWNLOADED + 1))
-                  echo "    ✅ Success (raw)"
-                else
-                  echo "    ❌ Failed to download $file"
-                fi
-              fi
+              curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                   -H "Accept: application/vnd.github.v3.raw" \
+                   -o "public/data/history/$file" \
+                   "https://api.github.com/repos/${{ github.repository }}/contents/data/$file"
             fi
           done
           
           rm $TEMP_LIST
           
-          if [ -f public/frontend_config.json ]; then
-            FARMS=$(grep -o '"id":"[^"]*"' public/frontend_config.json | cut -d'"' -f4 || echo "")
-            echo "$FARMS" | while read farm; do
-              if [ ! -z "$farm" ] && [ ! -f "public/data/history/history_${farm}.json" ]; then
-                echo "  📝 Creating empty history for $farm"
-                echo "{\"farm_history\":[],\"last_update\":\"$(date -Iseconds)\",\"total_entries\":0,\"farm_name\":\"$farm\",\"version\":\"2.0\"}" > "public/data/history/history_${farm}.json"
-              fi
-            done
+          # Считаем скачанные файлы
+          if [ -d public/data/history ]; then
+            COUNT=$(ls -1 public/data/history/*.json 2>/dev/null | wc -l)
+            echo "✅ Downloaded $COUNT history files"
           fi
-          
-          COUNT=$(ls -1 public/data/history/*.json 2>/dev/null | wc -l)
-          echo "✅ Downloaded/created $COUNT history files"
-
-      - name: Create version file
-        run: |
-          echo "📝 Creating version file..."
-          TIMESTAMP=$(date -Iseconds)
-          COMMIT=$(git rev-parse --short HEAD)
-          
-          cat > public/version.json << EOF
-          {
-            "version": "${{ env.APP_VERSION }}",
-            "buildTime": "$TIMESTAMP",
-            "commit": "$COMMIT",
-            "files": $(ls -1 public/data/history/*.json 2>/dev/null | wc -l),
-            "farms": $(grep -o '"id":"[^"]*"' public/frontend_config.json 2>/dev/null | wc -l || echo 0)
-          }
-          EOF
-          
-          echo "✅ Version file created"
 
       - name: Build React app
         run: |
           echo "🔨 Building React app..."
           CI=false GENERATE_SOURCEMAP=false npm run build
           
-          cp public/frontend_config.json build/ 2>/dev/null || true
-          cp public/version.json build/ 2>/dev/null || true
-          cp public/available_files.txt build/ 2>/dev/null || true
+          # Копируем конфиги в build
+          if [ -f public/frontend_config.json ]; then
+            cp public/frontend_config.json build/
+            echo "✅ Config copied to build"
+          fi
           
           if [ -d public/data/history ]; then
             mkdir -p build/data/history
             cp -r public/data/history/* build/data/history/ 2>/dev/null || true
+            echo "✅ History copied to build"
           fi
           
           echo "✅ Build completed"
-
-      - name: Create cache-busting index
-        run: |
-          echo "🔄 Creating cache-busting index..."
-          TIMESTAMP=$(date +%s)
-          sed -i "s/<\/head>/<meta name=\"build-time\" content=\"$TIMESTAMP\"><\/head>/" build/index.html
-          echo "✅ Cache-busting meta added"
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -199,37 +122,15 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-      - name: Copy 404.html for SPA routing
-        run: |
-          if [ -f public/404.html ]; then
-            cp public/404.html build/404.html
-            echo "✅ 404.html copied"
-          else
-            echo "⚠️ 404.html not found, creating default..."
-            cat > build/404.html << 'EOF'
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="utf-8">
-                <title>Mining Monitor - Redirecting...</title>
-                <meta http-equiv="refresh" content="0; URL=/mining-monitor-web/">
-                <script>
-                    sessionStorage.setItem('redirectPath', window.location.pathname.replace('/mining-monitor-web', ''));
-                    window.location.href = '/mining-monitor-web/';
-                </script>
-            </head>
-            <body>
-                <h1>Redirecting...</h1>
-            </body>
-            </html>
-            EOF
-            echo "✅ Default 404.html created"
-          fi
-
       - name: Deployment info
         run: |
           echo "🎉 Deployment successful!"
           echo "📅 Time: $(date)"
           echo "🔗 URL: ${{ steps.deployment.outputs.page_url }}"
           echo "📦 Version: ${{ env.APP_VERSION }}"
-          echo "🔧 Build timestamp: $(date +%s)"
+      
+      # Добавь этот шаг после build
+      - name: Copy 404.html for SPA routing
+        run: |
+          cp public/404.html build/404.html
+          echo "✅ 404.html copied for SPA routing"
