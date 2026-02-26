@@ -7,15 +7,19 @@ import '../styles/components/FarmSelection.css';
 const FarmSelection = ({ currentUser, onLogout }) => {
     const [farms, setFarms] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [config, setConfig] = useState(null);
+    const [retryCount, setRetryCount] = useState({});
     const navigate = useNavigate();
 
-    const FARM_FILES = {
-        VISOKOVKA: 'https://raw.githubusercontent.com/denpistsoff/mining-monitor-web/main/data/farm_data_VISOKOVKA.json',
-        HOME: 'https://raw.githubusercontent.com/denpistsoff/mining-monitor-web/main/data/farm_data_home.json',
-        SARATOV: 'https://raw.githubusercontent.com/denpistsoff/mining-monitor-web/main/data/farm_data_SARATOV.json'
+    // Базовый URL для данных
+    const GITHUB_RAW_URL = 'https://raw.githubusercontent.com/denpistsoff/mining-monitor-web/main/data/';
+
+    // Маппинг ID ферм к URL (динамически строится)
+    const getFarmUrl = (farmId) => {
+        return `${GITHUB_RAW_URL}farm_data_${farmId}.json`;
     };
 
-    // Функция проверки свежести данных
+    // Функция для проверки свежести данных
     const checkDataFreshness = (data) => {
         if (!data || (!data.timestamp && !data.last_update)) {
             return 'offline';
@@ -42,20 +46,98 @@ const FarmSelection = ({ currentUser, onLogout }) => {
         }
     };
 
+    // Функция для проверки существования файла
+    const checkFileExists = async (url) => {
+        try {
+            const response = await fetch(url, {
+                method: 'HEAD',
+                cache: 'no-cache',
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache'
+                }
+            });
+            return response.ok;
+        } catch {
+            return false;
+        }
+    };
+
+    // Функция для загрузки данных с обходом кэша
+    const fetchWithCacheBust = async (url, retries = 2) => {
+        const cacheBuster = `${Date.now()}_${Math.random()}`;
+        const fetchUrl = `${url}?t=${cacheBuster}`;
+
+        console.log(`📥 Загрузка: ${fetchUrl}`);
+
+        for (let i = 0; i <= retries; i++) {
+            try {
+                const response = await fetch(fetchUrl, {
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    return { success: true, data };
+                } else if (response.status === 404) {
+                    // Файл действительно не найден
+                    return { success: false, status: 404 };
+                }
+            } catch (error) {
+                console.log(`⚠️ Попытка ${i + 1} не удалась для ${url}`);
+            }
+
+            // Ждем перед повторной попыткой
+            if (i < retries) {
+                await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+            }
+        }
+
+        return { success: false, status: 500 };
+    };
+
     const loadFarmData = async (farmId) => {
-        const url = FARM_FILES[farmId];
-        if (!url) return null;
+        const url = getFarmUrl(farmId);
 
         try {
-            const response = await fetch(url + '?t=' + Date.now());
-            if (response.ok) {
-                const data = await response.json();
-                const freshness = checkDataFreshness(data);
-                return { ...data, _dataStatus: freshness };
+            // Сначала проверяем существует ли файл
+            const exists = await checkFileExists(url);
+            if (!exists) {
+                console.log(`📁 Файл для ${farmId} не найден на GitHub`);
+                return null;
+            }
+
+            // Загружаем данные с обходом кэша
+            const result = await fetchWithCacheBust(url);
+
+            if (result.success) {
+                const freshness = checkDataFreshness(result.data);
+                return { ...result.data, _dataStatus: freshness };
+            } else if (result.status === 404) {
+                console.log(`📁 Файл для ${farmId} не найден (404)`);
+                return null;
+            } else {
+                console.log(`⚠️ Ошибка загрузки для ${farmId}, пробуем прямой URL...`);
+
+                // Пробуем прямой URL без параметров
+                const directResponse = await fetch(url, {
+                    cache: 'reload'
+                });
+
+                if (directResponse.ok) {
+                    const data = await directResponse.json();
+                    const freshness = checkDataFreshness(data);
+                    return { ...data, _dataStatus: freshness };
+                }
             }
         } catch (error) {
-            console.error(`Ошибка загрузки ${farmId}:`, error);
+            console.error(`❌ Ошибка загрузки ${farmId}:`, error);
         }
+
         return null;
     };
 
@@ -66,14 +148,20 @@ const FarmSelection = ({ currentUser, onLogout }) => {
         }
 
         setLoading(true);
-        console.log('📥 Loading farms for user:', currentUser);
+        console.log('📥 Загрузка ферм для пользователя:', currentUser);
+        console.log('📋 Доступные фермы:', currentUser.farms);
 
         const farmsList = [];
+        const newRetryCount = { ...retryCount };
 
         for (const farmId of currentUser.farms) {
+            console.log(`🔍 Загрузка данных для фермы: ${farmId}`);
+
             const data = await loadFarmData(farmId);
 
             if (data) {
+                console.log(`✅ Данные получены для ${farmId}`);
+
                 const containers = data.containers || {};
                 const containerList = Object.values(containers);
 
@@ -108,9 +196,18 @@ const FarmSelection = ({ currentUser, onLogout }) => {
                     containers: totalContainers,
                     lastUpdate: data.last_update,
                     exists: true,
-                    dataStatus: freshnessStatus
+                    dataStatus: freshnessStatus,
+                    data: data // Сохраняем полные данные для отладки
                 });
+
+                // Сбрасываем счетчик попыток при успехе
+                delete newRetryCount[farmId];
             } else {
+                console.log(`❌ Нет данных для ${farmId}`);
+
+                // Увеличиваем счетчик попыток
+                newRetryCount[farmId] = (newRetryCount[farmId] || 0) + 1;
+
                 farmsList.push({
                     id: farmId,
                     name: farmId,
@@ -123,33 +220,64 @@ const FarmSelection = ({ currentUser, onLogout }) => {
                     containers: 0,
                     lastUpdate: null,
                     exists: false,
-                    dataStatus: 'offline'
+                    dataStatus: 'offline',
+                    retryCount: newRetryCount[farmId]
                 });
             }
         }
 
-        console.log('✅ Farms loaded:', farmsList);
+        setRetryCount(newRetryCount);
+        console.log('✅ Фермы загружены:', farmsList);
         setFarms(farmsList);
         setLoading(false);
     };
 
+    // Повторная попытка загрузить конкретную ферму
+    const retryFarm = async (farmId) => {
+        console.log(`🔄 Повторная попытка для ${farmId}`);
+        setLoading(true);
+
+        const data = await loadFarmData(farmId);
+
+        if (data) {
+            // Обновляем список ферм
+            await loadAccessibleFarms();
+        } else {
+            alert(`❌ Не удалось загрузить данные для фермы ${farmId}. Файл все еще не доступен.`);
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
         loadAccessibleFarms();
-        const interval = setInterval(loadAccessibleFarms, 60000);
+
+        // Обновляем каждые 30 секунд для повторных попыток
+        const interval = setInterval(() => {
+            // Проверяем есть ли фермы с ошибками
+            const hasErrors = farms.some(f => !f.exists && f.retryCount < 5);
+            if (hasErrors) {
+                console.log('🔄 Повторная попытка загрузки ошибочных ферм...');
+                loadAccessibleFarms();
+            }
+        }, 30000);
+
         return () => clearInterval(interval);
     }, [currentUser]);
 
     const handleFarmClick = (farmName) => {
-        console.log('➡️ Navigating to farm:', farmName);
-        // Используем navigate для перехода
+        console.log('➡️ Переход к ферме:', farmName);
         navigate(`/farm/${farmName}/dashboard`);
     };
 
     const handleLogoutClick = () => {
-        console.log('🚪 Logging out');
+        console.log('🚪 Выход из системы');
         onLogout();
-        // Перенаправляем на логин
         navigate('/login');
+    };
+
+    const handleManualRefresh = () => {
+        console.log('🔄 Ручное обновление');
+        loadAccessibleFarms();
     };
 
     const getStatusInfo = (status, freshness) => {
@@ -208,6 +336,20 @@ const FarmSelection = ({ currentUser, onLogout }) => {
         return `✅ ${lastUpdate}`;
     };
 
+    // Функция для прямой проверки файла
+    const handleCheckFile = async (farmId) => {
+        const url = getFarmUrl(farmId);
+        const exists = await checkFileExists(url);
+
+        if (exists) {
+            alert(`✅ Файл ${farmId} существует!\nURL: ${url}\nПопробуйте открыть его напрямую.`);
+            // Открываем в новой вкладке
+            window.open(url, '_blank');
+        } else {
+            alert(`❌ Файл ${farmId} не найден!\nURL: ${url}`);
+        }
+    };
+
     return (
         <div className="farm-selection">
             <div className="background-glow"></div>
@@ -254,8 +396,7 @@ const FarmSelection = ({ currentUser, onLogout }) => {
                         return (
                             <div
                                 key={farm.id}
-                                className={`farm-card ${status.class}`}
-                                onClick={() => handleFarmClick(farm.id)}
+                                className={`farm-card ${status.class} ${farm.retryCount > 2 ? 'persistent-error' : ''}`}
                             >
                                 <div className="farm-accent"></div>
 
@@ -271,6 +412,11 @@ const FarmSelection = ({ currentUser, onLogout }) => {
                                             <div className="farm-display-name">
                                                 {farm.displayName}
                                             </div>
+                                            {farm.retryCount > 0 && (
+                                                <div className="retry-badge" title={`Попыток: ${farm.retryCount}`}>
+                                                    🔄 {farm.retryCount}
+                                                </div>
+                                            )}
                                         </div>
                                         <div className="status-icon">
                                             {statusIcon}
@@ -321,7 +467,10 @@ const FarmSelection = ({ currentUser, onLogout }) => {
                                                 </div>
                                             )}
 
-                                            <button className={`action-button ${farm.dataStatus}`}>
+                                            <button
+                                                className={`action-button ${farm.dataStatus}`}
+                                                onClick={() => handleFarmClick(farm.id)}
+                                            >
                                                 {farm.dataStatus === 'offline' ? 'ПРОВЕРИТЬ СВЯЗЬ' :
                                                     farm.dataStatus === 'stale' ? 'ОБНОВИТЬ ДАННЫЕ' : 'ОТКРЫТЬ ДАШБОРД'}
                                             </button>
@@ -329,7 +478,38 @@ const FarmSelection = ({ currentUser, onLogout }) => {
                                     ) : (
                                         <div className="error-state">
                                             <div className="error-text">Файл данных не найден</div>
-                                            <div className="error-subtext">Проверьте настройки фермы</div>
+                                            <div className="error-subtext">
+                                                {farm.retryCount > 3
+                                                    ? 'Проблема с кэшем GitHub. Попробуйте:'
+                                                    : 'Проверьте настройки фермы'}
+                                            </div>
+                                            {farm.retryCount > 3 && (
+                                                <div className="error-help">
+                                                    <p>1. Откройте файл напрямую:</p>
+                                                    <code
+                                                        className="file-link"
+                                                        onClick={() => window.open(getFarmUrl(farm.id), '_blank')}
+                                                    >
+                                                        {getFarmUrl(farm.id)}
+                                                    </code>
+                                                    <p>2. Нажмите Ctrl+F5 для жесткой перезагрузки</p>
+                                                    <p>3. Подождите 5-10 минут (кэш GitHub обновится)</p>
+                                                </div>
+                                            )}
+                                            <div className="error-actions">
+                                                <button
+                                                    className="retry-small"
+                                                    onClick={() => retryFarm(farm.id)}
+                                                >
+                                                    🔄 ПОВТОРИТЬ
+                                                </button>
+                                                <button
+                                                    className="check-small"
+                                                    onClick={() => handleCheckFile(farm.id)}
+                                                >
+                                                    🔍 ПРОВЕРИТЬ ФАЙЛ
+                                                </button>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
@@ -369,29 +549,51 @@ const FarmSelection = ({ currentUser, onLogout }) => {
                         </div>
                     </div>
 
-                    <button
-                        className={`refresh-button ${loading ? 'loading' : ''}`}
-                        onClick={loadAccessibleFarms}
-                        disabled={loading}
-                    >
-                        {loading ? (
-                            <>
-                                <div className="loading-spinner"></div>
-                                ОБНОВЛЕНИЕ...
-                            </>
-                        ) : (
-                            '🔄 ОБНОВИТЬ'
-                        )}
-                    </button>
+                    <div className="panel-actions">
+                        <button
+                            className={`refresh-button ${loading ? 'loading' : ''}`}
+                            onClick={handleManualRefresh}
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <>
+                                    <div className="loading-spinner"></div>
+                                    ОБНОВЛЕНИЕ...
+                                </>
+                            ) : (
+                                '🔄 ОБНОВИТЬ'
+                            )}
+                        </button>
 
-                    <button
-                        className="logout-button-nav"
-                        onClick={handleLogoutClick}
-                    >
-                        🚪 ВЫЙТИ
-                    </button>
+                        <button
+                            className="debug-button"
+                            onClick={() => {
+                                console.log('📊 Текущее состояние:', farms);
+                                console.log('👤 Пользователь:', currentUser);
+                                alert('Данные в консоли (F12)');
+                            }}
+                            title="Отладка"
+                        >
+                            🐛
+                        </button>
+
+                        <button
+                            className="logout-button-nav"
+                            onClick={handleLogoutClick}
+                        >
+                            🚪 ВЫЙТИ
+                        </button>
+                    </div>
                 </div>
             </div>
+
+            {/* Подсказка при проблемах с кэшем */}
+            {farms.some(f => !f.exists && f.retryCount > 2) && (
+                <div className="cache-warning">
+                    <p>⚠️ Возможно проблема с кэшем GitHub. Файлы существуют, но не загружаются.</p>
+                    <p>💡 Решение: Откройте файл напрямую, нажмите Ctrl+F5, подождите 5-10 минут.</p>
+                </div>
+            )}
         </div>
     );
 };
