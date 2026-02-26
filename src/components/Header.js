@@ -12,6 +12,9 @@ const Header = ({
                     onAlertsClick
                 }) => {
     const [showAlertBadge, setShowAlertBadge] = useState(unreadAlertsCount > 0);
+    const [prevCount, setPrevCount] = useState(unreadAlertsCount);
+    const [animate, setAnimate] = useState(false);
+
     const tabs = [
         { id: 'dashboard', label: 'ДАШБОРД' },
         { id: 'miners', label: 'АСИКИ' }
@@ -19,7 +22,15 @@ const Header = ({
 
     useEffect(() => {
         setShowAlertBadge(unreadAlertsCount > 0);
-    }, [unreadAlertsCount]);
+
+        // Анимация при появлении новых уведомлений
+        if (unreadAlertsCount > prevCount) {
+            setAnimate(true);
+            setTimeout(() => setAnimate(false), 1000);
+        }
+
+        setPrevCount(unreadAlertsCount);
+    }, [unreadAlertsCount, prevCount]);
 
     const handleBack = () => {
         console.log('🔙 Back button clicked');
@@ -33,11 +44,9 @@ const Header = ({
     };
 
     const handleAlertsClick = () => {
-        // Если есть обработчик алертов, вызываем его
         if (onAlertsClick) {
             onAlertsClick();
         } else {
-            // Иначе просто переключаем вкладку
             onTabChange('alerts');
         }
     };
@@ -58,7 +67,7 @@ const Header = ({
                 <div className="header-controls">
                     <div className="action-buttons">
                         <button
-                            className={`alerts-button ${showAlertBadge ? 'has-alerts' : ''}`}
+                            className={`alerts-button ${showAlertBadge ? 'has-alerts' : ''} ${animate ? 'pulse' : ''}`}
                             onClick={handleAlertsClick}
                             title="Оповещения"
                         >

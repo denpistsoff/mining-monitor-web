@@ -5,6 +5,7 @@ import Header from './Header';
 import Dashboard from './Dashboard';
 import MinersView from './MinersView';
 import AlertsPanel from './AlertsPanel';
+import alertManager from '../utils/alertManager';
 import '../styles/components/FarmLayout.css';
 
 const FarmLayout = ({ currentUser }) => {
@@ -21,13 +22,6 @@ const FarmLayout = ({ currentUser }) => {
         if (currentUser && !currentUser.farms.includes(farmName)) {
             console.log('⛔ No access to farm:', farmName);
             navigate('/');
-        }
-
-        // Загружаем количество непрочитанных из localStorage
-        const savedReadAlerts = localStorage.getItem(`readAlerts_${farmName}`);
-        if (savedReadAlerts) {
-            // Здесь можно будет загрузить актуальное количество
-            // Но пока оставляем как есть
         }
     }, [farmName, currentUser, navigate]);
 
@@ -50,20 +44,12 @@ const FarmLayout = ({ currentUser }) => {
         setAlertsOpen(true);
     };
 
-    const handleAlertMarkAsRead = (alertId) => {
-        // Обновляем счетчик
-        setUnreadAlertsCount(prev => Math.max(0, prev - 1));
+    const handleAlertCountChange = (count) => {
+        setUnreadAlertsCount(count);
     };
 
     const handleAlertsClose = () => {
         setAlertsOpen(false);
-        // Обновляем счетчик при закрытии
-        const savedReadAlerts = localStorage.getItem(`readAlerts_${farmName}`);
-        if (savedReadAlerts) {
-            const readAlerts = JSON.parse(savedReadAlerts);
-            // Здесь нужно будет загрузить актуальное количество уведомлений
-            // и вычислить непрочитанные
-        }
     };
 
     const handleLogout = () => {
@@ -107,7 +93,7 @@ const FarmLayout = ({ currentUser }) => {
                 farmNameProp={farmName}
                 isOpen={alertsOpen}
                 onClose={handleAlertsClose}
-                onMarkAsRead={handleAlertMarkAsRead}
+                onCountChange={handleAlertCountChange}
             />
         </div>
     );
