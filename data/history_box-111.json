@@ -1,6 +1,36 @@
 {
   "farm_history": [
     {
+      "timestamp": "2026-03-06T15:35:36.173267",
+      "date": "06.03.2026",
+      "hour": 15,
+      "minute": 35,
+      "time_label": "15:35",
+      "total_hashrate": 17659.24756945,
+      "total_power": 549724.0,
+      "online_miners": 159,
+      "problematic_miners": 9,
+      "total_miners": 192,
+      "efficiency": 32.124,
+      "is_offline": false,
+      "farm_name": "box-111"
+    },
+    {
+      "timestamp": "2026-03-06T15:30:21.657416",
+      "date": "06.03.2026",
+      "hour": 15,
+      "minute": 30,
+      "time_label": "15:30",
+      "total_hashrate": 12711.746851440004,
+      "total_power": 416204.0,
+      "online_miners": 114,
+      "problematic_miners": 0,
+      "total_miners": 192,
+      "efficiency": 30.542,
+      "is_offline": false,
+      "farm_name": "box-111"
+    },
+    {
       "timestamp": "2026-03-06T15:30:18.711496",
       "date": "06.03.2026",
       "hour": 15,
@@ -30209,39 +30239,9 @@
       "efficiency": 30.463,
       "is_offline": false,
       "farm_name": "VISOKOVKA"
-    },
-    {
-      "timestamp": "2026-02-25T12:58:52.006202",
-      "date": "25.02.2026",
-      "hour": 12,
-      "minute": 58,
-      "time_label": "12:58",
-      "total_hashrate": 20104.16668023,
-      "total_power": 659261.0,
-      "online_miners": 182,
-      "problematic_miners": 4,
-      "total_miners": 183,
-      "efficiency": 30.495,
-      "is_offline": false,
-      "farm_name": "VISOKOVKA"
-    },
-    {
-      "timestamp": "2026-02-25T12:53:47.439992",
-      "date": "25.02.2026",
-      "hour": 12,
-      "minute": 53,
-      "time_label": "12:53",
-      "total_hashrate": 20077.030794420003,
-      "total_power": 659598.0,
-      "online_miners": 182,
-      "problematic_miners": 6,
-      "total_miners": 183,
-      "efficiency": 30.438,
-      "is_offline": false,
-      "farm_name": "VISOKOVKA"
     }
   ],
-  "last_update": "2026-03-06T15:30:18.711496",
+  "last_update": "2026-03-06T15:35:36.173267",
   "total_entries": 2016,
   "farm_name": "VISOKOVKA",
   "version": "2.0"
