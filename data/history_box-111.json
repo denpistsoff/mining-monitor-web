@@ -1,6 +1,36 @@
 {
   "farm_history": [
     {
+      "timestamp": "2026-03-12T19:36:53.225293",
+      "date": "12.03.2026",
+      "hour": 19,
+      "minute": 36,
+      "time_label": "19:36",
+      "total_hashrate": 18871.611355589997,
+      "total_power": 568956.0,
+      "online_miners": 167,
+      "problematic_miners": 10,
+      "total_miners": 167,
+      "efficiency": 33.169,
+      "is_offline": false,
+      "farm_name": "box-111"
+    },
+    {
+      "timestamp": "2026-03-12T19:31:25.079078",
+      "date": "12.03.2026",
+      "hour": 19,
+      "minute": 31,
+      "time_label": "19:31",
+      "total_hashrate": 18813.345213209996,
+      "total_power": 563893.0,
+      "online_miners": 165,
+      "problematic_miners": 12,
+      "total_miners": 167,
+      "efficiency": 33.363,
+      "is_offline": false,
+      "farm_name": "box-111"
+    },
+    {
       "timestamp": "2026-03-12T19:31:23.410486",
       "date": "12.03.2026",
       "hour": 19,
@@ -30209,39 +30239,9 @@
       "efficiency": 0,
       "is_offline": false,
       "farm_name": "box-111"
-    },
-    {
-      "timestamp": "2026-03-04T09:48:23.043787",
-      "date": "04.03.2026",
-      "hour": 9,
-      "minute": 48,
-      "time_label": "09:48",
-      "total_hashrate": 0,
-      "total_power": 0,
-      "online_miners": 0,
-      "problematic_miners": 0,
-      "total_miners": 192,
-      "efficiency": 0,
-      "is_offline": false,
-      "farm_name": "box-111"
-    },
-    {
-      "timestamp": "2026-03-04T09:43:12.925874",
-      "date": "04.03.2026",
-      "hour": 9,
-      "minute": 43,
-      "time_label": "09:43",
-      "total_hashrate": 20878.993475130002,
-      "total_power": 658409.0,
-      "online_miners": 190,
-      "problematic_miners": 12,
-      "total_miners": 192,
-      "efficiency": 31.711,
-      "is_offline": false,
-      "farm_name": "box-111"
     }
   ],
-  "last_update": "2026-03-12T19:31:23.410486",
+  "last_update": "2026-03-12T19:36:53.225293",
   "total_entries": 2016,
   "farm_name": "VISOKOVKA",
   "version": "2.0"
