@@ -1,6 +1,36 @@
 {
   "farm_history": [
     {
+      "timestamp": "2026-03-19T14:57:18.173105",
+      "date": "19.03.2026",
+      "hour": 14,
+      "minute": 57,
+      "time_label": "14:57",
+      "total_hashrate": 30983.164007030005,
+      "total_power": 617759.0,
+      "online_miners": 263,
+      "problematic_miners": 96,
+      "total_miners": 287,
+      "efficiency": 50.154,
+      "is_offline": false,
+      "farm_name": "box-111"
+    },
+    {
+      "timestamp": "2026-03-16T01:12:26.303219",
+      "date": "16.03.2026",
+      "hour": 1,
+      "minute": 12,
+      "time_label": "01:12",
+      "total_hashrate": 19028.552841410008,
+      "total_power": 570130.0,
+      "online_miners": 166,
+      "problematic_miners": 11,
+      "total_miners": 166,
+      "efficiency": 33.376,
+      "is_offline": false,
+      "farm_name": "box-111"
+    },
+    {
       "timestamp": "2026-03-16T01:12:25.099900",
       "date": "16.03.2026",
       "hour": 1,
@@ -30209,39 +30239,9 @@
       "efficiency": 32.147,
       "is_offline": false,
       "farm_name": "box-111"
-    },
-    {
-      "timestamp": "2026-03-07T08:13:16.827702",
-      "date": "07.03.2026",
-      "hour": 8,
-      "minute": 13,
-      "time_label": "08:13",
-      "total_hashrate": 17565.51151615,
-      "total_power": 546726.0,
-      "online_miners": 159,
-      "problematic_miners": 8,
-      "total_miners": 192,
-      "efficiency": 32.129,
-      "is_offline": false,
-      "farm_name": "box-111"
-    },
-    {
-      "timestamp": "2026-03-07T08:07:59.074792",
-      "date": "07.03.2026",
-      "hour": 8,
-      "minute": 7,
-      "time_label": "08:07",
-      "total_hashrate": 17624.66176003001,
-      "total_power": 547246.0,
-      "online_miners": 159,
-      "problematic_miners": 8,
-      "total_miners": 192,
-      "efficiency": 32.206,
-      "is_offline": false,
-      "farm_name": "box-111"
     }
   ],
-  "last_update": "2026-03-16T01:12:25.099900",
+  "last_update": "2026-03-19T14:57:18.173105",
   "total_entries": 2016,
   "farm_name": "VISOKOVKA",
   "version": "2.0"
