@@ -1,6 +1,21 @@
 {
   "farm_history": [
     {
+      "timestamp": "2026-03-24T12:36:02.972104",
+      "date": "24.03.2026",
+      "hour": 12,
+      "minute": 36,
+      "time_label": "12:36",
+      "total_hashrate": 0,
+      "total_power": 0,
+      "online_miners": 0,
+      "problematic_miners": 0,
+      "total_miners": 287,
+      "efficiency": 0,
+      "is_offline": false,
+      "farm_name": "box-111"
+    },
+    {
       "timestamp": "2026-03-24T12:30:44.476271",
       "date": "24.03.2026",
       "hour": 12,
@@ -30224,24 +30239,9 @@
       "efficiency": 31.917,
       "is_offline": false,
       "farm_name": "box-111"
-    },
-    {
-      "timestamp": "2026-03-12T05:51:41.258706",
-      "date": "12.03.2026",
-      "hour": 5,
-      "minute": 51,
-      "time_label": "05:51",
-      "total_hashrate": 17428.29408394999,
-      "total_power": 547126.0,
-      "online_miners": 159,
-      "problematic_miners": 9,
-      "total_miners": 192,
-      "efficiency": 31.854,
-      "is_offline": false,
-      "farm_name": "box-111"
     }
   ],
-  "last_update": "2026-03-24T12:30:44.476271",
+  "last_update": "2026-03-24T12:36:02.972104",
   "total_entries": 2016,
   "farm_name": "VISOKOVKA",
   "version": "2.0"
